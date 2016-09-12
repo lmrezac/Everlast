@@ -1,28 +1,25 @@
 package com.ombda;
 
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Shape;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Tile{
+public class Tile implements Collideable{
 	private static Tile[] tiles = new Tile[0xFF];
 	
 	private static short id_count = 0;
-	private BufferedImage image;
+	private Image image;
 	private Shape boundingBox;
 	public final short id;
 	//public static final int NO_COLLIDE = Color.white.getRGB(), COLLIDE = Color.black.getRGB(), WATER = Color.gray.getRGB();
-	public Tile(BufferedImage image, Shape boundingBox){
+	public Tile(Image image, Shape boundingBox){
 		this.image = image;
 		this.boundingBox = boundingBox;
 		while(tiles[id_count] != null) id_count++;
 		tiles[id_count] = this;
 		id = id_count;
 	}
-	public Tile(short id, BufferedImage image, Shape boundingBox){
+	public Tile(short id, Image image, Shape boundingBox){
 		this.image = image;
 		this.boundingBox = boundingBox;
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: "+id);
@@ -40,16 +37,19 @@ public class Tile{
 		y %= 16;
 		return boundingBox.contains(x,y);
 	}
+	public void testCollision(){}
 	public boolean doesPointCollide(double x, double y){
 		return doesPointCollide((int)x,(int)y);
 	}
-	public void manageCollision(Player player){}
+	public void manageCollision(Collideable c){}
 	
 	public static Tile getTile(int id){
 		if(id < 0 || id >= 0xFF) throw new RuntimeException("Invalid id: "+id);
 		if(tiles[id] == null) throw new RuntimeException("No tile with id "+id);
 		return tiles[id];
 	}
-	
+	public Shape getBoundingBox(){
+		return boundingBox;
+	}
 	
 }

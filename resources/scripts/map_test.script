@@ -1,0 +1,5 @@
+#sprite 0xA0 5t 5t test_character
+#msg sprite 0xA0.x = ${sprite 0xA0.x} *wait *wait
+#sprite 0xF7 0 5t error2 test
+set x 5
+msg "Dude, fail!" *wait 

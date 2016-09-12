@@ -110,5 +110,5 @@ public class MapMaker extends GUI{
 	public void draw(Graphics2D g2d){
 		super.draw(g2d);
 	}
-
+	public String toString(){ return "mapcreator"; }
 }

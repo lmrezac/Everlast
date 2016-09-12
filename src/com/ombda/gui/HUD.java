@@ -63,4 +63,5 @@ public class HUD extends GUI{
 	@Override
 	public boolean blockInput(){ return false; }
 
+	public String toString(){ return "hud"; }
 }

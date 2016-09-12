@@ -19,9 +19,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -32,6 +34,7 @@ import com.ombda.gui.HUD;
 import com.ombda.gui.Input;
 import com.ombda.gui.MapMaker;
 import com.ombda.gui.MessageBox;
+import com.ombda.scripts.Script;
 
 //import javax.swing.Timer;
 
@@ -40,6 +43,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	private static Panel instance;
 	
 	private Player player;
+	private Script currentScript = null;
 	private Map map;
 	private GUI gui;
 	public GUI previous;
@@ -65,6 +69,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 
 	public Panel(){
 		instance = this;
+		Images.init();
+		
 		buffer = new BufferedImage(PRF_WIDTH,PRF_HEIGHT,BufferedImage.TYPE_INT_ARGB);
 		
 		player = new Player(0,0);
@@ -76,10 +82,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		this.setDoubleBuffered(true);
 		this.setIgnoreRepaint(true);
 		
-		Tiles.loadTiles();
-		
-		loadSaveFile();
-		
 		hud = new HUD();
 		msgbox = new MessageBox();
 		input = new Input();
@@ -89,9 +91,33 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		previous = hud;
 		guiID = "hud";
 		
-		msgbox.setMessage("very long message\u0005test2\u0005newline test\nsuccess?\u0005");
+		Tiles.loadTiles();
+		loadScripts();
+		
+		loadSaveFile();
+		
+		
+		
+		
 		
 		System.out.println("New Panel created!");
+	}
+	private void loadScripts(){
+		File f = new File(Files.localize("scripts"));
+		assert f.exists() : "Scripts directory not found!";
+		assert f.isDirectory() : "\\resources\\scripts was not a directory!";
+		File[] files = f.listFiles(new FilenameFilter(){
+			public boolean accept(File arg0, String arg1){
+				return arg1.endsWith(".script");
+			}
+		});
+		for(File file : files){
+			String name = file.getName();
+			int i = name.indexOf('.');
+			if(i != -1)
+				name = name.substring(0, i);
+			Script.load(name,Files.read(file));
+		}
 	}
 	public void setMap(Map map){
 		this.map = map;
@@ -111,7 +137,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			Panel.noScreenDebug = true;
 		}
 	}
-	
+	public void runScript(Script s){
+		this.currentScript = s;
+	}
 	private void loadSaveFile(){
 	
 		File f = new File(Files.localize("saves/save0.dat"));
@@ -182,7 +210,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	}
 	
 	public static int[] screenCoordsToImageCoords(int x, int y){
-		
 		return new int[]{(int)(x*(Frame.PRF_WIDTH/(double)Panel.getInstance().getParent().getWidth())),(int)(y*(Frame.PRF_HEIGHT/(double)Panel.getInstance().getParent().getHeight()))};
 	}
 
@@ -215,6 +242,12 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 			player.draw(g2d,offsetX,offsetY);
 		
+			Iterator<Sprite> sprites = map.getSprites();
+			while(sprites.hasNext()){
+				Sprite s = sprites.next();
+				s.draw(g2d, offsetX, offsetY);
+			}
+			
 			map.drawForeground(g2d,offsetX,offsetY);
 		}
 		gui.draw(g2d);
@@ -228,7 +261,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			drawDebugString(g2d,"fpms:"+(((temp = System.currentTimeMillis())-lastFrame)),0,70);
 			int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
 			drawDebugString(g2d,"mouse X : "+mouseCoords[0]+" mouse Y : "+mouseCoords[1],0,82);
-			drawDebugString(g2d,"gui : "+guiID,0,94);
+			drawDebugString(g2d,"gui : "+gui.toString(),0,94);
 			lastFrame = temp;
 		}
 		Toolkit.getDefaultToolkit().sync();
@@ -251,12 +284,31 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 
 	public void update(){
+		if(currentScript != null){
+			currentScript.execute(this);
+			if(currentScript.done())
+				currentScript = null;
+		}
 		if(!gui.pauseGame()){
 			if(!gui.blockInput()){
+				//debug("gui == "+gui.toString()+" blockinput = "+gui.blockInput());
 				player.doKeys();
 			}
+
 			player.testCollision();
-		
+			Iterator<Sprite> sprites = map.getSprites();
+			while(sprites.hasNext()){
+				Sprite s = sprites.next();
+				if(s instanceof Updateable)
+					((Updateable)s).update();
+			}
+			
+			sprites = map.getSprites();
+			while(sprites.hasNext()){
+				Sprite s = sprites.next();
+				if(s instanceof Collideable)
+					((Collideable)s).testCollision();
+			}
 		}
 		gui.update();
 	}

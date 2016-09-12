@@ -12,7 +12,7 @@ public class TilemapOld{
 	private Tile[] tiles;
 	public final int width, height;
 	public TilemapOld(int id){
-		this.image = Images.load("images/tiles/texturemap"+id+".png");
+		this.image = Images.retrieve("images/tiles/texturemap"+id+".png");
 		width = (image.getWidth()-1)/17;
 		height = (image.getHeight()-1)/17;
 		tiles = new Tile[width*height];

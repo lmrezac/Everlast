@@ -5,27 +5,29 @@ import static com.ombda.Debug.printStackTrace;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ombda.Files;
 import com.ombda.Images;
 
 public abstract class GUI implements MouseListener, MouseMotionListener, KeyListener{
 	protected static final BufferedImage[] letters;
 	static{
-		BufferedImage image = Images.load("gui\\font\\normal.png");
+		Image image = Images.load(new File(Files.localize("images\\gui\\font\\normal.png")),true);
 		byte[] font_sizes = null;
 		try{
-			font_sizes = Files.readAllBytes(Paths.get(com.ombda.Files.localize("images\\gui\\font\\normal.png.sizes")));
+			font_sizes = java.nio.file.Files.readAllBytes(Paths.get(com.ombda.Files.localize("images\\gui\\font\\normal.png.sizes")));
 		}catch(IOException e){
 			if(debug){
 				debug(e.getMessage());
@@ -39,7 +41,7 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 		for(char c = '\u0000'; c < letters.length; c++){
 			char width = (char)font_sizes[c];
 			//debug("width for char '"+c+"' is "+(int)width+" (x="+x+",y="+y+")");
-			letters[c] = Images.crop(image, x, y, width, 10);
+			letters[c] = (BufferedImage)Images.crop((BufferedImage)image, x, y, width, 10);
 			col++;
 			if(col > 0x0F){
 				col = 0;
@@ -62,15 +64,15 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 	
 	protected static final BufferedImage msgbox_tl, msgbox_t, msgbox_tr, msgbox_l, msgbox_m, msgbox_r, msgbox_bl, msgbox_b, msgbox_br;
 	static{
-		msgbox_tl = Images.load("gui\\msgbox_tl.png");
-		msgbox_t = Images.load("gui\\msgbox_t.png");
-		msgbox_tr = Images.load("gui\\msgbox_tr.png");
-		msgbox_l = Images.load("gui\\msgbox_l.png");
-		msgbox_m = Images.load("gui\\msgbox_m.png");
-		msgbox_r = Images.load("gui\\msgbox_r.png");
-		msgbox_bl = Images.load("gui\\msgbox_bl.png");
-		msgbox_b = Images.load("gui\\msgbox_b.png");
-		msgbox_br = Images.load("gui\\msgbox_br.png");
+		msgbox_tl = (BufferedImage)Images.retrieve("gui/msgbox_tl");
+		msgbox_t = (BufferedImage)Images.retrieve("gui/msgbox_t");
+		msgbox_tr = (BufferedImage)Images.retrieve("gui/msgbox_tr");
+		msgbox_l = (BufferedImage)Images.retrieve("gui/msgbox_l");
+		msgbox_m = (BufferedImage)Images.retrieve("gui/msgbox_m");
+		msgbox_r = (BufferedImage)Images.retrieve("gui/msgbox_r");
+		msgbox_bl = (BufferedImage)Images.retrieve("gui/msgbox_bl");
+		msgbox_b = (BufferedImage)Images.retrieve("gui/msgbox_b");
+		msgbox_br = (BufferedImage)Images.retrieve("gui/msgbox_br");
 	}
 	
 	protected static void drawBox(Graphics2D g2d, int topx, int topy, int width, int height){
@@ -113,21 +115,21 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 		}
 		
 	}
-	public static BufferedImage tint(BufferedImage loadImg, Color color) {
+	public static Image tint(Image loadImg, Color color) {
 		if(color == null) return loadImg;
-	    BufferedImage img = new BufferedImage(loadImg.getWidth(), loadImg.getHeight(),
+	    BufferedImage img = new BufferedImage(loadImg.getWidth(null), loadImg.getHeight(null),
 	            BufferedImage.TRANSLUCENT);
 	    final float tintOpacity = 1f;
 	    Graphics2D g2d = img.createGraphics(); 
 
 	    //Draw the base image
-	    g2d.drawImage(loadImg, null, 0, 0);
+	    g2d.drawImage(loadImg, 0, 0,null);
 	    //Set the color to a transparent version of the input color
 	    g2d.setColor(new Color(color.getRed() / 255f, color.getGreen() / 255f, 
 	        color.getBlue() / 255f, tintOpacity));
 
 	    //Iterate over every pixel, if it isn't transparent paint over it
-	    Raster data = loadImg.getData();
+	    Raster data = ((BufferedImage)loadImg).getData();
 	    for(int x = data.getMinX(); x < data.getWidth(); x++){
 	        for(int y = data.getMinY(); y < data.getHeight(); y++){
 	            int[] pixel = data.getPixel(x, y, new int[4]);
@@ -154,23 +156,23 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 				x = startX;
 			}else if(c == '\t'){
 				g2d.drawImage(letters[' '],x,y,null);
-				x += letters[' '].getWidth();
+				x += letters[' '].getWidth(null);
 				g2d.drawImage(letters[' '],x,y,null);
-				x += letters[' '].getWidth();
+				x += letters[' '].getWidth(null);
 			}else if(c == SECTION){ /* section symbol */
 				if(++i >= string.length){
 					g2d.drawImage(letters[SECTION],x,y,null);
 					
-					x += letters[SECTION].getWidth();
+					x += letters[SECTION].getWidth(null);
 					//throw new RuntimeException("Letter modifier format at index "+i+" in string \""+str+"\".");
 				}else{
 					c = string[i];
 					if(c == 'c'){
 						if(i >= string.length-8){
 							g2d.drawImage(letters[SECTION], x, y, null);
-							x += letters[SECTION].getWidth();
+							x += letters[SECTION].getWidth(null);
 							g2d.drawImage(letters[c],x,y,null);
-							x += letters[c].getWidth();
+							x += letters[c].getWidth(null);
 							//throw new RuntimeException("Letter modifier format at index "+i+" in string \""+str+"\".");
 						}else{
 							String color = str.substring(i+1,i+9);
@@ -214,7 +216,7 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 						//g2d.drawImage(letters[SECTION], x, y, null);
 						//x += letters[SECTION].getWidth();
 						g2d.drawImage(letters[c],x,y,null);
-						x += letters[c].getWidth();
+						x += letters[c].getWidth(null);
 					}
 				}
 			}else{
@@ -225,7 +227,7 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 				if(bold){
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(x, y+9, x+letters[c].getWidth()+1, y+9);
+						g2d.drawLine(x, y+9, x+letters[c].getWidth(null)+1, y+9);
 					}
 					g2d.drawImage(tint(letters[c],tint),x,y,null);
 					g2d.drawImage(tint(letters[c],tint),x+1,y,null);
@@ -234,11 +236,11 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 				}else{
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(x, y+9, x+letters[c].getWidth(), y+9);
+						g2d.drawLine(x, y+9, x+letters[c].getWidth(null), y+9);
 					}
 					g2d.drawImage(tint(letters[c],tint),x,y,null);
 				}
-				x += letters[c].getWidth();
+				x += letters[c].getWidth(null);
 			}
 		}
 	}

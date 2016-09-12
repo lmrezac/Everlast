@@ -99,12 +99,14 @@ public class MessageBox extends GUI{
 	protected int index = 1, drawX = INIT_DRAW_X, drawY = INIT_DRAW_Y;
 	protected int indexWait = 0, arrowWait = 0;
 	private static int indexWaitMax = 5;
-	private boolean waitingForInput = false, zReleased = true;
+	public boolean waitingForInput = false;
+	private boolean zReleased = true;
 	private int startIndexAt = 0;
 	public static final char DOWN_ARROW = '\u0010', LEFT_ARROW = '\u0012', UP_ARROW = '\u0014', RIGHT_ARROW = '\u0016';
 	public static final char WAIT = '\u0005', CONTINUE = '\u0006';
 	protected boolean drawOtherArrow = false;
-	
+	private boolean finished = false;
+	public boolean isFinished(){ return finished/* index >= string.length && !waitingForInput*/; }
 	@Override
 	public void draw(Graphics2D g2d){
 		drawBox(g2d,0,200,32,7);
@@ -118,9 +120,9 @@ public class MessageBox extends GUI{
 				drawX = INIT_DRAW_X;
 			}else if(c == '\t'){
 				g2d.drawImage(letters[' '],drawX,drawY,null);
-				drawX += letters[' '].getWidth();
+				drawX += letters[' '].getWidth(null);
 				g2d.drawImage(letters[' '],drawX,drawY,null);
-				drawX += letters[' '].getWidth();
+				drawX += letters[' '].getWidth(null);
 			}else if(c == WAIT){
 				if(arrowWait >= 10){
 					arrowWait = 0;
@@ -134,7 +136,7 @@ public class MessageBox extends GUI{
 			}else if(c == SECTION){ /* section symbol */
 				if(++i >= string.length){
 					g2d.drawImage(letters[SECTION], drawX, drawY, null);
-					drawX += letters[SECTION].getWidth();
+					drawX += letters[SECTION].getWidth(null);
 					
 				//	throw new RuntimeException("Letter modifier format at index "+i+" in string \""+str+"\".");
 				}else{
@@ -142,10 +144,10 @@ public class MessageBox extends GUI{
 					if(c == 'c'){
 						if(i >= string.length-8){
 							g2d.drawImage(letters[SECTION], drawX, drawY, null);
-							drawX += letters[SECTION].getWidth();
+							drawX += letters[SECTION].getWidth(null);
 							g2d.drawImage(letters[SECTION], drawX, drawY, null);
 							
-							drawX += letters[SECTION].getWidth();
+							drawX += letters[SECTION].getWidth(null);
 							//throw new RuntimeException("Letter modifier format at index "+i+" in string \""+str+"\".");
 						}else{
 							String color = str.substring(i+1,i+9);
@@ -186,7 +188,7 @@ public class MessageBox extends GUI{
 						//g2d.drawImage(letters[SECTION], drawX, drawY, null);
 						//drawX += letters[SECTION].getWidth();
 						g2d.drawImage(letters[SECTION], drawX, drawY, null);
-						drawX += letters[SECTION].getWidth();
+						drawX += letters[SECTION].getWidth(null);
 					}
 				}
 			}else{
@@ -196,7 +198,7 @@ public class MessageBox extends GUI{
 				if(bold){
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth()+1, drawY+9);
+						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth(null)+1, drawY+9);
 					}
 					g2d.drawImage(tint(letters[c],tint),drawX,drawY,null);
 					g2d.drawImage(tint(letters[c],tint),drawX+1,drawY,null);
@@ -205,12 +207,12 @@ public class MessageBox extends GUI{
 				}else{
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth(), drawY+9);
+						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth(null), drawY+9);
 					}
 					g2d.drawImage(tint(letters[c],tint),drawX,drawY,null);
 				}
 				
-				drawX += letters[c].getWidth();
+				drawX += letters[c].getWidth(null);
 			}
 		}
 		
@@ -222,11 +224,15 @@ public class MessageBox extends GUI{
 				}else indexWait++;
 			}
 			else{
-				Panel.getInstance().setGUI(Panel.getInstance().previous);
+				/*if(!(Panel.getInstance().previous instanceof MessageBox))
+					Panel.getInstance().setGUI(Panel.getInstance().previous);
+				else*/ 
+				finished = true;
+					Panel.getInstance().setGUI(Panel.getInstance().hud);
 			}
 		}
 		if(debug && !Panel.noScreenDebug){
-			Panel.drawDebugString(g2d,"wait="+indexWaitMax+" index="+index+" indexWait="+indexWait+(waitingForInput? " waiting" : ""),0,106);
+			Panel.drawDebugString(g2d,"wait="+indexWaitMax+" index="+index+" indexWait="+indexWait+" size = "+string.length+(waitingForInput? " waiting" : ""),0,106);
 		}
 	}
 
@@ -235,4 +241,5 @@ public class MessageBox extends GUI{
 		return true;
 	}
 	
+	public String toString(){ return "msgbox"; }
 }

@@ -3,19 +3,29 @@ package com.ombda;
 import static com.ombda.Debug.debug;
 
 import java.awt.Graphics2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+import com.ombda.scripts.Script;
 
 public class Map{
 	private short[][] foreground, background;
 	private int width = 0, height = 0;
 	private String name;
 	public int playerSpawnX = 0, playerSpawnY = 0;
+	private HashMap<Integer,Sprite> sprites = new HashMap<>();
 	public Map(String name){
 		this.name = name;
+		File f = new File(Files.localize("maps\\"+name));
+		if(!f.exists()) throw new RuntimeException("Directory maps\\"+name+" doesn't exist!");
 		foreground = load(Files.readBytes("maps\\"+name+"\\fore.map"));
 		background = load(Files.readBytes("maps\\"+name+"\\back.map"));
+		maps.put(name, this);
+		if(Script.exists("map_"+name))
+			Panel.getInstance().runScript(Script.getScript("map_"+name));
 	}
 	private short[][] load(byte[] bytes){
 		width = 0;
@@ -45,6 +55,7 @@ public class Map{
 	
 		
 	}
+	
 	public void save(){
 		debug("Saved map to "+Files.localize("maps\\"+name));
 		saveShorts(foreground,"maps\\"+name+"\\fore.map");
@@ -136,5 +147,19 @@ public class Map{
 			return map;
 		}
 	}
-	
+	public Iterator<Sprite> getSprites(){
+		return sprites.values().iterator();
+	}
+	public void addSprite(Sprite s){
+		//s.setMap(this);
+		sprites.put(s.hashCode(),s);
+	}
+	public void removeSprite(Sprite s){
+		sprites.remove(s.hashCode());
+	}
+	public Sprite getSprite(int hashcode){
+		if(!sprites.containsKey(hashcode))
+			throw new RuntimeException("A sprite with id "+hashcode+" in map "+toString()+" does not exist!");
+		return sprites.get(hashcode);
+	}
 }

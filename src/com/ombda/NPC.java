@@ -1,28 +1,73 @@
 package com.ombda;
 
-import static com.ombda.Frame.keys;
 import static com.ombda.Panel.borderX_left;
 import static com.ombda.Panel.borderX_right;
-import static com.ombda.Panel.borderY_top;
 import static com.ombda.Panel.borderY_bottom;
-import static com.ombda.Panel.dist;
-import static java.awt.event.KeyEvent.VK_A;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_S;
-import static java.awt.event.KeyEvent.VK_SHIFT;
-import static java.awt.event.KeyEvent.VK_W;
+import static com.ombda.Panel.borderY_top;
 
+import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.Iterator;
 
-public class Player extends Sprite implements Updateable, Collideable{
+import com.ombda.Player.Collision;
+
+public class NPC extends Sprite implements Updateable, Collideable{
+	private static HashMap<Integer,NPC> npcs = new HashMap<>();
+	private int destX, destY;
 	private double lastX, lastY;
-	public boolean noclip = false;
-	private Rectangle2D boundingBox = new Rectangle2D.Double(0,0,16,16);
-	public Player(int x, int y){
-		super(0,Images.getError(),x,y);
-		lastX = x; lastY = y;
+	private Rectangle2D boundingBox;
+	public NPC(int x, int y,int hash, Image[] animations){
+		//animations == [N still, NE still, E still, SE still, S still, SW still, W still, NW still, N walk, NE walk, E walk, SE walk, S walk, SW walk, W walk, NW walk]
+		super(hash,Images.getError(),x,y);
+		assert animations.length == 16 : "Not enough images passed to NPC()";
+		boundingBox = new Rectangle2D.Double(0,0,16,16);
+		lastX = x;
+		lastY = y;
+		npcs.put(hash,this);
+	}
+	public static NPC getNPC(int hash){
+		NPC npc = npcs.get(hash);
+		if(npc == null){
+			throw new RuntimeException("Could'nt find NPC of id "+hash);
+		}
+		return npc;
+	}
+	
+	public void update(){
+		if(x != destX){
+			if(x < destX)
+				setPos(x+1,y);
+			else if(x > destX)
+				setPos(x-1,y);
+		}
+		if(y != destY){
+			if(y < destY)
+				setPos(x,y+1);
+			else if(y > destY)
+				setPos(x,y-1);
+		}
+		testCollision();
+		
+	}
+	public void setPos(double x, double y){
+		lastX = this.x;
+		lastY = this.y;
+		super.setPos(x, y);
+	}
+	public void setDestination(int x, int y){
+		destX = x;
+		destY = y;
+	}
+	public Shape getBoundingBox(){
+		return boundingBox;
+	}
+	@Override
+	public boolean doesPointCollide(int x, int y){
+		x -= this.x;
+		y -= this.y;
+		return boundingBox.contains(x, y);
 	}
 	public Collision[] collidedTiles(){
 		// {   0    ,    1    ,     2     ,      3     }
@@ -72,7 +117,6 @@ public class Player extends Sprite implements Updateable, Collideable{
 	}
 
 	public void testCollision(){
-		if(noclip) return;
 		Panel panel = Panel.getInstance();
 		//map border collisions
 		if(x < 0){
@@ -131,94 +175,7 @@ public class Player extends Sprite implements Updateable, Collideable{
 		}
 		
 	}
-	public boolean doesPointCollide(int x, int y){
-		x -= this.x;
-		y -= this.y;
-		return boundingBox.contains(x, y);
-	}
-	
-	private double speed(){
-		return keys[VK_SHIFT]? 1.5 : 1.0;
-	}
-	public void update(){
-		doKeys();
-		testCollision();
-	}
-	public void doKeys(){
-		lastX = x; lastY = y;
-		if(keys[VK_A]){
-			if(keys[VK_W]){
-				if(keys[VK_D])
-					y-=speed();
-				else{
-					x-=dist*speed();
-					y-=dist*speed();
-				}
-			}else if(keys[VK_S]){
-				if(keys[VK_D])
-					y+=speed();
-				else{
-					x-=dist*speed();
-					y+=dist*speed();
-				}
-			}else if(!keys[VK_D])
-				x-=speed();
-		}
-		else if(keys[VK_D]){
-			if(keys[VK_W]){
-				if(keys[VK_A])
-					y-=speed();
-				else{
-					x+=dist*speed();
-					y-=dist*speed();
-				}
-			}else if(keys[VK_S]){
-				if(keys[VK_A])
-					y+=speed();
-				else{
-					x+=dist*speed();
-					y+=dist*speed();
-				}
-			}else if(!keys[VK_A])
-				x+=speed();
-		}
-		else if(keys[VK_W]){
-			if(keys[VK_A]){
-				if(keys[VK_S])
-					x-=speed();
-				else{
-					y-=dist*speed();
-					x-=dist*speed();
-				}
-			}else if(keys[VK_D]){
-				if(keys[VK_S])
-					x+=speed();
-				else{
-					y-=dist*speed();
-					x+=dist*speed();
-				}
-			}else if(!keys[VK_S])
-				y-=speed();
-		}
-		else if(keys[VK_S]){
-			if(keys[VK_A]){
-				if(keys[VK_W])
-					x-=speed();
-				else{
-					y+=dist*speed();
-					x-=dist*speed();
-				}
-			}else if(keys[VK_D]){
-				if(keys[VK_W])
-					x+=speed();
-				else{
-					y+=dist*speed();
-					x+=dist*speed();
-				}
-			}else if(!keys[VK_W])
-				y+=speed();
-		}
-	}
+	@Override
 	public void manageCollision(Collideable c){
 		for(int tries = 0; tries < 20 && c.getBoundingBox().intersects(boundingBox); tries++){
 			if(lastX < x)
@@ -229,20 +186,6 @@ public class Player extends Sprite implements Updateable, Collideable{
 				y--;
 			else if(lastY > y)
 				y++;
-		}
-	}
-	public Shape getBoundingBox(){
-		return boundingBox;
-	}
-	public static class Collision{
-		public final Point point;
-		public final Tile tile;
-		public Collision(Point p, Tile t){
-			this.point = p;
-			this.tile = t;
-		}
-		public Collision(double x, double y, Tile t){
-			this(new Point((int)x,(int)y),t);
 		}
 	}
 }

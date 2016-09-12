@@ -1,7 +1,7 @@
 package com.ombda;
 
+import java.awt.Image;
 import java.awt.Shape;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Tilemap{
 		do{
 			
 			Shape box = BoundingBox.FULL;
-			BufferedImage image = null;
+			Image image = null;
 			if((f = new File(Files.localize("tilemaps\\"+id+"\\"+count+"\\tile.info"))).exists()){
 				List<String> lines = Files.read(f);
 				for(String str : lines){
@@ -34,7 +34,7 @@ public class Tilemap{
 						String key = str.substring(0,i);
 						str = str.substring(i+1);
 						if(key.equals("image"))
-							image = Images.load("tilemaps\\"+id+"\\"+count+"\\"+str+".png");
+							image = Images.retrieve("tilemaps\\"+id+"\\"+count+"\\"+str+".png");
 						else if(key.equals("collision")){
 							box = new BoundingBox(str).shape;
 						}
@@ -44,7 +44,7 @@ public class Tilemap{
 			}
 			if(image == null){
 				System.out.println("Loading default image for tile id "+count+" in tilemap id "+id);
-				image = Images.load("tilemaps\\"+id+"\\"+count+"\\layer0.png");
+				image = Images.retrieve("tilemaps\\"+id+"\\"+count+"\\layer0.png");
 			}
 			tiles.add(new Tile(image,box));
 			file = new File(Files.localize("tilemaps\\"+id+"\\"+ ++count));

@@ -15,10 +15,13 @@ import java.util.List;
 
 import com.ombda.Frame;
 import com.ombda.Map;
+import com.ombda.NPC;
 import com.ombda.Panel;
 import com.ombda.Player;
+import com.ombda.Sprite;
 import com.ombda.Tile;
 import com.ombda.Tiles;
+import com.ombda.scripts.Script;
 
 public class Console extends Input{
 	private Panel panel;
@@ -43,6 +46,9 @@ public class Console extends Input{
 			return;
 		}
 		List<String> args = parseArgs(str.substring(6));
+		executeCommand(args);
+	}
+	public void executeCommand(List<String> args){
 		if(args.get(0).equals("gui")){
 			cmdGui(args);
 		}else if(args.get(0).equals("noclip")){
@@ -63,6 +69,10 @@ public class Console extends Input{
 			cmdGoto(args);
 		}else if(args.get(0).equals("help")){
 			cmdHelp(args);
+		}else if(args.get(0).equals("testfor")){
+			cmdTestfor(args);
+		}else if(args.get(0).equals("script")){
+			cmdScript(args);
 		}else{
 			debug("unknown command");
 			panel.msgbox.setMessage("Error: unknown command"+WAIT);
@@ -235,7 +245,7 @@ public class Console extends Input{
 					args.remove(0);
 				}
 				cmdGui(args);
-			}else if(args.get(index).equals("map")){
+			}else if(args.get(index).equals("map") || args.get(index).equals("player.map")){
 				index++;
 				String str2 = "";
 				for(int i = index; i < args.size(); i++)
@@ -267,6 +277,77 @@ public class Console extends Input{
 					player.setPos(x, y);
 				}else{
 					panel.msgbox.setMessage("Variable "+var+" does not exist."+WAIT);
+					panel.msgbox.instant();
+					panel.setGUI(panel.msgbox);
+				}
+			}else if(args.get(index).equals("sprite")){
+				index++;
+				String selector = args.get(index);
+				int i = selector.indexOf('.');
+				try{
+					if(i == -1)
+						throw new RuntimeException("Invalid sprite selector.");
+					String map_name;
+					if(selector.matches("(0x|#)?[A-Za-z\\d]+\\.(x|y|map)")){
+						map_name = panel.getPlayer().getMap().toString();
+						i = -1;
+					}else
+						map_name = Script.parseString(selector.substring(0,i));
+					int j = selector.indexOf('.',i+1);
+					if(j == -1)
+						throw new RuntimeException("Invalid sprite selector.");
+					int hash = Script.parseInt(selector.substring(i+1, j));
+					String var = selector.substring(j+1);
+					Map sprite_map = Map.get(map_name);
+					Sprite sprite = sprite_map.getSprite(hash);
+					index++;
+					if(var.equals("map")){
+						String mapname;
+							mapname = Script.parseString(args.get(index));
+						Map map = Map.get(mapname);
+						sprite.setMap(map);
+					}else if(var.equals("x")){
+						int x = Script.parseInt(Script.parseString(args.get(index)));
+						sprite.setPos(x, sprite.y);
+					}else if(var.equals("y")){
+						int y = Script.parseInt(Script.parseString(args.get(index)));
+						sprite.setPos(sprite.x, y);
+					}else throw new RuntimeException("Invalid sprite var: "+var);
+				}catch(RuntimeException ex){
+					panel.msgbox.setMessage(ex.getMessage()+WAIT);
+					panel.msgbox.instant();
+					panel.setGUI(panel.msgbox);
+				}
+			}else if(args.get(index).equals("npc")){
+				index++;
+				String selector = args.get(index);
+				int i = selector.indexOf('.');
+				try{
+					if(i == -1)
+						throw new RuntimeException("Invalid NPC selector.");
+					int hash = Script.parseInt(selector.substring(0, i));
+					String var = selector.substring(i+1);
+					NPC npc = NPC.getNPC(hash);
+					index++;
+					if(var.equals("map")){
+						String mapname;
+						mapname = Script.parseString(args.get(index));
+						Map map = Map.get(mapname);
+						npc.setMap(map);
+					}else if(var.equals("x")){
+						int x = Script.parseInt(Script.parseString(args.get(index)));
+						npc.setPos(x, npc.y);
+					}else if(var.equals("y")){
+						int y = Script.parseInt(Script.parseString(args.get(index)));
+						npc.setPos(npc.x, y);
+					}else if(var.equals("dest")){
+						int x = Script.parseInt(Script.parseString(args.get(index)));
+						index++;
+						int y = Script.parseInt(Script.parseString(args.get(index)));
+						npc.setDestination(x, y);
+					}else throw new RuntimeException("Invalid NPC var: "+var);
+				}catch(RuntimeException ex){
+					panel.msgbox.setMessage(ex.getMessage()+WAIT);
 					panel.msgbox.instant();
 					panel.setGUI(panel.msgbox);
 				}
@@ -505,12 +586,91 @@ public class Console extends Input{
 				message = "help [command]\nDisplays this message.";
 			}else if(cmd.equals("quit")){
 				message = "quit\nQuits the game and closes the app.\nDoes not save.";
+			}else if(cmd.equals("testfor")){
+				message = "testfor <sprite:entity:map selector>\nTests if the given sprite/entity/map exists, and outputs the result.";
 			}else{
 				message = "Unknown command '"+cmd+"'.";
 			}
 			message += WAIT;
 			
 			panel.msgbox.setMessage(message);
+			panel.setGUI(panel.msgbox);
+		}
+	}
+
+	private void cmdTestfor(List<String> args){
+		args.remove(0);
+		if(args.size() > 2 || args.size() == 0){
+			panel.msgbox.setMessage("Error: param count"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+		}else{
+			boolean found = false;
+			if(args.size() == 1){
+				if(args.get(0).equals("player")){
+					found = true;
+				}
+			}else{
+				if(args.get(0).equals("npc")){
+					try{
+						int hash = Script.parseInt(args.get(1));
+						NPC.getNPC(hash);
+						found = true;
+					}catch(RuntimeException ex){}
+				}else if(args.get(0).equals("sprite")){
+					try{
+						int i = args.get(1).indexOf('.');
+						String mapname;
+						if(i == -1){
+							mapname = panel.getPlayer().getMap().toString();
+						}else mapname = args.get(1).substring(0,i);
+						int hash = Script.parseInt(args.get(1).substring(i+1));
+						debug("testing for sprite id "+hash+" in map "+mapname);
+						Map.get(mapname).getSprite(hash);
+						found = true;
+					}catch(RuntimeException ex){}
+				}else if(args.get(0).equals("map")){
+					try{
+						Map.get(args.get(1));
+						found = true;
+					}catch(RuntimeException ex){}
+				}
+			}
+			String msg = args.get(0);
+			if(args.size() == 2)
+				msg += " "+args.get(1);
+			if(found){
+				panel.msgbox.setMessage("Found "+msg+WAIT);
+				panel.msgbox.instant();
+				panel.setGUI(panel.msgbox);
+			}else{
+				panel.msgbox.setMessage(msg+" was not found"+WAIT);
+				panel.msgbox.instant();
+				panel.setGUI(panel.msgbox);
+			}
+		}
+	}
+	
+	private void cmdScript(List<String> args){
+		assert args.get(0).equals("script");
+		if(args.size() == 1){
+			panel.msgbox.setMessage("Error: param count"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			return;
+		}
+		String str = "";
+		for(int i = 1; i < args.size(); i++){
+			str += args.get(i);
+			if(i != args.size()-1)
+				str += ' ';
+		}
+		try{
+			Script s = Script.getScript(str);
+			Panel.getInstance().runScript(s);
+		}catch(RuntimeException e){
+			panel.msgbox.setMessage(e.getMessage()+WAIT);
+			panel.msgbox.instant();
 			panel.setGUI(panel.msgbox);
 		}
 	}
@@ -524,6 +684,7 @@ public class Console extends Input{
 	
 	public static List<String> parseArgs(String str){
 		List<String> list = new ArrayList<>();
+		
 		list.add("");
 		boolean inString = false;
 		for(char c : str.toCharArray()){
@@ -537,4 +698,6 @@ public class Console extends Input{
 		}
 		return list;
 	}
+	
+	public String toString(){ return "console"; }
 }

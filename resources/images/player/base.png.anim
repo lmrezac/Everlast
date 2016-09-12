@@ -1,0 +1,17 @@
+framesize 14x32
+define base_still_E 0
+define base_still_NE 5
+define base_still_N 10
+define base_still_NW 15
+define base_still_W 20
+define base_still_SW 25
+define base_still_S 30
+define base_still_SE 35
+define base_walk_E 1-4
+define base_walk_NE 6-9
+define base_walk_N 11-14
+define base_walk_NW 16-19
+define base_walk_W 21-24
+define base_walk_SW 26-29
+define base_walk_S 31-34
+define base_walk_SE 36-39

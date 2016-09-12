@@ -1,12 +1,11 @@
 package com.ombda;
 
+import java.awt.Image;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Tiles{
 	public static final Shape FULL = new Rectangle2D.Double(0,0,16,16), TRIANGLE_TL, TRIANGLE_TR, TRIANGLE_BL, TRIANGLE_BR, EMPTY = new MultiShape(new ArrayList<Shape>());
@@ -62,57 +61,37 @@ public class Tiles{
 	public static void loadTiles(){
 		new Tile(new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB),EMPTY);
 		
-		BufferedImage[] images = loadFolder("tiles\\bush");
+		//BufferedImage[] images = loadFolder("tiles/bush");
 		
-		new Tile(BUSH_TOP_LEFT,images[0],FULL);
-		new Tile(BUSH_TOP,images[1],FULL);
-		new Tile(BUSH_TOP_RIGHT,images[2],FULL);
-		new Tile(BUSH_LEFT,images[3],FULL);
-		new Tile(BUSH_MIDDLE,images[4],FULL);
-		new Tile(BUSH_RIGHT,images[5],FULL);
-		new Tile(BUSH_BOTTOM_LEFT,images[6],FULL);
-		new Tile(BUSH_BOTTOM,images[7],FULL);
-		new Tile(BUSH_BOTTOM_RIGHT,images[8],FULL);
-		new Tile(BUSH_CORNER_BOTTOM_RIGHT,images[9],FULL);
-		new Tile(BUSH_CORNER_BOTTOM_LEFT,images[10],FULL);
-		new Tile(BUSH_CORNER_TOP_RIGHT,images[11],FULL);
-		new Tile(BUSH_CORNER_TOP_LEFT,images[12],FULL);
+		new Tile(BUSH_TOP_LEFT,load("tiles/bush/0"),FULL);
+		new Tile(BUSH_TOP,load("tiles/bush/1"),FULL);
+		new Tile(BUSH_TOP_RIGHT,load("tiles/bush/2"),FULL);
+		new Tile(BUSH_LEFT,load("tiles/bush/3"),FULL);
+		new Tile(BUSH_MIDDLE,load("tiles/bush/4"),FULL);
+		new Tile(BUSH_RIGHT,load("tiles/bush/5"),FULL);
+		new Tile(BUSH_BOTTOM_LEFT,load("tiles/bush/6"),FULL);
+		new Tile(BUSH_BOTTOM,load("tiles/bush/7"),FULL);
+		new Tile(BUSH_BOTTOM_RIGHT,load("tiles/bush/8"),FULL);
+		new Tile(BUSH_CORNER_BOTTOM_RIGHT,load("tiles/bush/9"),FULL);
+		new Tile(BUSH_CORNER_BOTTOM_LEFT,load("tiles/bush/10"),FULL);
+		new Tile(BUSH_CORNER_TOP_RIGHT,load("tiles/bush/11"),FULL);
+		new Tile(BUSH_CORNER_TOP_LEFT,load("tiles/bush/12"),FULL);
 		
-		images = loadFolder("tiles\\grass");
+		//images = loadFolder("tiles/grass");
 		
-		new Tile(GRASS_TOP_LEFT,images[0],EMPTY);
-		new Tile(GRASS_TOP,images[1],EMPTY);
-		new Tile(GRASS_TOP_RIGHT,images[2],EMPTY);
-		new Tile(GRASS_LEFT,images[3],EMPTY);
-		new Tile(GRASS_MIDDLE,images[4],EMPTY);
-		new Tile(GRASS_RIGHT,images[5],EMPTY);
-		new Tile(GRASS_BOTTOM_LEFT,images[6],EMPTY);
-		new Tile(GRASS_BOTTOM,images[7],EMPTY);
-		new Tile(GRASS_BOTTOM_RIGHT,images[8],EMPTY);
+		new Tile(GRASS_TOP_LEFT,load("tiles/grass/0"),EMPTY);
+		new Tile(GRASS_TOP,load("tiles/grass/1"),EMPTY);
+		new Tile(GRASS_TOP_RIGHT,load("tiles/grass/2"),EMPTY);
+		new Tile(GRASS_LEFT,load("tiles/grass/3"),EMPTY);
+		new Tile(GRASS_MIDDLE,load("tiles/grass/4"),EMPTY);
+		new Tile(GRASS_RIGHT,load("tiles/grass/5"),EMPTY);
+		new Tile(GRASS_BOTTOM_LEFT,load("tiles/grass/6"),EMPTY);
+		new Tile(GRASS_BOTTOM,load("tiles/grass/7"),EMPTY);
+		new Tile(GRASS_BOTTOM_RIGHT,load("tiles/grass/8"),EMPTY);
 	}
 	
-	public static BufferedImage load(String name){
-		return Images.load("images\\"+name+".png");
+	public static Image load(String name){
+		return Images.retrieve(name);
 	}
-	public static BufferedImage[] loadFolder(String folder){
-		List<BufferedImage> images = new ArrayList<>();
-		File f = new File(Files.localize("images\\"+folder));
-		if(!f.exists()) throw new RuntimeException("Folder \""+folder+"\" in "+Files.localize("images\\")+" does not exist.");
-		if(!f.isDirectory()) throw new RuntimeException(f.getAbsolutePath()+" is not a folder.");
-		
-		File[] files = f.listFiles();
-		for(File file : files){
-			if(Images.isImageFile(file)){
-				String name = file.getName();
-				name = name.substring(0,name.length()-4);
-				if(name.matches("\\d+")){
-					int index = Integer.parseInt(name);
-					while(images.size() <= index)
-						images.add(null);
-					images.set(index,Images.load(file));
-				}
-			}
-		}
-		return images.toArray(new BufferedImage[images.size()]);
-	}
+
 }

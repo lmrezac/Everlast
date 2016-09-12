@@ -1,7 +1,10 @@
 package com.ombda;
 
+import static com.ombda.Debug.debug;
+import static com.ombda.Debug.printStackTrace;
+import static com.ombda.Files.localize;
+
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
@@ -9,34 +12,75 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
-
-import static com.ombda.Debug.*;
-import static com.ombda.Files.*;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+
+import com.ombda.scripts.Script;
 
 public class Images{
 	
-	
-	private static BufferedImage error;
-	static{
+	private static HashMap<String,Image> images;
+	private static Image error;
+	public static void init(){
 		try{
-			error = load("error.png",true);
+			error = load(new File(localize("images\\error.png")),true);
 		}catch(RuntimeException e){
-			error = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
+			BufferedImage temp = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
 			Random r = new Random();
 			for(int y = 0; y < 16; y++){
 				for(int x = 0; x < 16; x++){
-					error.setRGB(x, y, r.nextInt(new Color(255,255,255).getRGB()));
+					temp.setRGB(x, y, r.nextInt(new Color(255,255,255).getRGB()));
 				}
+			}
+			error = temp;
+		}
+		images = new HashMap<String,Image>();
+		images.put("error", error);
+		
+		File file = new File(Files.localize("images"));
+		assert file.isDirectory();
+	
+		File[] files = file.listFiles();
+		for(File f : files){
+			if(isImageFile(f)){
+				String name = f.getName();
+				int i = name.lastIndexOf('.');
+				assert i != -1;
+				name = name.substring(0, i);
+				Image image = load(f,true);
+				debug("Loaded image "+name+" as "+f.getAbsolutePath());
+				images.put(name, image);
+			}else if(f.isDirectory()){
+				loadImagesInDirectory(f.getName());
 			}
 		}
 	}
-	public static BufferedImage getError(){
+	private static void loadImagesInDirectory(String dir){
+		//if(dir.startsWith("\\")) dir = dir.substring(1);
+		File file = new File(Files.localize("images\\"+dir));
+		assert file.isDirectory();
+	
+		File[] files = file.listFiles();
+		for(File f : files){
+			if(isImageFile(f)){
+				String name = dir+"\\"+f.getName();
+				int i = name.lastIndexOf('.');
+				assert i != -1;
+				name = name.substring(0, i).replaceAll("\\\\", "/");
+				Image image = load(f,true);
+				debug("Loaded image "+name+" as "+f.getAbsolutePath());
+				images.put(name, image);
+			}else if(f.isDirectory()){
+				loadImagesInDirectory(dir+"\\"+f.getName());
+			}
+		}
+	}
+	public static Image getError(){
 		return error;
 	}
 	public static boolean isImageFile(String filename){
@@ -45,43 +89,93 @@ public class Images{
 	public static boolean isImageFile(File file){
 		return isImageFile(file.getAbsolutePath());
 	}
-	public static BufferedImage load(String filename){
-		return load(filename,false);
-		/*if(!isImageFile(filename)){
-			int i = filename.lastIndexOf('.');
-			if(i != -1){ //if extension was given
-				String extension = filename.substring(i);
-				throw new RuntimeException(f.getAbsolutePath()+": "+extension+" is not a recognized image format.");
-			}else{
-				boolean found = false;
-				for(String extension : new String[]{".png",".jpg",".bmp"}){
-					f = new File(localize(filename+extension));
-					if(f.exists()){
-						found = true;
-						break;
-					}
-				}
-				if(!found){
-					String name = filename;
-					String postfix = "";
-					String separator = Files.isWindowsOS? "\\" : "/";
-					if(filename.contains(separator)){
-						i = filename.lastIndexOf(separator);
-						postfix = "\\"+filename.substring(0, i);
-						name = filename.substring(i+1);
-					}
-					throw new RuntimeException("Could not find an image file in "+Files.dir+"images"+postfix+" with name \""+name+"\\.");
-				}
+	public static Image retrieve(String filename){
+		return retrieve(filename,false);
+	}
+	public static Image retrieve(String filename, boolean throwexception){
+		//return retrieve(new File(localize("images\\"+filename)),throwexception);
+		Image img = images.get(filename);
+		if(img == null){
+			if(throwexception){
+				throw new RuntimeException("Image "+filename+" not found.");
 			}
-		}*/
+			return error;
+		}
+		return img;
 	}
-	public static BufferedImage load(String filename, boolean throwexception){
-		return load(new File(localize("images\\"+filename)),throwexception);
+	public static Set<String> allImages(){
+		return images.keySet();
 	}
-	public static BufferedImage load(File file){
-		return load(file,false);
+	private static Image evaluateAnimFile(File f, BufferedImage image){
+		List<String> lines = Files.read(f);
+		List<BufferedImage> frames = new ArrayList<>();
+		int width = -1, height = -1;
+		boolean nodefine = false;
+		for(String str : lines){
+			if(str.startsWith("framesize ")){
+				String size = str.substring(10);
+				int i = size.indexOf('x');
+				if(i == -1)
+					throw new RuntimeException("Invalid framesize in file "+f.getAbsolutePath());
+				width = Integer.parseInt(size.substring(0, i));
+				height = Integer.parseInt(size.substring(i+1));
+			}else if(str.equals("nodefine"))
+				nodefine = true;
+			else if(!str.startsWith("define ") && !str.startsWith("#"))
+				throw new RuntimeException("Invalid anim file : "+f.getAbsolutePath());
+		}
+		if(width == -1 || height == -1)
+			throw new RuntimeException("Frame size not defined! Cannot animate!");
+		
+		for(int y = 0; y < image.getHeight(); y+=height){
+			for(int x = 0; x < image.getWidth(); x += width){
+				frames.add((BufferedImage)Images.crop(image, x, y, width, height));
+			}
+		}
+		
+		if(!nodefine){
+			String name = f.getName();
+			int i = name.lastIndexOf('.');
+			i = name.lastIndexOf('.',i-1);
+			name = name.substring(0, i);
+			for(i = 0; i < frames.size(); i++){
+				images.put(name+"/"+i, frames.get(i));
+			}
+			images.put(name, new AnimatedImage(frames.toArray(new BufferedImage[frames.size()])));
+		}
+		for(String str : lines){
+			if(str.startsWith("define ")){
+				String[] args = Script.scanLine(str);
+				assert args[0].equals("define");
+				if(args.length <= 2) throw new RuntimeException("Invalid define statement in file "+f.getAbsolutePath()+", must have indexes.");
+				String name = args[1];
+				List<BufferedImage> subimages = new ArrayList<>();
+				for(int i = 2; i < args.length; i++){
+					String index = args[i];
+					int j = index.indexOf('-');
+					if(j == -1){
+						subimages.add(frames.get(Integer.parseInt(index)));
+					}else{
+						int begin = Integer.parseInt(index.substring(0, j));
+						int end = Integer.parseInt(index.substring(j+1));
+						if(begin < end){
+							for(j = begin; j <= end; j++)
+								subimages.add(frames.get(j));
+						}else if(begin == end){
+							subimages.add(frames.get(begin));
+						}else{
+							for(j = begin; j >= end; j--)
+								subimages.add(frames.get(j));
+						}
+					}
+				}
+				Image img = new AnimatedImage(subimages.toArray(new BufferedImage[subimages.size()]));
+				images.put(name, img);
+			}
+		}
+		return null;
 	}
-	public static BufferedImage load(File file, boolean throwexception){
+	public static Image load(File file, boolean throwexception){
 		String filename = file.getAbsolutePath();
 		int i = filename.lastIndexOf('.');
 		if(i != -1){
@@ -94,8 +188,14 @@ public class Images{
 		}
 		try {
 			BufferedImage bimg = ImageIO.read(file);
-			debug("Loaded image:"+file.getAbsolutePath());
-			return bimg;
+			//BufferedImage[] list = {bimg};
+			//return new AnimatedImage(list);
+			File f = new File(filename+".anim");
+			if(f.exists()){
+				return evaluateAnimFile(f,bimg);
+			}else{
+				return bimg;
+			}
 		} catch (IOException e) {
 			if(debug){
 				debug("Error loading "+file.getAbsolutePath());
@@ -206,10 +306,10 @@ public class Images{
 		
 		return bimage;
 	}
-	public static BufferedImage crop(BufferedImage original,int x, int y,int width, int height){
+	public static Image crop(Image original,int x, int y,int width, int height){
 		BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = resizedImage.createGraphics();
-		g.drawImage(original, -x,-y, original.getWidth(), original.getHeight(), null);
+		g.drawImage(original, -x,-y, original.getWidth(null), original.getHeight(null), null);
 		g.dispose();
 		return resizedImage;
 	}
@@ -263,8 +363,8 @@ public class Images{
 		}
 		return bOut;
 	}
-	public static BufferedImage copyTo(BufferedImage base, BufferedImage source, int startx, int starty){
-		BufferedImage bOut = new BufferedImage(base.getWidth(),base.getHeight(),BufferedImage.TYPE_INT_ARGB);
+	/*public static BufferedImage copyTo(Image base, Image source, int startx, int starty){
+		Image bOut = new BufferedImage(base.getWidth(),base.getHeight(),BufferedImage.TYPE_INT_ARGB);
 		if(base.getWidth()< source.getWidth()){
 			source = crop(source,0,0, base.getWidth(), source.getHeight());
 		}if(base.getHeight()< source.getHeight()){
@@ -411,7 +511,7 @@ public class Images{
 				for(; y < top.length; y++){
 					top[y] = new Color(bimg.getRGB(x,y));
 				}
-				/* fills the 'bottom' list with data */
+				// fills the 'bottom' list with data 
 				//starty is used so that when setting the value
 				//of 'bottom', the first value will be zero and
 				//not the last value of y
@@ -446,5 +546,5 @@ public class Images{
 		}
 		return bOut;
 	}
-
+	*/
 }

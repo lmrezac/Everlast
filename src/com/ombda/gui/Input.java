@@ -95,5 +95,5 @@ public class Input extends MessageBox{
 	@Override
 	public boolean pauseGame(){ return !done; }
 	
-	
+	public String toString(){ return "input"; }
 }
