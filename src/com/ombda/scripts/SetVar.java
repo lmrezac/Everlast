@@ -2,12 +2,13 @@ package com.ombda.scripts;
 
 import java.util.Arrays;
 
+import com.ombda.Facing;
 import com.ombda.Map;
 import com.ombda.NPC;
 import com.ombda.Panel;
 import com.ombda.Player;
 import com.ombda.Sprite;
-
+import static com.ombda.Debug.*;
 public class SetVar implements ScriptStep{
 	private String[] args;
 	public SetVar(String[] a){
@@ -54,6 +55,11 @@ public class SetVar implements ScriptStep{
 			}else if(var.equals("y")){
 				int y = Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				sprite.setPos(sprite.x, y);
+			}else if(var.equals("pos")){
+				testLength(5);
+				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				sprite.setPos(x,y);
 			}else throw new RuntimeException("Invalid sprite var: "+var);
 		}else if(args[1].equals("npc")){
 			testLength(4);
@@ -80,11 +86,35 @@ public class SetVar implements ScriptStep{
 			}else if(var.equals("y")){
 				int y = Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				npc.setPos(npc.x, y);
+			}else if(var.equals("onInteracted")){
+				String str = "";
+				for(int q = 3; q < args.length; q++){
+					str += args[q];
+					if(q != args.length-1)
+						str += ' ';
+				}
+				debug("set ncp oninteract");
+				npc.onInteractedScript = new Script(Arrays.asList(Script.loadStep(str)));
+			}else if(var.equals("pos")){
+				testLength(5);
+				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				npc.setPos(x,y);
 			}else if(var.equals("dest")){
 				testLength(5);
 				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
 				npc.setDestination(x, y);
+			}else if(var.equals("xy")){
+				testLength(5);
+				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				npc.setDestination(x, y);
+				npc.setPos(x,y);
+			}else if(var.equals("facing")){
+				String facing = script.evalVar(Script.parseString(args[3]));
+				Facing dir = Facing.fromString(facing.toUpperCase());
+				npc.setDirection(dir);
 			}else throw new RuntimeException("Invalid npc var: "+var);
 		}else if(args[1].equals("player.x")){
 			testLength(3);
@@ -96,6 +126,16 @@ public class SetVar implements ScriptStep{
 			int y = Script.parseInt(args[2]);
 			Player p = game.getPlayer();
 			p.setPos(p.x, y);
+		}else if(args[1].equals("player.pos")){
+			testLength(4);
+			int x = Script.parseInt(args[2]);
+			int y = Script.parseInt(args[3]);
+			game.getPlayer().setPos(x, y);
+		}else if(args[1].equals("player.facing")){
+			testLength(3);
+			String facing = script.evalVar(Script.parseString(args[3]));
+			Facing dir = Facing.fromString(facing.toUpperCase());
+			game.getPlayer().setDirection(dir);
 		}else if(args.length == 3 && !args[1].equals("map") && !args[1].equals("player.map")){
 			script.setVar(Script.parseString(args[1]),script.evalVar(Script.parseString(args[2])));
 		}else if(args.length == 5 && (Script.parseString(args[2]).equals("add") || args[2].equals("+"))){

@@ -1,10 +1,11 @@
 package com.ombda;
 
-import java.awt.Image;
 import java.awt.Shape;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.ImageIcon;
 @Deprecated
 public class Tilemap{
 	private Tile[] tiles;
@@ -25,7 +26,7 @@ public class Tilemap{
 		do{
 			
 			Shape box = BoundingBox.FULL;
-			Image image = null;
+			ImageIcon image = null;
 			if((f = new File(Files.localize("tilemaps\\"+id+"\\"+count+"\\tile.info"))).exists()){
 				List<String> lines = Files.read(f);
 				for(String str : lines){

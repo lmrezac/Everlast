@@ -1,5 +1,12 @@
 #sprite 0xA0 5t 5t test_character
 #msg sprite 0xA0.x = ${sprite 0xA0.x} *wait *wait
 #sprite 0xF7 0 5t error2 test
-set x 5
-msg "Dude, fail!" *wait 
+#npc 0xAA 14 8 npc01_still_N npc01_still_NE npc01_still_E npc01_still_SE npc01_still_S npc01_still_SW npc01_still_W npc01_still_NW npc01_walk_N npc01_walk_NE npc01_walk_E npc01_walk_SE npc01_walk_S npc01_walk_SW npc01_walk_W npc01_walk_NW
+#set npc 0xAA.map test
+#set npc 0xAA.xy 5t 5t
+#set npc 0xAA.facing N
+npc 0x01 14 32 0 error error error error error error npcs/hoodlum error error error error error error error error error
+set npc 0x01.map test
+set npc 0x01.xy 15t 5t
+set npc 0x01.facing W
+set npc 0x01.onInteracted msg I am Error *wait

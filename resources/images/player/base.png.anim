@@ -1,4 +1,6 @@
 framesize 14x32
+nodefine
+frametime 9
 define base_still_E 0
 define base_still_NE 5
 define base_still_N 10

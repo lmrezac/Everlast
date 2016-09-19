@@ -19,27 +19,30 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import com.ombda.scripts.Script;
 
 public class Images{
 	
-	private static HashMap<String,Image> images;
-	private static Image error;
+	private static HashMap<String,ImageIcon> images;
+	private static ImageIcon error;
+	private static BufferedImage error_bimg;
 	public static void init(){
 		try{
-			error = load(new File(localize("images\\error.png")),true);
+			error_bimg = load(new File(localize("images\\error.png")),true);
 		}catch(RuntimeException e){
-			BufferedImage temp = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
+			error_bimg = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
 			Random r = new Random();
 			for(int y = 0; y < 16; y++){
 				for(int x = 0; x < 16; x++){
-					temp.setRGB(x, y, r.nextInt(new Color(255,255,255).getRGB()));
+					error_bimg.setRGB(x, y, r.nextInt(new Color(255,255,255).getRGB()));
 				}
 			}
-			error = temp;
 		}
-		images = new HashMap<String,Image>();
+		error = new ImageIcon(error_bimg);
+		
+		images = new HashMap<>();
 		images.put("error", error);
 		
 		File file = new File(Files.localize("images"));
@@ -52,7 +55,14 @@ public class Images{
 				int i = name.lastIndexOf('.');
 				assert i != -1;
 				name = name.substring(0, i);
-				Image image = load(f,true);
+				//Image image = load(f,true);
+				ImageIcon image;
+				File f2 = new File(f.getAbsolutePath()+".anim");
+				if(f2.exists()){
+					image = evaluateAnimFile(null,f2,load(f,true));
+				}else{
+					image = new ImageIcon(f.getAbsolutePath());
+				}
 				debug("Loaded image "+name+" as "+f.getAbsolutePath());
 				images.put(name, image);
 			}else if(f.isDirectory()){
@@ -72,7 +82,14 @@ public class Images{
 				int i = name.lastIndexOf('.');
 				assert i != -1;
 				name = name.substring(0, i).replaceAll("\\\\", "/");
-				Image image = load(f,true);
+				//Image image = load(f,true);
+				ImageIcon image;
+				File f2 = new File(f.getAbsolutePath()+".anim");
+				if(f2.exists()){
+					image = evaluateAnimFile(dir,f2,load(f,true));
+				}else{
+					image = new ImageIcon(f.getAbsolutePath());
+				}
 				debug("Loaded image "+name+" as "+f.getAbsolutePath());
 				images.put(name, image);
 			}else if(f.isDirectory()){
@@ -80,7 +97,7 @@ public class Images{
 			}
 		}
 	}
-	public static Image getError(){
+	public static ImageIcon getError(){
 		return error;
 	}
 	public static boolean isImageFile(String filename){
@@ -89,12 +106,12 @@ public class Images{
 	public static boolean isImageFile(File file){
 		return isImageFile(file.getAbsolutePath());
 	}
-	public static Image retrieve(String filename){
+	public static ImageIcon retrieve(String filename){
 		return retrieve(filename,false);
 	}
-	public static Image retrieve(String filename, boolean throwexception){
+	public static ImageIcon retrieve(String filename, boolean throwexception){
 		//return retrieve(new File(localize("images\\"+filename)),throwexception);
-		Image img = images.get(filename);
+		ImageIcon img = images.get(filename);
 		if(img == null){
 			if(throwexception){
 				throw new RuntimeException("Image "+filename+" not found.");
@@ -106,12 +123,15 @@ public class Images{
 	public static Set<String> allImages(){
 		return images.keySet();
 	}
-	private static Image evaluateAnimFile(File f, BufferedImage image){
+	private static ImageIcon evaluateAnimFile(String folderIn,File f, BufferedImage image){
+		debug("Loading animated image "+f.getAbsolutePath());
 		List<String> lines = Files.read(f);
 		List<BufferedImage> frames = new ArrayList<>();
-		int width = -1, height = -1;
+		int width = -1, height = -1, frametime = 0;
 		boolean nodefine = false;
+		boolean noanim = false;
 		for(String str : lines){
+			str = str.trim();
 			if(str.startsWith("framesize ")){
 				String size = str.substring(10);
 				int i = size.indexOf('x');
@@ -121,61 +141,80 @@ public class Images{
 				height = Integer.parseInt(size.substring(i+1));
 			}else if(str.equals("nodefine"))
 				nodefine = true;
+			else if(str.equals("noanim"))
+				noanim = true;
+			else if(str.startsWith("frametime "))
+				frametime = Integer.parseInt(str.substring(10));
 			else if(!str.startsWith("define ") && !str.startsWith("#"))
 				throw new RuntimeException("Invalid anim file : "+f.getAbsolutePath());
 		}
 		if(width == -1 || height == -1)
 			throw new RuntimeException("Frame size not defined! Cannot animate!");
-		
-		for(int y = 0; y < image.getHeight(); y+=height){
-			for(int x = 0; x < image.getWidth(); x += width){
-				frames.add((BufferedImage)Images.crop(image, x, y, width, height));
+		for(int y = 0; y <= image.getHeight()-height; y+=height){
+			for(int x = 0; x <= image.getWidth()-width; x += width){
+				frames.add(Images.crop(image, x, y, width, height));
 			}
 		}
+		debug("frames = "+frames.size());
 		
 		if(!nodefine){
 			String name = f.getName();
 			int i = name.lastIndexOf('.');
 			i = name.lastIndexOf('.',i-1);
 			name = name.substring(0, i);
+			if(folderIn != null)
+				name = folderIn.replaceAll("\\\\","/")+"/"+name;
 			for(i = 0; i < frames.size(); i++){
-				images.put(name+"/"+i, frames.get(i));
+				images.put(name+"/"+i, new ImageIcon(frames.get(i)));
+				debug("Defined image "+name+"/"+i);
 			}
-			images.put(name, new AnimatedImage(frames.toArray(new BufferedImage[frames.size()])));
 		}
-		for(String str : lines){
-			if(str.startsWith("define ")){
-				String[] args = Script.scanLine(str);
-				assert args[0].equals("define");
-				if(args.length <= 2) throw new RuntimeException("Invalid define statement in file "+f.getAbsolutePath()+", must have indexes.");
-				String name = args[1];
-				List<BufferedImage> subimages = new ArrayList<>();
-				for(int i = 2; i < args.length; i++){
-					String index = args[i];
-					int j = index.indexOf('-');
-					if(j == -1){
-						subimages.add(frames.get(Integer.parseInt(index)));
-					}else{
-						int begin = Integer.parseInt(index.substring(0, j));
-						int end = Integer.parseInt(index.substring(j+1));
-						if(begin < end){
-							for(j = begin; j <= end; j++)
-								subimages.add(frames.get(j));
-						}else if(begin == end){
-							subimages.add(frames.get(begin));
+		if(!noanim){
+			ImageIcon result = null;
+			for(String str : lines){
+				str = str.trim();
+				if(str.startsWith("define ")){
+					String[] args = Script.scanLine(str);
+					assert args[0].equals("define");
+					if(args.length <= 2) throw new RuntimeException("Invalid define statement in file "+f.getAbsolutePath()+", must have indexes.");
+					String name = Script.parseString(args[1]);
+					List<BufferedImage> subimages = new ArrayList<>();
+					for(int i = 2; i < args.length; i++){
+						String index = args[i];
+						int j = index.indexOf('-');
+						if(j == -1){
+							subimages.add(frames.get(Integer.parseInt(index)));
 						}else{
-							for(j = begin; j >= end; j--)
-								subimages.add(frames.get(j));
+							int begin = Integer.parseInt(index.substring(0, j));
+							int end = Integer.parseInt(index.substring(j+1));
+							if(begin < end){
+								for(j = begin; j <= end; j++)
+									subimages.add(frames.get(j));
+							}else if(begin == end){
+								subimages.add(frames.get(begin));
+							}else{
+								for(j = begin; j >= end; j--)
+									subimages.add(frames.get(j));
+							}
 						}
 					}
+					ImageIcon img = new AnimatedImage(subimages.toArray(new BufferedImage[subimages.size()]),frametime);
+					if(name.equals("this")){
+						result = img;
+					}else{
+						debug("Defined "+name);
+						images.put(name, img);
+					}
 				}
-				Image img = new AnimatedImage(subimages.toArray(new BufferedImage[subimages.size()]));
-				images.put(name, img);
 			}
+			if(result == null)
+				result = new AnimatedImage(frames.toArray(new BufferedImage[frames.size()]),frametime);
+			return result;
 		}
-		return null;
+		return new ImageIcon(image);
 	}
-	public static Image load(File file, boolean throwexception){
+	
+	public static BufferedImage load(File file, boolean throwexception){
 		String filename = file.getAbsolutePath();
 		int i = filename.lastIndexOf('.');
 		if(i != -1){
@@ -183,19 +222,12 @@ public class Images{
 			if(!isImageFile(filename)){
 				if(throwexception)
 					throw new RuntimeException(file.getAbsolutePath()+": "+extension+" is not a recognized image format.");
-				else return getError();
+				else return error_bimg;
 			}
 		}
 		try {
 			BufferedImage bimg = ImageIO.read(file);
-			//BufferedImage[] list = {bimg};
-			//return new AnimatedImage(list);
-			File f = new File(filename+".anim");
-			if(f.exists()){
-				return evaluateAnimFile(f,bimg);
-			}else{
-				return bimg;
-			}
+			return bimg;
 		} catch (IOException e) {
 			if(debug){
 				debug("Error loading "+file.getAbsolutePath());
@@ -204,7 +236,7 @@ public class Images{
 			}
 			if(throwexception)
 				throw new RuntimeException("Error loading "+file.getAbsolutePath());
-			else return getError();
+			else return error_bimg;
 		}
 	}
 	
@@ -306,7 +338,7 @@ public class Images{
 		
 		return bimage;
 	}
-	public static Image crop(Image original,int x, int y,int width, int height){
+	public static BufferedImage crop(BufferedImage original,int x, int y,int width, int height){
 		BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = resizedImage.createGraphics();
 		g.drawImage(original, -x,-y, original.getWidth(null), original.getHeight(null), null);

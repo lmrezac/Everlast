@@ -1,1 +1,1 @@
-msg "Dude, fail!" *wait 
+set npc 0xAA.pos 2t 2t

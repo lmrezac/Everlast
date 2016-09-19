@@ -17,8 +17,6 @@ import static com.ombda.Debug.*;
 
 public class MessageBox extends GUI{
 	
-	
-	
 	@Override
 	public void mouseClicked(MouseEvent e){}
 
@@ -55,7 +53,8 @@ public class MessageBox extends GUI{
 				indexWaitMax = 2;
 			else if(indexWaitMax == 2)
 				indexWaitMax = 1;
-		
+		}else if(e.getKeyCode() == KeyEvent.VK_X){
+			instant();
 		}
 	}
 
@@ -80,13 +79,17 @@ public class MessageBox extends GUI{
 
 	@Override
 	public boolean pauseGame(){
-		return false;
+		return true;
 	}
 	
 	private char[] string;
 	protected String str;
 	public void instant(){
-		indexWaitMax = 2;
+		int i = str.indexOf(WAIT,index)+1;
+		waitingForInput = i != 0;
+		if(i == 0) i = str.length();
+		index = i;
+		
 	}
 	public void setMessage(String str){
 		string = str.toCharArray();
@@ -240,6 +243,7 @@ public class MessageBox extends GUI{
 	public boolean blockInput(){
 		return true;
 	}
+	
 	
 	public String toString(){ return "msgbox"; }
 }

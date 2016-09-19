@@ -1,0 +1,1 @@
+msg To change text color, use the § sign, *line followed by a pre-set character that *line determines the color (example: r = red) *line or c, followed by a hex code of rgb. *wait §rRED §gGREEN §bBLUE §oORANGE *line §yYELLER §pPURPLE §0§uUNDERLINE §BBOLD *wait 

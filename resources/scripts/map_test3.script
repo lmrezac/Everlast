@@ -1,0 +1,5 @@
+npc 0x01 14 32 0 error error error error error error npcs/hoodlum error error error error error error error error error
+set npc 0x01.map test3
+set npc 0x01.xy 15t 5t
+set npc 0x01.facing W
+set npc 0x01.onInteracted msg Hey, buddy. This street is my turf. *line I'd turn around if I were you. *wait

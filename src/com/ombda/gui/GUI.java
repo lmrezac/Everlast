@@ -24,7 +24,7 @@ import com.ombda.Images;
 public abstract class GUI implements MouseListener, MouseMotionListener, KeyListener{
 	protected static final BufferedImage[] letters;
 	static{
-		Image image = Images.load(new File(Files.localize("images\\gui\\font\\normal.png")),true);
+		BufferedImage image = Images.load(new File(Files.localize("images\\gui\\font\\normal.png")),true);
 		byte[] font_sizes = null;
 		try{
 			font_sizes = java.nio.file.Files.readAllBytes(Paths.get(com.ombda.Files.localize("images\\gui\\font\\normal.png.sizes")));
@@ -41,7 +41,7 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 		for(char c = '\u0000'; c < letters.length; c++){
 			char width = (char)font_sizes[c];
 			//debug("width for char '"+c+"' is "+(int)width+" (x="+x+",y="+y+")");
-			letters[c] = (BufferedImage)Images.crop((BufferedImage)image, x, y, width, 10);
+			letters[c] = Images.crop(image, x, y, width, 10);
 			col++;
 			if(col > 0x0F){
 				col = 0;
@@ -64,15 +64,15 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 	
 	protected static final BufferedImage msgbox_tl, msgbox_t, msgbox_tr, msgbox_l, msgbox_m, msgbox_r, msgbox_bl, msgbox_b, msgbox_br;
 	static{
-		msgbox_tl = (BufferedImage)Images.retrieve("gui/msgbox_tl");
-		msgbox_t = (BufferedImage)Images.retrieve("gui/msgbox_t");
-		msgbox_tr = (BufferedImage)Images.retrieve("gui/msgbox_tr");
-		msgbox_l = (BufferedImage)Images.retrieve("gui/msgbox_l");
-		msgbox_m = (BufferedImage)Images.retrieve("gui/msgbox_m");
-		msgbox_r = (BufferedImage)Images.retrieve("gui/msgbox_r");
-		msgbox_bl = (BufferedImage)Images.retrieve("gui/msgbox_bl");
-		msgbox_b = (BufferedImage)Images.retrieve("gui/msgbox_b");
-		msgbox_br = (BufferedImage)Images.retrieve("gui/msgbox_br");
+		msgbox_tl = Images.load(new File(Files.localize("images\\gui\\msgbox_tl.png")),true);
+		msgbox_t = Images.load(new File(Files.localize("images\\gui\\msgbox_t.png")),true);
+		msgbox_tr = Images.load(new File(Files.localize("images\\gui\\msgbox_tr.png")),true);
+		msgbox_l = Images.load(new File(Files.localize("images\\gui\\msgbox_l.png")),true);
+		msgbox_m = Images.load(new File(Files.localize("images\\gui\\msgbox_m.png")),true);
+		msgbox_r = Images.load(new File(Files.localize("images\\gui\\msgbox_r.png")),true);
+		msgbox_bl = Images.load(new File(Files.localize("images\\gui\\msgbox_bl.png")),true);
+		msgbox_b = Images.load(new File(Files.localize("images\\gui\\msgbox_b.png")),true);
+		msgbox_br = Images.load(new File(Files.localize("images\\gui\\msgbox_br.png")),true);
 	}
 	
 	protected static void drawBox(Graphics2D g2d, int topx, int topy, int width, int height){
@@ -144,7 +144,15 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 	protected static final Color PURPLE = new Color(178,0,255);
 	protected static final char SECTION = '§';
 	protected boolean bold = false, underline = false;
-	protected static void drawString(Graphics2D g2d, String str, int x, int y){
+	public static int stringWidth(String str){
+		str = str.replaceAll("§([0rgboypuB]|(c[\\dA-Za-z]{6}))", "");
+		int length = 0;
+		for(char c : str.toCharArray()){
+			length += letters[c].getWidth();
+		}
+		return length;
+	}
+	public static void drawString(Graphics2D g2d, String str, int x, int y){
 		char[] string = str.toCharArray();
 		int startX = x;
 		Color tint = null;

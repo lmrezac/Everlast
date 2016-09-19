@@ -1,0 +1,4 @@
+framesize 16x16
+nodefine
+define intro/cream_wall_bottom 0
+define intro/cream_wall_bottom_crack 1

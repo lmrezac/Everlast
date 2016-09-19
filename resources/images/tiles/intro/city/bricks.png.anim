@@ -1,0 +1,8 @@
+framesize 16x16
+nodefine
+define intro/bricks_left 0
+define intro/bricks 1
+define intro/bricks_right 2
+define intro/bricks_bottom_left 3
+define intro/bricks_bottom 4
+define intro/bricks_bottom_right 5

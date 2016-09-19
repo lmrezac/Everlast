@@ -26,6 +26,8 @@ public class DispMessage implements ScriptStep{
 				String chs = args[i];
 				int c = Script.parseInt(script.evalVar(chs));
 				str += (char)c;
+			}else if(arg.equals("*line")){
+				str += '\n';
 			}else{
 				if(Script.isString(arg) && arg.length() > 1)
 					str += arg.substring(1, arg.length()-1);

@@ -23,7 +23,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -43,6 +43,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	private static Panel instance;
 	
 	private Player player;
+	private String player_name;
 	private Script currentScript = null;
 	private Map map;
 	private GUI gui;
@@ -73,7 +74,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 		buffer = new BufferedImage(PRF_WIDTH,PRF_HEIGHT,BufferedImage.TYPE_INT_ARGB);
 		
-		player = new Player(0,0);
+		player = new Player(0,0,Facing.N);
 		renderingHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		renderingHints.put(RenderingHints.KEY_RENDERING,
@@ -152,18 +153,17 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 					e.printStackTrace();
 				System.exit(0);
 			}
-			Files.write(f.getAbsolutePath(), Arrays.asList("map=test"));
+			Files.write(f.getAbsolutePath(), Arrays.asList("player","test"));
 			System.out.println(Files.read(f));
 		}
 		List<String> lines = Files.read(f);
+		if(lines.size() != 6) throw new RuntimeException("Invalid save file");
 		System.out.println(lines);
-		for(String str : lines){
-			Object info = compartmentalize(str);
-			if(info.equals("map")){
-				setMap(Map.get(info.toString()));
-				debug("map created!");
-			}
-		}
+		player_name = lines.get(0);
+		setMap(Map.get(lines.get(1)));
+		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
+		offsetX = Integer.parseInt(lines.get(4));
+		offsetY = Integer.parseInt(lines.get(5));
 	}
 	public void saveGame(){
 		File f = new File(Files.localize("saves/save0.dat"));
@@ -178,7 +178,14 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			}
 		}
 		List<String> lines = new ArrayList<>();
-		lines.add("map="+player.getMap().toString());
+		lines.add(player_name);
+		lines.add(player.getMap().toString());
+		lines.add(Double.toString(player.x));
+		lines.add(Double.toString(player.y));
+		lines.add(Integer.toString(offsetX));
+		lines.add(Integer.toString(offsetY));
+		Files.write("saves/save0.dat", lines);
+		debug("Game saved!");
 	}
 	public static Panel getInstance(){ return instance;}
 	public Player getPlayer(){ return player; }
@@ -219,7 +226,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.addRenderingHints(renderingHints);
 		Graphics2D offG = (Graphics2D)buffer.getGraphics();
-		offG.setColor(getBackground());
+		offG.setColor(map.getBackground());
 		offG.fillRect(0, 0, Frame.PRF_WIDTH, Frame.PRF_HEIGHT);
 		// Draw into the offscreen image.
 		paintOffscreen(offG);
@@ -240,28 +247,42 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(gui.drawMap()){
 			map.drawBackground(g2d,offsetX,offsetY);
 		
-			player.draw(g2d,offsetX,offsetY);
+			
 		
-			Iterator<Sprite> sprites = map.getSprites();
-			while(sprites.hasNext()){
-				Sprite s = sprites.next();
-				s.draw(g2d, offsetX, offsetY);
+			List<Sprite> sprites = new ArrayList<>(map.getSprites());
+			
+			//List<Sprite> undrawn = new ArrayList<Sprite>();
+			
+			double minY = 1;
+			while(!sprites.isEmpty()){
+				for(int i = sprites.size()-1; i >= 0; i--){
+					Sprite s = sprites.get(i);
+					double h = s.y+s.spriteHeight();
+					if(h <= minY){
+						s.draw(g2d, offsetX, offsetY);
+						sprites.remove(i);
+					}
+				}
+				minY++;
 			}
 			
 			map.drawForeground(g2d,offsetX,offsetY);
+			
+			Tiles.incrementAnimationFrames();
 		}
 		gui.draw(g2d);
 		if(debug && !noScreenDebug){
 			long temp = 0;
-			drawDebugString(g2d,"player ("+Math.round(player.x)+","+Math.round(player.y)+")",0,10);
+			drawDebugString(g2d,"player ("+Math.round(player.x)+","+Math.round(player.y)+") ["+(int)(Math.round(player.x)/16.0)+","+(int)(Math.round(player.y)/16.0)+"]",0,10);
 			drawDebugString(g2d,"map {width:"+map.width()+", height:"+map.height()+"}",0,22);
 			drawDebugString(g2d,"offset X = "+(int)offsetX+" offset Y = "+(int)offsetY,0,34);
-			drawDebugString(g2d,"border X : ["+borderX_left+";"+borderX_right+"]",0,46);
+			drawDebugString(g2d,"facing: "+player.getDirection(),0,46);
 			drawDebugString(g2d,"border Y : ["+borderY_top+";"+borderY_bottom+"]",0,58);
 			drawDebugString(g2d,"fpms:"+(((temp = System.currentTimeMillis())-lastFrame)),0,70);
 			int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
-			drawDebugString(g2d,"mouse X : "+mouseCoords[0]+" mouse Y : "+mouseCoords[1],0,82);
-			drawDebugString(g2d,"gui : "+gui.toString(),0,94);
+			int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
+			drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,82);
+			drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,94);
 			lastFrame = temp;
 		}
 		Toolkit.getDefaultToolkit().sync();
@@ -285,30 +306,25 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 
 	public void update(){
 		if(currentScript != null){
+			
 			currentScript.execute(this);
 			if(currentScript.done())
 				currentScript = null;
 		}
 		if(!gui.pauseGame()){
+			
 			if(!gui.blockInput()){
-				//debug("gui == "+gui.toString()+" blockinput = "+gui.blockInput());
-				player.doKeys();
+				
+				
+				player.update();
 			}
 
-			player.testCollision();
-			Iterator<Sprite> sprites = map.getSprites();
-			while(sprites.hasNext()){
-				Sprite s = sprites.next();
+			Collection<Sprite> sprites = map.getSprites();
+			for(Sprite s : sprites){
 				if(s instanceof Updateable)
 					((Updateable)s).update();
 			}
 			
-			sprites = map.getSprites();
-			while(sprites.hasNext()){
-				Sprite s = sprites.next();
-				if(s instanceof Collideable)
-					((Collideable)s).testCollision();
-			}
 		}
 		gui.update();
 	}
@@ -403,6 +419,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	@Override
 	public void keyReleased(KeyEvent e){
 		gui.keyReleased(e);
+		
 	}
 
 	@Override
@@ -415,8 +432,45 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			else setGUI(console);
 		}else{
 			gui.keyTyped(e);
+			if(e.getKeyChar() == 'z' && gui == hud){
+				Frame.keys[KeyEvent.VK_Z] = false;
+				Collection<Sprite> sprites = map.getSprites();
+				int x, y;
+				if(player.direction == Facing.N){
+					x = (int)(player.x+(player.boundingBox.getWidth()/2));
+					y = (int)(player.y-1);
+					
+				}else if(player.direction == Facing.E){
+					x = (int)(player.x+player.boundingBox.getWidth());
+					y = (int)(player.y+(player.boundingBox.getHeight()/2));
+					
+				}else if(player.direction == Facing.S){
+					x = (int)(player.x+(player.boundingBox.getWidth()/2));
+					y = (int)(player.y+player.boundingBox.getHeight());
+					
+				}else if(player.direction == Facing.W){
+					x = (int)(player.x-1);
+					y = (int)(player.y+(player.boundingBox.getHeight()/2));	
+					
+				}else return;
+				
+				map.getTileAt(x,y, 0).onInteracted(player, x, y);
+				for(Sprite s : sprites){
+					if(s instanceof Interactable){
+						((Interactable)s).onInteracted(player, x, y);
+					}
+				}
+			}
 		}
 		
+	}
+	public static int[] screenCoordsToTiles(int x, int y){
+		int[] coords = Panel.screenCoordsToImageCoords(x, y);
+		x = coords[0]-Panel.getInstance().offsetX;
+		y = coords[1]-Panel.getInstance().offsetY;
+		x /= 16;
+		y /= 16;
+		return new int[]{x,y};
 	}
 
 	

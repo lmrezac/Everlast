@@ -10,4 +10,7 @@ public class Point{
 	public String toString(){
 		return "("+x+","+y+")";
 	}
+	public double distanceTo(Point p){
+		return Math.sqrt(Math.pow(x-p.x, 2)+Math.pow(y-p.y, 2));
+	}
 }

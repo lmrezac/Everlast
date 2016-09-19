@@ -3,17 +3,14 @@ package com.ombda.gui;
 import static com.ombda.Debug.debug;
 import static com.ombda.Debug.printStackTrace;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ombda.Frame;
 import com.ombda.Map;
 import com.ombda.NPC;
 import com.ombda.Panel;
@@ -49,6 +46,7 @@ public class Console extends Input{
 		executeCommand(args);
 	}
 	public void executeCommand(List<String> args){
+		try{
 		if(args.get(0).equals("gui")){
 			cmdGui(args);
 		}else if(args.get(0).equals("noclip")){
@@ -73,11 +71,25 @@ public class Console extends Input{
 			cmdTestfor(args);
 		}else if(args.get(0).equals("script")){
 			cmdScript(args);
+		}else if(args.get(0).equals("newmap")){
+			cmdNewMap(args);
+		}else if(args.get(0).equals("tileEntity")){
+			cmdTileEntity(args);
+		}else if(args.get(0).equals("delete")){
+			cmdDelete(args);
 		}else{
 			debug("unknown command");
 			panel.msgbox.setMessage("Error: unknown command"+WAIT);
 			panel.msgbox.instant();
 			panel.setGUI(panel.msgbox);
+		}
+		}catch(IndexOutOfBoundsException ef){
+			panel.msgbox.setMessage("Error: param count"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			if(printStackTrace){
+				ef.printStackTrace();
+			}else debug(ef.getMessage());
 		}
 		reset();
 	}
@@ -160,7 +172,7 @@ public class Console extends Input{
 	}
 	
 	private void cmdSet(List<String> args){
-		try{
+	
 			int index = 0;
 			if(args.get(++index).equals("tile")){
 				if(args.get(index+1).equals("from")){
@@ -191,6 +203,8 @@ public class Console extends Input{
 					short tileId = 0;
 					if(id.matches("\\d+")){
 						tileId = Short.parseShort(id);
+					}else if(id.matches("0x[\\dA-Za-z]+")){
+						tileId = Short.decode(id);
 					}else if(id.matches("[\\w_]+")){
 						Class<Tiles> c = Tiles.class;
 						try{
@@ -245,6 +259,14 @@ public class Console extends Input{
 					args.remove(0);
 				}
 				cmdGui(args);
+			}else if(args.get(index).equals("map.size")){
+				String arg1s = args.get(++index);
+				String arg2s = args.get(++index);
+				int w = Integer.parseInt(arg1s), h = Integer.parseInt(arg2s);
+				boolean down = false;
+				if(index + 1 < args.size())
+					down = args.get(++index).equals("down");
+				panel.getPlayer().getMap().setSize(w, h, down);
 			}else if(args.get(index).equals("map") || args.get(index).equals("player.map")){
 				index++;
 				String str2 = "";
@@ -356,11 +378,6 @@ public class Console extends Input{
 				panel.msgbox.instant();
 				panel.setGUI(panel.msgbox);
 			}
-			}catch(IndexOutOfBoundsException ef){
-				panel.msgbox.setMessage("Error: param count"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
-			}
 	}
 	
 	private void cmdFill(List<String> args){
@@ -391,6 +408,8 @@ public class Console extends Input{
 		short tileId = 0;
 		if(id.matches("\\d+")){
 			tileId = Short.parseShort(id);
+		}else if(id.matches("0x[\\dA-Za-z]+")){
+			tileId = Short.decode(id);
 		}else if(id.matches("[\\w_]+")){
 			Class<Tiles> c = Tiles.class;
 			try{
@@ -468,9 +487,15 @@ public class Console extends Input{
 			panel.msgbox.instant();
 			panel.setGUI(panel.msgbox);
 		}else{
-		
 			if(args.size() == 1 || args.get(1).equals("game")){
 				panel.saveGame();
+			}else if(args.get(1).equals("all")){
+				panel.getPlayer().getMap().save();
+				panel.saveGame();
+			}else if(args.get(1).equals("x")){
+				panel.getPlayer().getMap().save();
+				panel.saveGame();
+				System.exit(0);
 			}else if(args.get(1).equals("map")){
 				panel.getPlayer().getMap().save();
 			}else{
@@ -573,11 +598,17 @@ public class Console extends Input{
 						message = "save map (no other arguments)\nSaves the current map with any changes\nto its files.";
 					else if(value.equals("game"))
 						message = "save game (no other arguments)\nSaves the game.";
+					else if(value.equals("all"))
+						message = "save all (no other arguments)\nSaves both the map and the game.";
+					else if(value.equals("x"))
+						message = "save x (no other arguments)\nSave & quit";
 					else
 						message = "Unknown value '"+value+"'.";
 				}else{
 					message = "save <map|game>\nSaves something.";
 				}
+			}else if(cmd.equals("newmap")){
+				message = "newmap <name> <width> <height> <background color>\nCreates a new map.";
 			}else if(cmd.equals("debug")){
 				message = "debug <state>\nChanges whether debug information is shown.\n'minimal' allows terminal output but does not draw\nto screen.";
 			}else if(cmd.equals("goto")){
@@ -588,6 +619,10 @@ public class Console extends Input{
 				message = "quit\nQuits the game and closes the app.\nDoes not save.";
 			}else if(cmd.equals("testfor")){
 				message = "testfor <sprite:entity:map selector>\nTests if the given sprite/entity/map exists, and outputs the result.";
+			}else if(cmd.equals("tileEntity")){
+				message = "tileEntity <tile x> <tile y> <name> [parameters]\nCreates a tile entity.";
+			}else if(cmd.equals("delete")){
+				message = "delete <sprite : npc : tileEntity> <selectors>\nDeletes something.";
 			}else{
 				message = "Unknown command '"+cmd+"'.";
 			}
@@ -634,6 +669,18 @@ public class Console extends Input{
 						Map.get(args.get(1));
 						found = true;
 					}catch(RuntimeException ex){}
+				}else if(args.get(0).equals("tileEntity")){
+					String arg = args.get(1);
+					if(arg.startsWith("[") || arg.startsWith("("))
+						arg = arg.substring(1);
+					if(arg.endsWith("]") || arg.endsWith(")"))
+						arg = arg.substring(0, arg.length()-1);
+					int i = arg.indexOf(",");
+					if(i == -1)
+						throw new RuntimeException("Invalid point : "+arg);
+					int tilex = Integer.parseInt(arg.substring(0,i));
+					int tiley = Integer.parseInt(arg.substring(i+1));
+					found = panel.getPlayer().getMap().getTileEntityAt(tilex, tiley) != null;
 				}
 			}
 			String msg = args.get(0);
@@ -672,6 +719,125 @@ public class Console extends Input{
 			panel.msgbox.setMessage(e.getMessage()+WAIT);
 			panel.msgbox.instant();
 			panel.setGUI(panel.msgbox);
+		}
+	}
+	
+	private void cmdNewMap(List<String> args){
+		args.remove(0);
+		if(args.size() != 4){
+			panel.msgbox.setMessage("Error: param count"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			return;
+		}
+		String mapname = args.get(0);
+		int width = Integer.parseInt(args.get(1));
+		int height = Integer.parseInt(args.get(2));
+		if(width == 0 || height == 0){
+			panel.msgbox.setMessage("Error: invalid width/height"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			return;
+		}
+		Color clr;
+		String colorstr = args.get(3);
+		if(colorstr.length() != 6){
+			panel.msgbox.setMessage("Error: invalid color literal"+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			return;
+		}
+		int byte1 = Integer.parseInt(colorstr.substring(0,2),16);
+		int byte2 = Integer.parseInt(colorstr.substring(2,4),16);
+		int byte3 = Integer.parseInt(colorstr.substring(4),16);
+		clr = new Color(byte1,byte2,byte3);
+		File f = new File(com.ombda.Files.localize("maps\\"+mapname));
+		if(f.exists() && !f.isDirectory()){
+			panel.msgbox.setMessage("File maps\\"+mapname+" already exists, and is not a directory."+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
+			return;
+		}
+		if(!f.exists()){
+			f.mkdir();
+		}
+		List<String> lines = new ArrayList<>();
+		lines.add(colorstr);
+		com.ombda.Files.write("maps\\"+mapname+"\\background.color", lines);
+		f = new File(com.ombda.Files.localize("maps\\"+mapname+"\\fore.map"));
+		if(!f.exists())
+			try{
+				f.createNewFile();
+			}catch(IOException e){
+				panel.msgbox.setMessage(SECTION+"rIOException : see console"+WAIT);
+				panel.msgbox.instant();
+				panel.setGUI(panel.msgbox);
+				e.printStackTrace();
+				return;
+			}
+		f = new File(com.ombda.Files.localize("maps\\"+mapname+"\\back.map"));
+		if(!f.exists())
+			try{
+				f.createNewFile();
+			}catch(IOException e){
+				panel.msgbox.setMessage(GUI.SECTION+"rIOException : see console"+WAIT);
+				panel.msgbox.instant();
+				panel.setGUI(panel.msgbox);
+				e.printStackTrace();
+				return;
+			}
+		f = new File(com.ombda.Files.localize("maps\\"+mapname+"\\tileEntities.info"));
+		if(!f.exists())
+			try{
+				f.createNewFile();
+			}catch(IOException e){
+				panel.msgbox.setMessage(GUI.SECTION+"rIOException : see console"+WAIT);
+				panel.msgbox.instant();
+				panel.setGUI(panel.msgbox);
+				e.printStackTrace();
+				return;
+			}
+		Map map = new Map(mapname,width,height,clr);
+		map.save();
+		panel.msgbox.setMessage("Created map "+mapname+" successfully."+WAIT);
+		panel.msgbox.instant();
+		panel.setGUI(panel.msgbox);
+	}
+	
+	private void cmdTileEntity(List<String> args){
+		args.remove(0);
+		panel.getPlayer().getMap().doTileEntity(args);
+	}
+	
+	private void cmdDelete(List<String> args){
+		args.remove(0);
+		try{
+			if(args.get(0).equals("npc")){
+				int hash = Script.parseInt(args.get(1));	
+				NPC npc = NPC.getNPC(hash);
+				Map map = npc.getMap();
+				map.removeSprite(npc);
+				NPC.deleteNPC(hash);
+			}else if(args.get(0).equals("sprite")){
+				int i = args.get(1).indexOf('.');
+				String mapname;
+				if(i == -1){
+					mapname = panel.getPlayer().getMap().toString();
+				}else mapname = args.get(1).substring(0,i);
+				int hash = Script.parseInt(args.get(1).substring(i+1));
+				debug("testing for sprite id "+hash+" in map "+mapname);
+				Map map = Map.get(mapname);
+				Sprite s = map.getSprite(hash);
+				map.removeSprite(s);
+			}else if(args.get(0).equals("tileEntity")){
+				int tilex = Integer.parseInt(args.get(1));
+				int tiley = Integer.parseInt(args.get(2));
+				Map map = panel.getPlayer().getMap();
+				map.deleteTileEntityAt(tilex, tiley);
+			}
+		}catch(RuntimeException ex){
+			if(ex instanceof IndexOutOfBoundsException)
+				throw ex;
 		}
 	}
 	

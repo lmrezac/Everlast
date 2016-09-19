@@ -1,6 +1,6 @@
 package com.ombda.scripts;
 
-import static com.ombda.Debug.*;
+import static com.ombda.Debug.debug;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,10 +23,14 @@ public class Script{
 		this.description = desc;
 		scripts.put(description, this);
 	}
+	public Script(List<ScriptStep> list){
+		this.steps = list;
+		this.description = "null";
+	}
 	private ScriptStep currentStep(){ return steps.get(currentScriptPos); }
 	public void execute(Panel game){
 		if(currentScriptPos >= steps.size())
-			throw new RuntimeException("Script is already completed! Cannot increment step!");
+			return;//throw new RuntimeException("Script is already completed! Cannot increment step!");
 		ScriptStep step = currentStep();
 		step.execute(game, this);
 		if(step.done()){
@@ -69,7 +73,7 @@ public class Script{
 		}
 		return new Script(name,list);
 	}
-	private static ScriptStep loadStep(String line){
+	public static ScriptStep loadStep(String line){
 		debug("loading line: "+line);
 		String[] args = scanLine(line);
 		if(args[0].equals("sprite"))
@@ -82,6 +86,8 @@ public class Script{
 			return ExecuteCommand.loadFromString(args);
 		else if(args[0].equals("set"))
 			return SetVar.loadFromString(args);
+		else if(args[0].equals("npc"))
+			return CreateNPC.loadFromString(args);
 		else 
 			throw new RuntimeException("Invalid script step: "+line+" (args="+Arrays.toString(args)+")");
 	}

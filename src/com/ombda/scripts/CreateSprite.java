@@ -1,7 +1,8 @@
 package com.ombda.scripts;
 
-import java.awt.Image;
 import java.util.Arrays;
+
+import javax.swing.ImageIcon;
 
 import com.ombda.Images;
 import com.ombda.Map;
@@ -11,7 +12,7 @@ import com.ombda.Sprite;
 public class CreateSprite implements ScriptStep{
 	private int spriteId;
 	private String spriteX, spriteY;
-	private Image spriteImage;
+	private ImageIcon spriteImage;
 	private String mapName;
 	public CreateSprite(int spriteId,String imageName,String x, String y,String mapName){
 		this.spriteId = spriteId;

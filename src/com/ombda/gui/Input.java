@@ -10,13 +10,24 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.ombda.Frame;
+import com.ombda.InputListener;
 import com.ombda.Panel;
 
 public class Input extends MessageBox{
+	private List<InputListener> listeners = new ArrayList<>();
 	public Input(){
 		setMessage("");
+	}
+	public void addInputListener(InputListener listener){
+		if(!listeners.contains(listener))
+			listeners.add(listener);
+	}
+	public void removeInputListener(InputListener l){
+		listeners.remove(l);
 	}
 	public String getMessage(){
 		return str;
@@ -24,6 +35,7 @@ public class Input extends MessageBox{
 	
 	public void reset(){
 		setMessage("");
+		listeners.clear();
 		done = false;
 	}
 	
@@ -53,6 +65,9 @@ public class Input extends MessageBox{
 			done = true;
 			Panel panel = Panel.getInstance();
 			panel.setGUI(panel.previous);
+			for(int i = listeners.size()-1; i >= 0; i--){
+				listeners.get(i).onInput(this.getMessage());
+			}
 		}
 	}
 	

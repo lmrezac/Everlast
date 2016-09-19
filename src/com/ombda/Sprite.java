@@ -4,14 +4,15 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-public class Sprite{
-	protected Map map;
-	protected Image image;
-	public double x, y;
+import javax.swing.ImageIcon;
+
+public class Sprite extends Entity{
+	
+	protected ImageIcon image;
+	
 	private int hash;
-	protected Sprite(int hash, Image bimg, int x, int y){
-		this.x = x;
-		this.y = y;
+	protected Sprite(int hash, ImageIcon bimg, int x, int y){
+		super(x,y);
 		image = bimg;
 		this.hash = hash;
 	}
@@ -25,14 +26,12 @@ public class Sprite{
 		this.map = map;
 		this.map.addSprite(this);
 	}
-	public Map getMap(){
-		return map;
-	}
-	public Sprite(int x, int y, Image bimg,int hash){
+	
+	public Sprite(int x, int y, ImageIcon bimg,int hash){
 		this(hash,bimg,x,y);
 		System.out.println("New Sprite created at ("+x+","+y+")");
 	}
-	public Sprite(BufferedImage bimg,int hash){
+	public Sprite(ImageIcon bimg,int hash){
 		this(0,0,bimg,hash);
 	}
 	public void setPos(int newx, int newy){
@@ -57,8 +56,13 @@ public class Sprite{
 	public void setPos(double newx, double newy){
 		setPos((int)newx,(int)newy);
 	}
-	
+	public double spriteHeight(){
+		return image.getIconHeight();
+	}
 	public void draw(Graphics2D g, int offsetX, int offsetY){
-		g.drawImage(image,(int)x+offsetX,(int)y+offsetY,null);
+		g.drawImage(image.getImage(),(int)x+offsetX,(int)y+offsetY,null);
+	}
+	public String toString(){
+		return "sprite "+map.toString()+".0x"+Integer.toHexString(hash);
 	}
 }
