@@ -30,6 +30,9 @@ public class Tile implements Collideable, Interactable{
 		tiles[id] = this;
 		this.id = id;
 	}
+	public Tile(int i, ImageIcon retrieve, Shape boundingBox){
+		this((short)i,retrieve,boundingBox);
+	}
 	public void incrementFrame(){
 		frame = image.getImage();
 	}
@@ -43,12 +46,19 @@ public class Tile implements Collideable, Interactable{
 		if(hasTileEntity(x/16,y/16)){
 			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/16, y/16);
 			if(te != null)
-				return boundingBox.contains(x % 16, y % 16) || te.getBoundingBox().contains(x % 16,y % 16);
+				if(te.getBoundingBox().contains(x % 16,y % 16)){
+					te.manageCollision(Panel.getInstance().getPlayer());
+					return true;
+				}
 		}
 		x %= 16;
 		y %= 16;
 		
-		return boundingBox.contains(x,y);
+		if(boundingBox.contains(x,y)){
+			manageCollision(Panel.getInstance().getPlayer());
+			return true;
+		}
+		return false;
 	}
 	public void testCollision(){}
 	public boolean doesPointCollide(double x, double y){
@@ -57,13 +67,11 @@ public class Tile implements Collideable, Interactable{
 	public boolean hasTileEntity(int x, int y){
 		return Panel.getInstance().getPlayer().getMap().getTileEntityAt(x, y) != null;
 	}
-	public void manageCollision(Collideable c){
-		
-	}
+	public void manageCollision(Collideable c){}
 	
 	public static Tile getTile(int id){
 		if(id < 0 || id >= 0xFF) throw new RuntimeException("Invalid id: "+id);
-		if(tiles[id] == null) throw new RuntimeException("No tile with id "+id);
+		if(tiles[id] == null) throw new RuntimeException("No tile with id "+Integer.toHexString(id));
 		return tiles[id];
 	}
 	public Shape getBoundingBox(){

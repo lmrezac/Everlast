@@ -9,7 +9,7 @@ import com.ombda.Interactable;
 import com.ombda.Updateable;
 
 public abstract class TileEntity extends Entity implements Collideable, Updateable, Interactable{
-	protected Rectangle2D.Double boundingBox = new Rectangle2D.Double(0, 0, 16, 16);
+	protected Shape boundingBox = new Rectangle2D.Double(0, 0, 16, 16);
 	public TileEntity(int x, int y){
 		super(16*x,16*y);
 	}

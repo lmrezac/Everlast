@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 import com.ombda.Map;
 import com.ombda.NPC;
@@ -28,31 +30,83 @@ public class Script{
 		this.description = "null";
 	}
 	private ScriptStep currentStep(){ return steps.get(currentScriptPos); }
+	private boolean done = false;
 	public void execute(Panel game){
 		if(currentScriptPos >= steps.size())
 			return;//throw new RuntimeException("Script is already completed! Cannot increment step!");
 		ScriptStep step = currentStep();
+		if(step instanceof DispMessage){
+			if(currentScriptPos+1 < steps.size())
+				game.msgbox.closeWhenDone = (steps.get(currentScriptPos+1) instanceof DispMessage);
+			else game.msgbox.closeWhenDone = true;
+		}else game.msgbox.closeWhenDone = true; 
 		step.execute(game, this);
-		if(step.done()){
-			lastPos = currentScriptPos;
-			currentScriptPos++;
+		if(step instanceof If){
+			if(step.done()){
+				lastPos = currentScriptPos;
+				currentScriptPos++;
+			}else{
+				lastPos = currentScriptPos;
+				currentScriptPos+=2;
+			}
+		}else{
+			if(step.done()){
+				lastPos = currentScriptPos;
+				currentScriptPos++;
+			}
 		}
+		
+	}
+	public void reset(){
+		done = false;
+		currentScriptPos = 0;
+		
 	}
 	public boolean done(){
 		if(currentScriptPos >= steps.size()){
-			currentScriptPos = 0;
+			reset();
 			return true;
 		}
 		return false;
 	}
+	/*public boolean done(){
+		if(currentScriptPos == -1){
+			currentScriptPos = 0;
+			return true;
+		}
+		return false;
+	}*/
 	public String toString(){
 		return description;
 	}
-	
+	public static String saveVars(){
+		String result = "_";
+		List<String> keys = new ArrayList<>(vars.keySet());
+		for(int i = 0; i < keys.size(); i++){
+			String str = keys.get(i);
+			result += '"'+str+"\"=\""+vars.get(str)+"\"";
+			if(i != keys.size()-1)
+				result += ' ';
+		}
+		return result;
+	}
+	public static void loadVars(String str){
+		str = str.substring(1).trim();
+		if(str.equals("")) return;
+		Scanner scan = new Scanner(str);
+		scan.useDelimiter(" ");
+		while(scan.hasNext()){
+			String value = scan.next();
+			int i = value.indexOf('"',1);
+			if(value.charAt(i+1) != '=') throw new RuntimeException("Expected = at index "+(i+1)+" in string "+value);
+			vars.put(value.substring(1,i),value.substring(i+3,value.length()-1));
+		}
+	}
 	public void run(){
 		debug("running script!");
-		while(!done())
-			execute(Panel.getInstance());
+		for(ScriptStep step : steps){
+			step.execute(Panel.getInstance(), this);
+		}
 	}
 	
 	public static Script getScript(String name){
@@ -88,6 +142,8 @@ public class Script{
 			return SetVar.loadFromString(args);
 		else if(args[0].equals("npc"))
 			return CreateNPC.loadFromString(args);
+		else if(args[0].equals("if"))
+			return If.loadFromString(args);
 		else 
 			throw new RuntimeException("Invalid script step: "+line+" (args="+Arrays.toString(args)+")");
 	}
@@ -192,8 +248,10 @@ public class Script{
 				return Panel.getInstance().getPlayer().getMap().toString();
 			}else{
 				var = vars.get(name);
-				if(var == null)
-					var = "";
+				if(var == null){
+					var = "0";
+					vars.put(name, var);
+				}
 			}
 			str = str.replace("${"+name+"}",var);
 		}

@@ -44,6 +44,8 @@ public class DispMessage implements ScriptStep{
 		game.msgbox.setMessage(str);
 		game.setGUI(game.msgbox);
 		Panel.getInstance().msgbox.waitingForInput = false;
+		
+		//while(!Panel.getInstance().msgbox.isFinished()){}
 	}
 
 	@Override

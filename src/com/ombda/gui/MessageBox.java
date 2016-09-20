@@ -96,6 +96,9 @@ public class MessageBox extends GUI{
 		this.str = str;
 		index = 1;
 		startIndexAt = 0;
+		waitingForInput = false;
+		indexWait = 0;
+		finished = false;
 	}
 	
 	protected static final int INIT_DRAW_X = 8, INIT_DRAW_Y = 208;
@@ -231,14 +234,15 @@ public class MessageBox extends GUI{
 					Panel.getInstance().setGUI(Panel.getInstance().previous);
 				else*/ 
 				finished = true;
-					Panel.getInstance().setGUI(Panel.getInstance().hud);
+				if(closeWhenDone)
+				Panel.getInstance().setGUI(Panel.getInstance().hud);
 			}
 		}
 		if(debug && !Panel.noScreenDebug){
 			Panel.drawDebugString(g2d,"wait="+indexWaitMax+" index="+index+" indexWait="+indexWait+" size = "+string.length+(waitingForInput? " waiting" : ""),0,106);
 		}
 	}
-
+	public boolean closeWhenDone = true;
 	@Override
 	public boolean blockInput(){
 		return true;

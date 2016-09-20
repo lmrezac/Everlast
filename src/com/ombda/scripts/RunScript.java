@@ -16,7 +16,7 @@ public class RunScript implements ScriptStep{
 		if(!(scriptName.startsWith("\"") && scriptName.endsWith("\"")))
 			name = script.evalVar(name);
 		Script s = Script.getScript(name);
-		s.run();
+		game.runScript(s);
 	}
 
 	@Override

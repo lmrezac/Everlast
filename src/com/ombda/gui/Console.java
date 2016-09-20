@@ -77,6 +77,8 @@ public class Console extends Input{
 			cmdTileEntity(args);
 		}else if(args.get(0).equals("delete")){
 			cmdDelete(args);
+		}else if(args.get(0).equals("load")){
+			cmdLoad(args);
 		}else{
 			debug("unknown command");
 			panel.msgbox.setMessage("Error: unknown command"+WAIT);
@@ -263,10 +265,20 @@ public class Console extends Input{
 				String arg1s = args.get(++index);
 				String arg2s = args.get(++index);
 				int w = Integer.parseInt(arg1s), h = Integer.parseInt(arg2s);
-				boolean down = false;
-				if(index + 1 < args.size())
-					down = args.get(++index).equals("down");
-				panel.getPlayer().getMap().setSize(w, h, down);
+				boolean down = false, left = false;
+				if(index + 1 < args.size()){
+					if(args.get(index+1).equals("vert"))
+						down = true;
+					else if(args.get(index+1).equals("horiz"))
+						left = true;
+				}
+				if(index + 2 < args.size()){
+					if(args.get(index+2).equals("vert"))
+						down = true;
+					else if(args.get(index+2).equals("horiz"))
+						left = true;
+				}
+				panel.getPlayer().getMap().setSize(w, h, down,left);
 			}else if(args.get(index).equals("map") || args.get(index).equals("player.map")){
 				index++;
 				String str2 = "";
@@ -839,6 +851,12 @@ public class Console extends Input{
 			if(ex instanceof IndexOutOfBoundsException)
 				throw ex;
 		}
+	}
+	
+	private void cmdLoad(List<String> args){
+		if(args.size() != 1 && !args.get(1).equals("game"))
+			throw new RuntimeException("cannot load "+args.get(1));
+		Panel.getInstance().loadSaveFile();
 	}
 	
 	@Override

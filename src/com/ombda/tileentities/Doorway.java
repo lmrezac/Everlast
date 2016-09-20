@@ -8,15 +8,18 @@ import com.ombda.Player;
 public class Doorway extends TileEntity{
 	private String mapname;
 	private int tilex, tiley;
-	public Doorway(int x, int y, String map, int tilex, int tiley){
+	private boolean onCollision;
+	public Doorway(int x, int y, String map, int tilex, int tiley, boolean onCollision){
 		super(x, y);
 		this.tilex = tilex;
 		this.tiley = tiley;
 		this.mapname = map;
+		this.onCollision = onCollision;
 	}
 
 	@Override
 	public void manageCollision(Collideable c){
+		if(!onCollision) return;
 		if(c instanceof Player){
 			Player p = (Player)c;
 			Map map = Map.get(mapname);
@@ -27,7 +30,7 @@ public class Doorway extends TileEntity{
 
 	@Override
 	public String save(){
-		return "warp "+mapname+" "+tilex+" "+tiley;
+		return (onCollision? "warp " : "door ")+mapname+" "+tilex+" "+tiley;
 	}
 
 	@Override

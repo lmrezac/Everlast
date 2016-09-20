@@ -59,10 +59,10 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	private boolean running = true;
 	private int FPS = 60;
 	private int mouseX = 0, mouseY = 0;
-	public static final double borderX_left = (1.0/4)*(double)PRF_WIDTH;
-	public static final double borderX_right = (3.0/4)*(double)PRF_WIDTH;
-	public static final double borderY_top = (1.0/4.0)*(double)PRF_HEIGHT;
-	public static final double borderY_bottom = (3.0/4)*(double)PRF_HEIGHT;
+	public static final double borderX_left = (3.0/8)*(double)PRF_WIDTH;
+	public static final double borderX_right = (5.0/8)*(double)PRF_WIDTH;
+	public static final double borderY_top = (3.0/8)*(double)PRF_HEIGHT;
+	public static final double borderY_bottom = (5.0/8)*(double)PRF_HEIGHT;
 
 	// public final Timer timer;
 	private RenderingHints renderingHints;
@@ -119,6 +119,22 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				name = name.substring(0, i);
 			Script.load(name,Files.read(file));
 		}
+		/*new Script("map_test3",Arrays.<ScriptStep>asList(
+			new ScriptStep(){
+
+				@Override
+				public void execute(Panel game, Script script){
+					
+				}
+
+				@Override
+				public boolean done(){
+					return false;
+				}
+				
+			}
+		));*/
+		
 	}
 	public void setMap(Map map){
 		this.map = map;
@@ -141,7 +157,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public void runScript(Script s){
 		this.currentScript = s;
 	}
-	private void loadSaveFile(){
+	public void loadSaveFile(){
 	
 		File f = new File(Files.localize("saves/save0.dat"));
 		if(!f.exists()){
@@ -157,13 +173,14 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			System.out.println(Files.read(f));
 		}
 		List<String> lines = Files.read(f);
-		if(lines.size() != 6) throw new RuntimeException("Invalid save file");
+		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
 		System.out.println(lines);
 		player_name = lines.get(0);
 		setMap(Map.get(lines.get(1)));
 		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
 		offsetX = Integer.parseInt(lines.get(4));
 		offsetY = Integer.parseInt(lines.get(5));
+		Script.loadVars(lines.get(6));
 	}
 	public void saveGame(){
 		File f = new File(Files.localize("saves/save0.dat"));
@@ -184,30 +201,13 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		lines.add(Double.toString(player.y));
 		lines.add(Integer.toString(offsetX));
 		lines.add(Integer.toString(offsetY));
+		lines.add(Script.saveVars());
 		Files.write("saves/save0.dat", lines);
 		debug("Game saved!");
 	}
 	public static Panel getInstance(){ return instance;}
 	public Player getPlayer(){ return player; }
 	
-	private static Object compartmentalize(String keyValue){
-		int i = keyValue.indexOf("=");
-		final String key = keyValue.substring(0,i), value = keyValue.substring(i+1);
-		return new Object(){
-			@Override
-			public boolean equals(Object obj){
-				if(obj instanceof String){
-					String str = (String)obj;
-					return str.equals(key);
-				}else return false;
-			}
-			@Override
-			public String toString(){
-				return value;
-			}
-		};
-	}
-
 	@Override
 	public void addNotify(){
 		super.addNotify();
@@ -252,7 +252,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			List<Sprite> sprites = new ArrayList<>(map.getSprites());
 			
 			//List<Sprite> undrawn = new ArrayList<Sprite>();
-			
 			double minY = 1;
 			while(!sprites.isEmpty()){
 				for(int i = sprites.size()-1; i >= 0; i--){
@@ -424,7 +423,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 
 	@Override
 	public void keyTyped(KeyEvent e){
-		if(e.getKeyChar() == '`'){
+		if(e.getKeyChar() == '`' && gui != mapcreator){
 			if(gui == console){
 				console.reset();
 				setGUI(hud);

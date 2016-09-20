@@ -126,9 +126,10 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	@Override
 	public void onInteracted(Player p, int x, int y){
 		if(onInteractedScript != null){
-			debug("int y = "+y+" x = "+x+" my y = "+this.y+" "+this.yminus+" "+boundingBox.getHeight()+" "+(int)((this.y-yminus)+boundingBox.getHeight()-1)+" my x = "+this.x+" "+(this.x+this.boundingBox.getWidth()));
-			if(y == (int)(this.y-yminus+boundingBox.getHeight()-1) && this.x < x && x < this.x+this.boundingBox.getWidth()){
+			//debug("int y = "+y+" x = "+x+" my y = "+this.y+" "+this.yminus+" "+boundingBox.getHeight()+" "+(int)((this.y-yminus)+boundingBox.getHeight()-1)+" my x = "+this.x+" "+(this.x+this.boundingBox.getWidth()));
+			if(y >= (int)(this.y-yminus+boundingBox.getHeight()-1) && y <= (int)(this.y-yminus+boundingBox.getHeight()+1) && this.x < x && x < this.x+this.boundingBox.getWidth()){
 				debug("running script");
+				onInteractedScript.reset();
 				Panel.getInstance().runScript(onInteractedScript);
 			}
 		}

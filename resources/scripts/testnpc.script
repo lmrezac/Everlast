@@ -1,0 +1,12 @@
+msg Hey, buddy. This street is my turf. *line I'd turn around if I were you. *wait
+msg test *wait
+msg test3 *wait
+#if equals ${hoodlum_jeff_talk_count} 1
+#msg "(Wasn't this guy just across the street" *line "only a moment ago?)" *wait
+#if equals ${hoodlum_jeff_talk_count} 2
+#msg "(How did he get across the street so fast...?!)" *wait
+#if equals ${hoodlum_jeff_talk_count} 3
+#msg "(What is this sorcery?!)" *wait
+#if ${hoodlum_jeff_talk_count} > 3
+#msg "(....How?!?)" *wait
+#set hoodlum_jeff_talk_count add ${hoodlum_jeff_talk_count} 1 

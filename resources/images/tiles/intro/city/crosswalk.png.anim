@@ -1,0 +1,6 @@
+framesize 16x16
+nodefine
+define intro/city/crosswalk_top 0
+define intro/city/crosswalk_bottom 2
+define intro/city/crosswalk_left 3
+define intro/city/crosswalk_right 1

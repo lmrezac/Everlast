@@ -14,6 +14,7 @@ import java.util.Scanner;
 import com.ombda.scripts.Script;
 import com.ombda.tileentities.Doorway;
 import com.ombda.tileentities.TileEntity;
+import com.ombda.tileentities.Triangle;
 import com.ombda.tileentities.Wall;
 
 public class Map{
@@ -128,12 +129,27 @@ public class Map{
 			if(!f.exists() || !f.isDirectory())
 				throw new RuntimeException("There is no map called "+map);
 			
-			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,map,dx,dy);
+			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,map,dx,dy,true);
+		}else if(cmd.equals("door")){
+			if(args.size() != 3)
+				throw new RuntimeException("tile entity warp requires 3 values : destination map, destination tile x, destination tile y.");
+			String map = args.get(0);
+			int dx = Integer.parseInt(args.get(1));
+			int dy = Integer.parseInt(args.get(2));
+			File f = new File(Files.localize("maps\\"+map));
+			if(!f.exists() || !f.isDirectory())
+				throw new RuntimeException("There is no map called "+map);
+			
+			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,map,dx,dy,false);
 		}else if(cmd.equals("wall")){
 			if(args.size() != 1)
 				throw new RuntimeException("tile entity wall requires 3 values : tile x, tile y, direction");
 			Facing f = Facing.fromString(args.get(0));
 			tileEntities[tiley][tilex] = new Wall(tilex,tiley,f);
+		}else if(cmd.equals("triangle")){
+			if(args.size() != 10)
+				throw new RuntimeException("tile entity triangle requires 10 values : tile x, tile y, x1, y1, x2, y2, x3, y3, fromNorth, fromEast, fromSouth, fromWest");
+			tileEntities[tiley][tilex] = new Triangle(tilex,tiley,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)),Integer.parseInt(args.get(2)),Integer.parseInt(args.get(3)),Integer.parseInt(args.get(4)),Integer.parseInt(args.get(5)),Integer.parseInt(args.get(6)),Integer.parseInt(args.get(7)),Integer.parseInt(args.get(8)),Integer.parseInt(args.get(9)));
 		}else throw new RuntimeException("Invalid tile entity : "+cmd);
 		debug("new tile entity created at ["+tilex+","+tiley+"] : "+tileEntities[tiley][tilex].save());
 	}
@@ -203,7 +219,7 @@ public class Map{
 	public int height(){
 		return height;
 	}
-	public void setSize(int newwidth, int newheight,boolean bottom){
+	public void setSize(int newwidth, int newheight,boolean bottom, boolean left){
 		int oldwidth = this.width;
 		int oldheight = this.height;
 		this.width = newwidth;
@@ -211,11 +227,12 @@ public class Map{
 		short[][] newfore = new short[newheight][newwidth], newback = new short[newheight][newwidth];
 		TileEntity[][] newte = new TileEntity[newheight][newwidth];
 		int startY = oldheight < height && bottom? height-oldheight : 0;
+		int startX = oldwidth < width && left? width-oldwidth : 0;
 		for(int y = startY; y < Math.min(oldheight,height); y++){
-			for(int x = 0; x < Math.min(oldwidth, width); x++){
-				newfore[y][x] = this.foreground[y-startY][x];
-				newback[y][x] = this.background[y-startY][x];
-				newte[y][x] = this.tileEntities[y-startY][x];
+			for(int x = startX; x < Math.min(oldwidth, width); x++){
+				newfore[y][x] = this.foreground[y-startY][x-startX];
+				newback[y][x] = this.background[y-startY][x-startX];
+				newte[y][x] = this.tileEntities[y-startY][x-startX];
 				if(newte[y][x] != null){
 					newte[y][x].x = 16*x;
 					newte[y][x].y = 16*y;

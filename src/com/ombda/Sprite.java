@@ -61,6 +61,7 @@ public class Sprite extends Entity{
 	}
 	public void draw(Graphics2D g, int offsetX, int offsetY){
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y+offsetY,null);
+	
 	}
 	public String toString(){
 		return "sprite "+map.toString()+".0x"+Integer.toHexString(hash);

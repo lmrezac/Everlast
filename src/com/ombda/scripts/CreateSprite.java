@@ -31,7 +31,9 @@ public class CreateSprite implements ScriptStep{
 		int x = Script.parseInt(script.evalVar(Script.parseString(spriteX)));
 		int y = Script.parseInt(script.evalVar(Script.parseString(spriteY)));
 		Sprite s = new Sprite(x,y,spriteImage,spriteId);
+		
 		s.setMap(map);
+		System.out.println(map.getSprites());
 	}
 
 	@Override

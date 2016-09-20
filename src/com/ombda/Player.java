@@ -102,7 +102,7 @@ public class Player extends NPC{
 	}
 	
 	private double speed(){
-		return keys[VK_SHIFT]? 1.5 : 1.0;
+		return keys[VK_SHIFT]? 1.0 : 0.5;
 	}
 	public void update(){
 		doKeys();
@@ -243,14 +243,18 @@ public class Player extends NPC{
 		}
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
-			while(this.map.getTileAt(x, (int)this.y, 0).doesPointCollide(x, (int)this.y)){
-				
+			Tile t;
+			try{
+			while((t = this.map.getTileAt(x, (int)this.y, 0)).doesPointCollide(x, (int)this.y)){
+				t.manageCollision(this);
 				y++;
 			}
+			}catch(NullPointerException e){}
 			for(Sprite s : sprites){
 				if(s instanceof Collideable && s != this){
 					Collideable c = (Collideable)s;
 					while(c.doesPointCollide(x, (int)this.y)){
+						c.manageCollision(this);
 						y++;
 					}
 				}
@@ -264,13 +268,18 @@ public class Player extends NPC{
 		}
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
-			while(this.map.getTileAt((int)(this.x+this.boundingBox.getWidth()), y, 0).doesPointCollide((int)(this.x+this.boundingBox.getWidth()),y)){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt((int)(this.x+this.boundingBox.getWidth()), y, 0)).doesPointCollide((int)(this.x+this.boundingBox.getWidth()),y)){
+				t.manageCollision(this);
 				x--;
 			}
+			}catch(NullPointerException e){}
 			for(Sprite s : sprites){
 				if(s instanceof Collideable && s != this){
 					Collideable c = (Collideable)s;
 					while(c.doesPointCollide((int)(this.x+this.boundingBox.getWidth()), y)){
+						c.manageCollision(this);
 						x--;
 					}
 				}
@@ -282,13 +291,18 @@ public class Player extends NPC{
 			y--;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
-			while(this.map.getTileAt(x, (int)(this.y+this.boundingBox.getHeight()), 0).doesPointCollide(x, (int)this.y+this.boundingBox.getHeight())){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt(x, (int)(this.y+this.boundingBox.getHeight()), 0)).doesPointCollide(x, (int)this.y+this.boundingBox.getHeight())){
+				t.manageCollision(this);
 				y--;
 			}
+			}catch(NullPointerException e){}
 			for(Sprite s : sprites){
 				if(s instanceof Collideable && s != this){
 					Collideable c = (Collideable)s;
 					while(c.doesPointCollide(x, (int)(this.y+this.boundingBox.getHeight()))){
+						c.manageCollision(this);
 						y--;
 					}
 				}
@@ -300,13 +314,18 @@ public class Player extends NPC{
 			x = 0;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
-			while(this.map.getTileAt((int)this.x, y, 0).doesPointCollide((int)this.x,y)){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt((int)this.x, y, 0)).doesPointCollide((int)this.x,y)){
+				t.manageCollision(this);
 				x++;
 			}
+			}catch(NullPointerException e){}
 			for(Sprite s : sprites){
 				if(s instanceof Collideable && s != this){
 					Collideable c = (Collideable)s;
 					while(c.doesPointCollide((int)this.x, y)){
+						c.manageCollision(this);
 						x++;
 					}
 				}

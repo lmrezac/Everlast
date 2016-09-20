@@ -2,3 +2,4 @@ framesize 14x32
 frametime 5
 nodefine
 define this 0-4 4-0 0 0 0 0
+define npcs/hoodlum_reversed 9-5 5-9 9 9 9 9

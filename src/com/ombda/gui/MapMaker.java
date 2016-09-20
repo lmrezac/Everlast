@@ -3,14 +3,15 @@ package com.ombda.gui;
 import static com.ombda.Debug.debug;
 import static com.ombda.Debug.printStackTrace;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 
+import javax.swing.ImageIcon;
+
 import com.ombda.Frame;
+import com.ombda.Images;
 import com.ombda.InputListener;
 import com.ombda.Map;
 import com.ombda.Panel;
@@ -18,19 +19,9 @@ import com.ombda.Tile;
 import com.ombda.Tiles;
 public class MapMaker extends GUI implements InputListener{
 	private short tileId = 0;
+	private ImageIcon bar;
 	public MapMaker(){
-		/*BufferedImage saveImage = new BufferedImage(34,12,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = saveImage.createGraphics();
-		g2d.setColor(new Color(185,229,229));
-		g2d.fill3DRect(0, 0, 34, 12, true);
-		drawString(g2d," Save",1,1);
-		g2d.dispose();
-		BufferedImage saveImagePressed = new BufferedImage(34,12,BufferedImage.TYPE_INT_ARGB);
-		g2d = saveImagePressed.createGraphics();
-		g2d.setColor(new Color(0,229,146));
-		g2d.fill3DRect(0, 0, 34, 12, true);
-		drawString(g2d," §ySave",1,1);
-		g2d.dispose();*/
+		bar = Images.retrieve("gui/bar");
 		buttons.add(new Button("Save",0,0){
 			@Override
 			public void buttonPressed(){
@@ -38,13 +29,18 @@ public class MapMaker extends GUI implements InputListener{
 				getMap().save();
 			}
 		});
-		buttons.add(new Button("Load",34,0){
+		buttons.add(new Button("Tile",34,0){
 			@Override
 			public void buttonPressed(){
 				debug("tile image pressed");
 				Panel.getInstance().input.reset();
 				Panel.getInstance().input.addInputListener(MapMaker.this);
 				Panel.getInstance().setGUI(Panel.getInstance().input);
+			}
+		});
+		buttons.add(new Button("Quit",68,0){
+			public void buttonPressed(){
+				Panel.getInstance().setGUI(Panel.getInstance().hud);
 			}
 		});
 	}
@@ -69,11 +65,13 @@ public class MapMaker extends GUI implements InputListener{
 	@Override
 	public void mouseClicked(MouseEvent e){
 		super.mouseClicked(e);
+		int x = e.getX();
+		int y = e.getY();
+		int[] coords = Panel.screenCoordsToImageCoords(x,y);
+		if(coords[1] > 30){
 		if(e.getButton() == MouseEvent.BUTTON1){
-			int x = e.getX();
-			int y = e.getY();
-			int[] coords = Panel.screenCoordsToImageCoords(x,y);
-			x = coords[0]-Panel.getInstance().offsetX;
+
+			x = coords[0]-Panel.getInstance().offsetX-4;
 			y = coords[1]-Panel.getInstance().offsetY-16;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
@@ -81,10 +79,8 @@ public class MapMaker extends GUI implements InputListener{
 			else layer = 0;
 			getMap().setTileAt(x, y, layer, Tile.getTile(tileId));
 		}else if(e.getButton() == MouseEvent.BUTTON3){
-			int x = e.getX();
-			int y = e.getY();
-			int[] coords = Panel.screenCoordsToImageCoords(x,y);
-			x = coords[0]-Panel.getInstance().offsetX;
+			
+			x = coords[0]-Panel.getInstance().offsetX-4;
 			y = coords[1]-Panel.getInstance().offsetY-16;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
@@ -93,6 +89,7 @@ public class MapMaker extends GUI implements InputListener{
 			Tile t = getMap().getTileAt(x, y, layer);
 			debug("set tileid to "+t.id);
 			tileId = t.id;
+		}
 		}
 	}
 
@@ -131,7 +128,13 @@ public class MapMaker extends GUI implements InputListener{
 	public void keyReleased(KeyEvent e){}
 
 	@Override
-	public void keyTyped(KeyEvent e){}
+	public void keyTyped(KeyEvent e){
+		if(e.getKeyChar() == '`'){
+			Panel.getInstance().input.reset();
+			Panel.getInstance().input.addInputListener(MapMaker.this);
+			Panel.getInstance().setGUI(Panel.getInstance().input);
+		}
+	}
 
 	@Override
 	public boolean drawMap(){
@@ -150,6 +153,7 @@ public class MapMaker extends GUI implements InputListener{
 
 	@Override
 	public void draw(Graphics2D g2d){
+		g2d.drawImage(bar.getImage(),0,0,null);
 		super.draw(g2d);
 	}
 	public String toString(){ return "mapcreator"; }
@@ -204,4 +208,5 @@ public class MapMaker extends GUI implements InputListener{
 			return;
 		}
 	}
+
 }
