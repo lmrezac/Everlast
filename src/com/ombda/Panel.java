@@ -54,7 +54,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public MapMaker mapcreator;
 	public String guiID;
 	public MessageBox msgbox;
-	public int offsetX = -3*16, offsetY = 0;
+	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	private boolean running = true;
 	private int FPS = 60;
@@ -101,7 +101,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 		
 		
-		System.out.println("New Panel created!");
+		debug("New Panel created!");
 	}
 	private void loadScripts(){
 		File f = new File(Files.localize("scripts"));
@@ -272,7 +272,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		gui.draw(g2d);
 		if(debug && !noScreenDebug){
 			long temp = 0;
-			drawDebugString(g2d,"player ("+Math.round(player.x)+","+Math.round(player.y)+") ["+(int)(Math.round(player.x)/16.0)+","+(int)(Math.round(player.y)/16.0)+"]",0,10);
+			drawDebugString(g2d,"player ("+Math.round(player.x)+","+Math.round(player.y)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
 			drawDebugString(g2d,"map {width:"+map.width()+", height:"+map.height()+"}",0,22);
 			drawDebugString(g2d,"offset X = "+(int)offsetX+" offset Y = "+(int)offsetY,0,34);
 			drawDebugString(g2d,"facing: "+player.getDirection(),0,46);
@@ -467,8 +467,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		int[] coords = Panel.screenCoordsToImageCoords(x, y);
 		x = coords[0]-Panel.getInstance().offsetX;
 		y = coords[1]-Panel.getInstance().offsetY;
-		x /= 16;
-		y /= 16;
+		x /= Tile.SIZE;
+		y /= Tile.SIZE;
 		return new int[]{x,y};
 	}
 

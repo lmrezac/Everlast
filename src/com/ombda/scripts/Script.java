@@ -13,6 +13,7 @@ import com.ombda.Map;
 import com.ombda.NPC;
 import com.ombda.Panel;
 import com.ombda.Sprite;
+import com.ombda.Tile;
 
 public class Script{
 	private static HashMap<String,Script> scripts = new HashMap<>();
@@ -142,6 +143,8 @@ public class Script{
 			return CreateNPC.loadFromString(args);
 		else if(args[0].equals("if"))
 			return If.loadFromString(args);
+		else if(args[0].equals("collideable"))
+			return CreateCollideable.loadFromString(args);
 		else 
 			throw new RuntimeException("Invalid script step: "+line+" (args="+Arrays.toString(args)+")");
 	}
@@ -261,7 +264,7 @@ public class Script{
 	public static int parseInt(String str){
 		str = parseString(str);
 		if(str.endsWith("t")){
-			return 16*Integer.decode(str.substring(0, str.length()-1));
+			return Tile.SIZE*Integer.decode(str.substring(0, str.length()-1));
 		}else return Integer.decode(str);
 	}
 	public static String parseString(String str){

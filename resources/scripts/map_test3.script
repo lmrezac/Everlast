@@ -1,6 +1,7 @@
 sprite 0x02 547 224 tiles/intro/city/pole test3
 sprite 0x03 387 24t tiles/intro/city/pole test3
 sprite 0x04 41t 13t tiles/intro/city/awning test3
+collideable 0x06 49t 6t tiles/intro/city/garbage_can_spilled 22 20 test3
 npc 0x01 14 32 0 error error npcs/hoodlum_reversed error error error npcs/hoodlum error error error error error error error error error
 set npc 0x01.map test3
 set npc 0x01.xy 35t 5t

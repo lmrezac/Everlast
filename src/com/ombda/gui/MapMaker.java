@@ -72,7 +72,7 @@ public class MapMaker extends GUI implements InputListener{
 		if(e.getButton() == MouseEvent.BUTTON1){
 
 			x = coords[0]-Panel.getInstance().offsetX-4;
-			y = coords[1]-Panel.getInstance().offsetY-16;
+			y = coords[1]-Panel.getInstance().offsetY-Tile.SIZE;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
 				layer = 1;
@@ -81,7 +81,7 @@ public class MapMaker extends GUI implements InputListener{
 		}else if(e.getButton() == MouseEvent.BUTTON3){
 			
 			x = coords[0]-Panel.getInstance().offsetX-4;
-			y = coords[1]-Panel.getInstance().offsetY-16;
+			y = coords[1]-Panel.getInstance().offsetY-Tile.SIZE;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
 				layer = 1;

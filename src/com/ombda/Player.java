@@ -38,7 +38,7 @@ public class Player extends NPC{
 				Images.retrieve("base_walk_W"),
 				Images.retrieve("base_walk_NW")
 			},
-			new Rectangle2D.Double(0,0,14,8));
+			new Rectangle2D.Double(0,0,28,16));
 		this.direction = dir;
 		image = images[direction.ordinal()];
 		yminus = (int)(images[0].getIconHeight() - boundingBox.getHeight());
@@ -52,16 +52,16 @@ public class Player extends NPC{
 		/*if(x < 0){
 			//lastX = x;
 			x = 0;
-		}else if(x > map.width()*16-boundingBox.getWidth()){
+		}else if(x > map.width()*Tile.SIZE-boundingBox.getWidth()){
 			//lastX = x;
-			x = map.width()*16-boundingBox.getWidth();//lastX;
+			x = map.width()*Tile.SIZE-boundingBox.getWidth();//lastX;
 		}
 		if(y < 0){
 			//lastY = y;
 			y = 0;
-		}else if(y > map.height()*16-boundingBox.getHeight()){
+		}else if(y > map.height()*Tile.SIZE-boundingBox.getHeight()){
 			//lastY = y;
-			y = map.height()*16-boundingBox.getHeight();//lastY;
+			y = map.height()*Tile.SIZE-boundingBox.getHeight();//lastY;
 		}*/
 		
 		image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
@@ -81,7 +81,7 @@ public class Player extends NPC{
 		
 		//scrolls the map
 		if(x+panel.offsetX > borderX_right){ //move panel.offset right
-			//if(panel.offsetX > map.width()*16-PRF_WIDTH)
+			//if(panel.offsetX > map.width()*Tile.SIZE-PRF_WIDTH)
 			panel.offsetX -= x+panel.offsetX-borderX_right;
 		}else if(x+panel.offsetX < borderX_left){ //move panel.offset left
 			//if(panel.offsetX < 0)
@@ -102,7 +102,7 @@ public class Player extends NPC{
 	}
 	
 	private double speed(){
-		return keys[VK_SHIFT]? 1.0 : 0.5;
+		return keys[VK_SHIFT]? 2.0 : 1.0;
 	}
 	public void update(){
 		doKeys();
@@ -263,8 +263,8 @@ public class Player extends NPC{
 		
 	}
 	private void testCollisionEast(){
-		while((int)(this.x+this.boundingBox.getWidth()) >= 16*map.width()){
-			x--;// = 16*map.width() - this.boundingBox.getWidth()-1;
+		while((int)(this.x+this.boundingBox.getWidth()) >= Tile.SIZE*map.width()){
+			x--;// = Tile.SIZE*map.width() - this.boundingBox.getWidth()-1;
 		}
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
@@ -287,7 +287,7 @@ public class Player extends NPC{
 		}
 	}
 	private void testCollisionSouth(){
-		while((int)(this.y+this.boundingBox.getHeight()) >= 16*map.height())
+		while((int)(this.y+this.boundingBox.getHeight()) >= Tile.SIZE*map.height())
 			y--;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){

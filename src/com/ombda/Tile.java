@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import com.ombda.tileentities.TileEntity;
 
 public class Tile implements Collideable, Interactable{
+	public static final int SIZE = 32;
 	public static Tile[] tiles = new Tile[0xFF];
 	private static short id_count = 0;
 	private ImageIcon image;
@@ -43,16 +44,16 @@ public class Tile implements Collideable, Interactable{
 		return "[object Tile]";
 	}
 	public boolean doesPointCollide(int x, int y){
-		if(hasTileEntity(x/16,y/16)){
-			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/16, y/16);
+		if(hasTileEntity(x/SIZE,y/SIZE)){
+			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/SIZE, y/SIZE);
 			if(te != null)
-				if(te.getBoundingBox().contains(x % 16,y % 16)){
+				if(te.getBoundingBox().contains(x % SIZE,y % SIZE)){
 					te.manageCollision(Panel.getInstance().getPlayer());
 					return true;
 				}
 		}
-		x %= 16;
-		y %= 16;
+		x %= SIZE;
+		y %= SIZE;
 		
 		if(boundingBox.contains(x,y)){
 			manageCollision(Panel.getInstance().getPlayer());
@@ -79,8 +80,8 @@ public class Tile implements Collideable, Interactable{
 	}
 	@Override
 	public void onInteracted(Player p, int x, int y){
-		if(hasTileEntity(x/16,y/16)){
-			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/16,y/16);
+		if(hasTileEntity(x/SIZE,y/SIZE)){
+			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/SIZE,y/SIZE);
 			te.onInteracted(p, x, y);
 		}
 	}

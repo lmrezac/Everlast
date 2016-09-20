@@ -5,6 +5,7 @@ import java.awt.geom.Rectangle2D;
 import com.ombda.Collideable;
 import com.ombda.Facing;
 import com.ombda.Player;
+import com.ombda.Tile;
 
 public class Wall extends TileEntity{
 	private Facing dir;
@@ -12,13 +13,13 @@ public class Wall extends TileEntity{
 		super(x,y);
 		this.dir = direction;
 		if(direction == Facing.N)
-			boundingBox = new Rectangle2D.Double(0,0,16,1);
+			boundingBox = new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/16);
 		else if(direction == Facing.E)
-			boundingBox = new Rectangle2D.Double(15, 0, 1, 16);
+			boundingBox = new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16, 0, Tile.SIZE/16, Tile.SIZE);
 		else if(direction == Facing.S)
-			boundingBox = new Rectangle2D.Double(0, 15, 16, 1);
+			boundingBox = new Rectangle2D.Double(0, Tile.SIZE-Tile.SIZE/16, Tile.SIZE, Tile.SIZE/16);
 		else if(direction == Facing.W)
-			boundingBox = new Rectangle2D.Double(0, 0, 1, 16);
+			boundingBox = new Rectangle2D.Double(0, 0, Tile.SIZE/16, Tile.SIZE);
 	}
 
 	@Override

@@ -89,7 +89,7 @@ public class Input extends MessageBox{
 	
 	@Override
 	public void draw(Graphics2D g2d){
-		drawBox(g2d,0,200,32,7);
+		drawBox(g2d,0,400,32,7);
 		if(arrowWait >= 10){
 			arrowWait = 0;
 			drawOtherArrow = !drawOtherArrow;

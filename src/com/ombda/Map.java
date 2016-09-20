@@ -148,8 +148,12 @@ public class Map{
 			tileEntities[tiley][tilex] = new Wall(tilex,tiley,f);
 		}else if(cmd.equals("triangle")){
 			if(args.size() != 10)
-				throw new RuntimeException("tile entity triangle requires 10 values : tile x, tile y, x1, y1, x2, y2, x3, y3, fromNorth, fromEast, fromSouth, fromWest");
+				throw new RuntimeException("tile entity triangle requires 12 values : tile x, tile y, x1, y1, x2, y2, x3, y3, fromNorth, fromEast, fromSouth, fromWest");
 			tileEntities[tiley][tilex] = new Triangle(tilex,tiley,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)),Integer.parseInt(args.get(2)),Integer.parseInt(args.get(3)),Integer.parseInt(args.get(4)),Integer.parseInt(args.get(5)),Integer.parseInt(args.get(6)),Integer.parseInt(args.get(7)),Integer.parseInt(args.get(8)),Integer.parseInt(args.get(9)));
+		}else if(cmd.equals("box")){
+			if(args.size() != 2)
+				throw new RuntimeException("tile entity box requires 4 values : tile x, tile y, width, height");
+			tileEntities[tiley][tilex] = new com.ombda.tileentities.BoundingBox(tilex,tiley,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)));
 		}else throw new RuntimeException("Invalid tile entity : "+cmd);
 		debug("new tile entity created at ["+tilex+","+tiley+"] : "+tileEntities[tiley][tilex].save());
 	}
@@ -234,8 +238,8 @@ public class Map{
 				newback[y][x] = this.background[y-startY][x-startX];
 				newte[y][x] = this.tileEntities[y-startY][x-startX];
 				if(newte[y][x] != null){
-					newte[y][x].x = 16*x;
-					newte[y][x].y = 16*y;
+					newte[y][x].x = Tile.SIZE*x;
+					newte[y][x].y = Tile.SIZE*y;
 				}
 			}
 		}
@@ -245,8 +249,8 @@ public class Map{
 	}
 	
 	public Tile getTileAt(int x, int y, int layer){  
-		x /= 16;
-		y /= 16;
+		x /= Tile.SIZE;
+		y /= Tile.SIZE;
 		if(y < 0 || y >= height) return null;
 		if(x < 0 || x >= width) return null; 
 		if(layer == 0)
@@ -257,22 +261,22 @@ public class Map{
 		debug("Set tile at ("+x+","+y+") to id "+t.id);
 		assert layer != 0 && layer != 1 : "Invalid layer: "+layer;
 		if(layer == 0)
-			background[y/16][x/16] = t.id;
-		else foreground[y/16][x/16] = t.id;
+			background[y/Tile.SIZE][x/Tile.SIZE] = t.id;
+		else foreground[y/Tile.SIZE][x/Tile.SIZE] = t.id;
 	}
 	public void drawBackground(Graphics2D g2d, int offsetX, int offsetY){
 		for(int x = 0; x < width; x++){
 			for(int y = 0; y < height; y++){
-				Tile t = getTileAt(16*x,16*y,0);
-				t.draw(g2d, 16*x+offsetX, 16*y+offsetY);
+				Tile t = getTileAt(Tile.SIZE*x,Tile.SIZE*y,0);
+				t.draw(g2d, Tile.SIZE*x+offsetX, Tile.SIZE*y+offsetY);
 			}
 		}
 	}
 	public void drawForeground(Graphics2D g2d, int offsetX, int offsetY){
 		for(int x = 0; x < width; x++){
 			for(int y = 0; y < height; y++){
-				Tile t = getTileAt(16*x,16*y,1);
-				t.draw(g2d, 16*x+offsetX, 16*y+offsetY);
+				Tile t = getTileAt(Tile.SIZE*x,Tile.SIZE*y,1);
+				t.draw(g2d, Tile.SIZE*x+offsetX, Tile.SIZE*y+offsetY);
 			}
 		}
 	}

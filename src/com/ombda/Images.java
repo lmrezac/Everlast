@@ -32,11 +32,11 @@ public class Images{
 		try{
 			error_bimg = load(new File(localize("images\\error.png")),true);
 		}catch(RuntimeException e){
-			error_bimg = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
+			error_bimg = new BufferedImage(Tile.SIZE,Tile.SIZE,BufferedImage.TYPE_INT_ARGB);
 			Random r = new Random();
-			for(int y = 0; y < 16; y++){
-				for(int x = 0; x < 16; x++){
-					error_bimg.setRGB(x, y, r.nextInt(new Color(255,255,255).getRGB()));
+			for(int y = 0; y < Tile.SIZE; y++){
+				for(int x = 0; x < Tile.SIZE; x++){
+					error_bimg.setRGB(x, y, r.nextInt(Math.abs(new Color(255,255,255).getRGB())));
 				}
 			}
 		}
@@ -88,7 +88,7 @@ public class Images{
 				if(f2.exists()){
 					image = evaluateAnimFile(dir,f2,load(f,true));
 				}else{
-					image = new ImageIcon(f.getAbsolutePath());
+					image = new ImageIcon(load(f,true));
 				}
 				debug("Loaded image "+name+" as "+f.getAbsolutePath());
 				images.put(name, image);
@@ -134,11 +134,16 @@ public class Images{
 			str = str.trim();
 			if(str.startsWith("framesize ")){
 				String size = str.substring(10);
-				int i = size.indexOf('x');
-				if(i == -1)
-					throw new RuntimeException("Invalid framesize in file "+f.getAbsolutePath());
-				width = Integer.parseInt(size.substring(0, i));
-				height = Integer.parseInt(size.substring(i+1));
+				if(size.equals("default")){
+					width = Tile.SIZE;
+					height = Tile.SIZE;
+				}else{
+					int i = size.indexOf('x');
+					if(i == -1)
+						throw new RuntimeException("Invalid framesize in file "+f.getAbsolutePath());
+					width = Integer.parseInt(size.substring(0, i))*(Tile.SIZE/16);
+					height = Integer.parseInt(size.substring(i+1))*(Tile.SIZE/16);
+				}
 			}else if(str.equals("nodefine"))
 				nodefine = true;
 			else if(str.equals("noanim"))
@@ -227,6 +232,8 @@ public class Images{
 		}
 		try {
 			BufferedImage bimg = ImageIO.read(file);
+			if(!file.getName().endsWith("base.png"))
+				return toBufferedImage(bimg.getScaledInstance(bimg.getWidth()*2,bimg.getHeight()*2,0));
 			return bimg;
 		} catch (IOException e) {
 			if(debug){

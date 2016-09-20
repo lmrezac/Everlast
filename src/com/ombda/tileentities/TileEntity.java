@@ -6,18 +6,19 @@ import java.awt.geom.Rectangle2D;
 import com.ombda.Collideable;
 import com.ombda.Entity;
 import com.ombda.Interactable;
+import com.ombda.Tile;
 import com.ombda.Updateable;
 
 public abstract class TileEntity extends Entity implements Collideable, Updateable, Interactable{
-	protected Shape boundingBox = new Rectangle2D.Double(0, 0, 16, 16);
+	protected Shape boundingBox = new Rectangle2D.Double(0, 0, Tile.SIZE, Tile.SIZE);
 	public TileEntity(int x, int y){
-		super(16*x,16*y);
+		super(Tile.SIZE*x,Tile.SIZE*y);
 	}
 
 	@Override
 	public boolean doesPointCollide(int x, int y){
-		x %= 16;
-		y %= 16;
+		x %= Tile.SIZE;
+		y %= Tile.SIZE;
 		return boundingBox.contains(x,y);
 	}
 

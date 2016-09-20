@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.ombda.Files;
 import com.ombda.Images;
+import com.ombda.Tile;
 
 public abstract class GUI implements MouseListener, MouseMotionListener, KeyListener{
 	protected static final BufferedImage[] letters;
@@ -37,18 +38,18 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 			}
 		}
 		letters = new BufferedImage[font_sizes.length];
-		int x = 1, y = 1, col = 0;
+		int x = 2, y = 2, col = 0;
 		for(char c = '\u0000'; c < letters.length; c++){
 			char width = (char)font_sizes[c];
 			//debug("width for char '"+c+"' is "+(int)width+" (x="+x+",y="+y+")");
-			letters[c] = Images.crop(image, x, y, width, 10);
+			letters[c] = Images.crop(image, x, y, width*2, 20);
 			col++;
 			if(col > 0x0F){
 				col = 0;
-				y+=11;
-				x=1;
+				y+=22;
+				x=2;
 			}else{
-				x+=width+1;
+				x+=2*(width+1);
 			}
 		}
 	}
@@ -97,19 +98,19 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 		g.drawImage(GUI.msgbox_m,0,0,null);
 		g.dispose();*/
 		g2d.drawImage(msgbox_tl,topx,topy,null);
-		g2d.drawImage(msgbox_tr, topx+width*8-8, topy, null);
-		g2d.drawImage(msgbox_bl, topx, topy+height*8-8, null);
-		g2d.drawImage(msgbox_br, topx+width*8-8, topy+height*8-8, null);
-		for(int x = 8; x < width*8-8; x+=8){
+		g2d.drawImage(msgbox_tr, topx+width*Tile.SIZE/2-Tile.SIZE/2, topy, null);
+		g2d.drawImage(msgbox_bl, topx, topy+height*Tile.SIZE/2-Tile.SIZE/2, null);
+		g2d.drawImage(msgbox_br, topx+width*Tile.SIZE/2-Tile.SIZE/2, topy+height*Tile.SIZE/2-Tile.SIZE/2, null);
+		for(int x = Tile.SIZE/2; x < width*Tile.SIZE/2-Tile.SIZE/2; x+=Tile.SIZE/2){
 			g2d.drawImage(msgbox_t, topx+x, topy, null);
-			g2d.drawImage(msgbox_b, topx+x, topy+height*8-8, null);
+			g2d.drawImage(msgbox_b, topx+x, topy+height*Tile.SIZE/2-Tile.SIZE/2, null);
 		}
-		for(int y = 8; y < height*8-8; y+=8){
+		for(int y = Tile.SIZE/2; y < height*Tile.SIZE/2-Tile.SIZE/2; y+=Tile.SIZE/2){
 			g2d.drawImage(msgbox_l,topx, topy+y, null);
-			g2d.drawImage(msgbox_r, topx+width*8-8, topy+y, null);
+			g2d.drawImage(msgbox_r, topx+width*Tile.SIZE/2-Tile.SIZE/2, topy+y, null);
 		}
-		for(int x = 8; x < width*8-8; x+=8){
-			for(int y = 8; y < height*8-8; y+=8){
+		for(int x = Tile.SIZE/2; x < width*Tile.SIZE/2-Tile.SIZE/2; x+=Tile.SIZE/2){
+			for(int y = Tile.SIZE/2; y < height*Tile.SIZE/2-Tile.SIZE/2; y+=Tile.SIZE/2){
 				g2d.drawImage(msgbox_m,topx+x,topy+y,null);
 			}
 		}

@@ -12,25 +12,25 @@ import javax.swing.ImageIcon;
 import static com.ombda.Images.retrieve;
 
 public class Tiles{
-	public static final Shape FULL = new Rectangle2D.Double(0,0,16,16), TRIANGLE_TL, TRIANGLE_TR, TRIANGLE_BL, TRIANGLE_BR, EMPTY = new MultiShape(new ArrayList<Shape>());
+	public static final Shape FULL = new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE), TRIANGLE_TL, TRIANGLE_TR, TRIANGLE_BL, TRIANGLE_BR, EMPTY = new MultiShape(new ArrayList<Shape>());
 	static{
 		Polygon t_tl = new Polygon(), t_tr = new Polygon(), t_bl = new Polygon(), t_br = new Polygon();
 
 		t_tl.addPoint(0, 0);
-		t_tl.addPoint(16, 0);
-		t_tl.addPoint(0, 16);
+		t_tl.addPoint(Tile.SIZE, 0);
+		t_tl.addPoint(0, Tile.SIZE);
 		
 		t_tr.addPoint(0, 0);
-		t_tr.addPoint(16, 0);
-		t_tr.addPoint(16,16);
+		t_tr.addPoint(Tile.SIZE, 0);
+		t_tr.addPoint(Tile.SIZE,Tile.SIZE);
 		
 		t_bl.addPoint(0, 0);
-		t_bl.addPoint(0, 16);
-		t_bl.addPoint(16, 16);
+		t_bl.addPoint(0, Tile.SIZE);
+		t_bl.addPoint(Tile.SIZE, Tile.SIZE);
 		
-		t_br.addPoint(16, 0);
-		t_br.addPoint(16, 16);
-		t_br.addPoint(0, 16);
+		t_br.addPoint(Tile.SIZE, 0);
+		t_br.addPoint(Tile.SIZE, Tile.SIZE);
+		t_br.addPoint(0, Tile.SIZE);
 		
 		TRIANGLE_TL = t_tl;
 		TRIANGLE_TR = t_tr;
@@ -131,9 +131,18 @@ public class Tiles{
 		SIDEWALK_CROSS_CORNER_LT = 0x54,
 		SIDEWALK_CROSS_CORNER_LB = 0x55,
 		SIDEWALK_CROSS_CORNER_RT = 0x56,
-		SIDEWALK_CROSS_CORNER_RB = 0x57;
+		SIDEWALK_CROSS_CORNER_RB = 0x57,
+		LINE_TOP_LEFT = 0x59,
+		LINE_TOP = 0x5A,
+		LINE_TOP_RIGHT = 0x5B,
+		LINE_LEFT = 0x5C,
+		LINE_MIDDLE = 0x5D,
+		LINE_RIGHT = 0x5E,
+		LINE_BOTTOM_LEFT = 0x5F,
+		LINE_BOTTOM = 0x60,
+		LINE_BOTTOM_RIGHT = 0x61;
 	public static void loadTiles(){
-		new Tile(new ImageIcon(new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB)),EMPTY);
+		new Tile(new ImageIcon(new BufferedImage(Tile.SIZE,Tile.SIZE,BufferedImage.TYPE_INT_ARGB)),EMPTY);
 		
 		new Tile(BUSH_TOP_LEFT,retrieve("tiles/bush/0"),FULL);
 		new Tile(BUSH_TOP,retrieve("tiles/bush/1"),FULL);
@@ -185,12 +194,12 @@ public class Tiles{
 		new Tile(CREAM_WALL_CRACK,retrieve("intro/cream_wall_bottom_crack"),FULL);
 		new Tile(CREAM_WALL_MOLD,retrieve("intro/cream_wall_top_mold"),FULL);
 		
-		new Tile(SOLID_TILE,new ImageIcon(new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB)),FULL);
+		new Tile(SOLID_TILE,new ImageIcon(new BufferedImage(Tile.SIZE,Tile.SIZE,BufferedImage.TYPE_INT_ARGB)),FULL);
 		
-		Shape TOP = new Rectangle2D.Double(0,0,16,8),
-				LEFT = new Rectangle2D.Double(0,0,7,16),
-				RIGHT = new Rectangle2D.Double(9,0,7,16),
-				BOTTOM = new Rectangle2D.Double(0,8,16,8);
+		Shape TOP = new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/2),
+				LEFT = new Rectangle2D.Double(0,0,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE),
+				RIGHT = new Rectangle2D.Double((Tile.SIZE/2)+(Tile.SIZE/16),0,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE),
+				BOTTOM = new Rectangle2D.Double(0,Tile.SIZE/2,Tile.SIZE,Tile.SIZE/2);
 		new Tile(SIDEWALK_TOP_LEFT,retrieve("tiles/intro/city/sidewalk/0"),new MultiShape(Arrays.asList(LEFT,TOP)));
 		new Tile(SIDEWALK_TOP,retrieve("tiles/intro/city/sidewalk/1"),TOP);
 		new Tile(SIDEWALK_TOP_RIGHT,retrieve("tiles/intro/city/sidewalk/2"),new MultiShape(Arrays.asList(TOP,RIGHT)));
@@ -200,22 +209,22 @@ public class Tiles{
 		new Tile(SIDEWALK_BOTTOM_LEFT,retrieve("tiles/intro/city/sidewalk/6"),new MultiShape(Arrays.asList(LEFT,BOTTOM)));
 		new Tile(SIDEWALK_BOTTOM,retrieve("tiles/intro/city/sidewalk/7"),BOTTOM);
 		new Tile(SIDEWALK_BOTTOM_RIGHT,retrieve("tiles/intro/city/sidewalk/8"),new MultiShape(Arrays.asList(BOTTOM,RIGHT)));
-		new Tile(SIDEWALK_CROSS_LEFT_1,retrieve("tiles/intro/city/sidewalk_cross_left/0"),new Rectangle2D.Double(0,0,7,1));
+		new Tile(SIDEWALK_CROSS_LEFT_1,retrieve("tiles/intro/city/sidewalk_cross_left/0"),new Rectangle2D.Double(0,0,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE/16));
 		new Tile(SIDEWALK_CROSS_LEFT_2,retrieve("tiles/intro/city/sidewalk_cross_left/1"),BOTTOM);
 		new Tile(SIDEWALK_CROSS_LEFT_3,retrieve("tiles/intro/city/sidewalk_cross_left/2"),TOP);
-		new Tile(SIDEWALK_CROSS_LEFT_4,retrieve("tiles/intro/city/sidewalk_cross_left/3"),new Rectangle2D.Double(0,8,7,8));
-		new Tile(SIDEWALK_CROSS_RIGHT_1,retrieve("tiles/intro/city/sidewalk_cross_right/0"),new Rectangle2D.Double(9,0,7,1));
+		new Tile(SIDEWALK_CROSS_LEFT_4,retrieve("tiles/intro/city/sidewalk_cross_left/3"),new Rectangle2D.Double(0,Tile.SIZE/2,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_RIGHT_1,retrieve("tiles/intro/city/sidewalk_cross_right/0"),new Rectangle2D.Double((Tile.SIZE/2)+(Tile.SIZE/16),0,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE/16));
 		new Tile(SIDEWALK_CROSS_RIGHT_2,retrieve("tiles/intro/city/sidewalk_cross_right/1"),BOTTOM);
 		new Tile(SIDEWALK_CROSS_RIGHT_3,retrieve("tiles/intro/city/sidewalk_cross_right/2"),TOP);
-		new Tile(SIDEWALK_CROSS_RIGHT_4,retrieve("tiles/intro/city/sidewalk_cross_right/3"),new Rectangle2D.Double(9,8,7,8));
-		new Tile(SIDEWALK_CROSS_BOTTOM_1,retrieve("tiles/intro/city/sidewalk_cross_bottom/0"),new Rectangle2D.Double(0,8,1,8));
-		new Tile(SIDEWALK_CROSS_BOTTOM_2,retrieve("tiles/intro/city/sidewalk_cross_bottom/1"),new Rectangle2D.Double(15,8,1,8));
-		new Tile(SIDEWALK_CROSS_BOTTOM_3,retrieve("tiles/intro/city/sidewalk_cross_bottom/2"),new Rectangle2D.Double(0,8,1,8));
-		new Tile(SIDEWALK_CROSS_BOTTOM_4,retrieve("tiles/intro/city/sidewalk_cross_bottom/3"),new Rectangle2D.Double(15,8,1,8));
-		new Tile(SIDEWALK_CROSS_TOP_1,retrieve("tiles/intro/city/sidewalk_cross_top/0"),new Rectangle2D.Double(0,0,1,8));
-		new Tile(SIDEWALK_CROSS_TOP_2,retrieve("tiles/intro/city/sidewalk_cross_top/1"),new Rectangle2D.Double(15,0,1,8));
-		new Tile(SIDEWALK_CROSS_TOP_3,retrieve("tiles/intro/city/sidewalk_cross_top/2"),new Rectangle2D.Double(0,0,1,8));
-		new Tile(SIDEWALK_CROSS_TOP_4,retrieve("tiles/intro/city/sidewalk_cross_top/3"),new Rectangle2D.Double(15,0,1,8));
+		new Tile(SIDEWALK_CROSS_RIGHT_4,retrieve("tiles/intro/city/sidewalk_cross_right/3"),new Rectangle2D.Double((Tile.SIZE/2)+(Tile.SIZE/16),Tile.SIZE/2,(Tile.SIZE/2)-(Tile.SIZE/16),Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_BOTTOM_1,retrieve("tiles/intro/city/sidewalk_cross_bottom/0"),new Rectangle2D.Double(0,Tile.SIZE/2,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_BOTTOM_2,retrieve("tiles/intro/city/sidewalk_cross_bottom/1"),new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16,Tile.SIZE/2,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_BOTTOM_3,retrieve("tiles/intro/city/sidewalk_cross_bottom/2"),new Rectangle2D.Double(0,Tile.SIZE/2,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_BOTTOM_4,retrieve("tiles/intro/city/sidewalk_cross_bottom/3"),new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16,Tile.SIZE/2,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_TOP_1,retrieve("tiles/intro/city/sidewalk_cross_top/0"),new Rectangle2D.Double(0,0,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_TOP_2,retrieve("tiles/intro/city/sidewalk_cross_top/1"),new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16,0,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_TOP_3,retrieve("tiles/intro/city/sidewalk_cross_top/2"),new Rectangle2D.Double(0,0,Tile.SIZE/16,Tile.SIZE/2));
+		new Tile(SIDEWALK_CROSS_TOP_4,retrieve("tiles/intro/city/sidewalk_cross_top/3"),new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16,0,Tile.SIZE/16,Tile.SIZE/2));
 		new Tile(SIDEWALK_CROSS_CORNER_LT,retrieve("tiles/intro/city/sidewalk_cross_all/0"),EMPTY);
 		new Tile(SIDEWALK_CROSS_CORNER_RT,retrieve("tiles/intro/city/sidewalk_cross_all/1"),EMPTY);
 		new Tile(SIDEWALK_CROSS_CORNER_LB,retrieve("tiles/intro/city/sidewalk_cross_all/2"),EMPTY);
@@ -225,10 +234,10 @@ public class Tiles{
 		new Tile(ROAD_LINES_VERT,retrieve("tiles/intro/city/yellow_lines_vertical"),EMPTY);
 		new Tile(ROAD_LINES_HORIZ,retrieve("tiles/intro/city/yellow_lines_horizontal"),EMPTY);
 		
-		new Tile(CROSSWALK_TOP,retrieve("intro/city/crosswalk_top"),new Rectangle2D.Double(0,0,16,1));
+		new Tile(CROSSWALK_TOP,retrieve("intro/city/crosswalk_top"),new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/16));
 		new Tile(CROSSWALK_BOTTOM,retrieve("intro/city/crosswalk_bottom"),BOTTOM);
-		new Tile(CROSSWALK_LEFT,retrieve("intro/city/crosswalk_left"),new Rectangle2D.Double(0,0,1,16));
-		new Tile(CROSSWALK_RIGHT,retrieve("intro/city/crosswalk_right"),new Rectangle2D.Double(15,0,1,16));
+		new Tile(CROSSWALK_LEFT,retrieve("intro/city/crosswalk_left"),new Rectangle2D.Double(0,0,Tile.SIZE/16,Tile.SIZE));
+		new Tile(CROSSWALK_RIGHT,retrieve("intro/city/crosswalk_right"),new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16,0,Tile.SIZE/16,Tile.SIZE));
 		
 		new Tile(STOPLIGHT_POLE_TOP_LB,retrieve("tiles/intro/city/pole_top_lb"),EMPTY);
 		new Tile(STOPLIGHT_POLE_TOP_RT,retrieve("tiles/intro/city/pole_top_rt"),EMPTY);
@@ -239,7 +248,15 @@ public class Tiles{
 		new Tile(STOPLIGHT_SUPPORT_VERT,retrieve("tiles/intro/city/support_vertical"),EMPTY);
 		new Tile(STOPLIGHT_SUPPORT_HORIZ,retrieve("tiles/intro/city/support_horizontal"),EMPTY);
 	
-	
+		new Tile(LINE_TOP_LEFT,retrieve("tiles/lines/0"),EMPTY);
+		new Tile(LINE_TOP,retrieve("tiles/lines/1"),EMPTY);
+		new Tile(LINE_TOP_RIGHT,retrieve("tiles/lines/2"),EMPTY);
+		new Tile(LINE_LEFT,retrieve("tiles/lines/3"),EMPTY);
+		new Tile(LINE_MIDDLE,retrieve("tiles/lines/4"),EMPTY);
+		new Tile(LINE_RIGHT,retrieve("tiles/lines/5"),EMPTY);
+		new Tile(LINE_BOTTOM_LEFT,retrieve("tiles/lines/6"),EMPTY);
+		new Tile(LINE_BOTTOM,retrieve("tiles/lines/7"),EMPTY);
+		new Tile(LINE_BOTTOM_RIGHT,retrieve("tiles/lines/8"),EMPTY);
 	}
 
 

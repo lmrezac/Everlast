@@ -101,7 +101,7 @@ public class MessageBox extends GUI{
 		finished = false;
 	}
 	
-	protected static final int INIT_DRAW_X = 8, INIT_DRAW_Y = 208;
+	protected static final int INIT_DRAW_X = 16, INIT_DRAW_Y = 416;
 	protected int index = 1, drawX = INIT_DRAW_X, drawY = INIT_DRAW_Y;
 	protected int indexWait = 0, arrowWait = 0;
 	private static int indexWaitMax = 5;

@@ -33,7 +33,6 @@ public class CreateSprite implements ScriptStep{
 		Sprite s = new Sprite(x,y,spriteImage,spriteId);
 		
 		s.setMap(map);
-		System.out.println(map.getSprites());
 	}
 
 	@Override

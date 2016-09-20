@@ -186,8 +186,8 @@ public class Console extends Input{
 				}else{
 					if(args.get(index+1).equals("at"))
 						index++;
-					int x = Integer.decode(args.get(++index))*16+1;
-					int y = Integer.decode(args.get(++index))*16+1;
+					int x = Integer.decode(args.get(++index))*Tile.SIZE+1;
+					int y = Integer.decode(args.get(++index))*Tile.SIZE+1;
 					
 					String layerName = args.get(++index);
 					int layer = 0;
@@ -394,12 +394,12 @@ public class Console extends Input{
 	
 	private void cmdFill(List<String> args){
 		int index = 0;
-		int x1 = Integer.decode(args.get(++index))*16+1;
-		int y1 = Integer.decode(args.get(++index))*16+1;
+		int x1 = Integer.decode(args.get(++index))*Tile.SIZE+1;
+		int y1 = Integer.decode(args.get(++index))*Tile.SIZE+1;
 		if(args.get(index+1).equals("to")) 
 			index++;
-		int x2 = Integer.decode(args.get(++index))*16+1;
-		int y2 = Integer.decode(args.get(++index))*16+1;
+		int x2 = Integer.decode(args.get(++index))*Tile.SIZE+1;
+		int y2 = Integer.decode(args.get(++index))*Tile.SIZE+1;
 		String layerName = args.get(++index);
 		int layer = 0;
 		if(layerName.equals("fore")||layerName.equals("foreground")||layerName.equals("1"))
