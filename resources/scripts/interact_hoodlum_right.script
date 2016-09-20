@@ -1,0 +1,5 @@
+if equals ${hoodlum_jeff_talk_last} right
+msg "Din'cha hear me, bub? Scram!" *wait
+if notequals ${hoodlum_jeff_talk_last} right
+script testnpc
+set hoodlum_jeff_talk_last right

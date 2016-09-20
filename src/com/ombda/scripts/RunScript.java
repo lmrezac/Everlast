@@ -12,16 +12,16 @@ public class RunScript implements ScriptStep{
 	}
 	@Override
 	public void execute(Panel game, Script script){
-		String name = Script.parseString(scriptName);
-		if(!(scriptName.startsWith("\"") && scriptName.endsWith("\"")))
-			name = script.evalVar(name);
-		Script s = Script.getScript(name);
-		game.runScript(s);
+		Script s = getScript();
+		s.execute(game);
 	}
-
+	private Script getScript(){
+		String name = Script.parseString(scriptName);
+		return Script.getScript(name);
+	}
 	@Override
 	public boolean done(){
-		return true;
+		return getScript().done();
 	}
 
 

@@ -18,7 +18,7 @@ public class Script{
 	private static HashMap<String,Script> scripts = new HashMap<>();
 	private static HashMap<String,String> vars = new HashMap<>();
 	private List<ScriptStep> steps;
-	private int currentScriptPos = 0, lastPos = -1;
+	private int pos = 0, lastPos = -1;
 	private String description;
 	public Script(String desc,List<ScriptStep> list){
 		this.steps = list;
@@ -29,41 +29,45 @@ public class Script{
 		this.steps = list;
 		this.description = "null";
 	}
-	private ScriptStep currentStep(){ return steps.get(currentScriptPos); }
+	private ScriptStep currentStep(){ return steps.get(pos); }
 	private boolean done = false;
 	public void execute(Panel game){
-		if(currentScriptPos >= steps.size())
+		if(pos >= steps.size())
 			return;//throw new RuntimeException("Script is already completed! Cannot increment step!");
 		ScriptStep step = currentStep();
-		if(step instanceof DispMessage){
-			if(currentScriptPos+1 < steps.size())
-				game.msgbox.closeWhenDone = (steps.get(currentScriptPos+1) instanceof DispMessage);
-			else game.msgbox.closeWhenDone = true;
-		}else game.msgbox.closeWhenDone = true; 
+	
+		if(pos+1 < steps.size()){
+			if(steps.get(pos+1) instanceof DispMessage){
+				game.msgbox.closeWhenDone = false;
+			}else if(steps.get(pos+1) instanceof If && pos+2 < steps.size() && steps.get(pos+2) instanceof DispMessage){
+				game.msgbox.closeWhenDone = false;
+			}
+		}else game.msgbox.closeWhenDone = true;
+		 
 		step.execute(game, this);
 		if(step instanceof If){
 			if(step.done()){
-				lastPos = currentScriptPos;
-				currentScriptPos++;
+				lastPos = pos;
+				pos++;
 			}else{
-				lastPos = currentScriptPos;
-				currentScriptPos+=2;
+				lastPos = pos;
+				pos+=2;
 			}
 		}else{
 			if(step.done()){
-				lastPos = currentScriptPos;
-				currentScriptPos++;
+				lastPos = pos;
+				pos++;
 			}
 		}
 		
 	}
 	public void reset(){
 		done = false;
-		currentScriptPos = 0;
+		pos = 0;
 		
 	}
 	public boolean done(){
-		if(currentScriptPos >= steps.size()){
+		if(pos >= steps.size()){
 			reset();
 			return true;
 		}
@@ -100,12 +104,6 @@ public class Script{
 			int i = value.indexOf('"',1);
 			if(value.charAt(i+1) != '=') throw new RuntimeException("Expected = at index "+(i+1)+" in string "+value);
 			vars.put(value.substring(1,i),value.substring(i+3,value.length()-1));
-		}
-	}
-	public void run(){
-		debug("running script!");
-		for(ScriptStep step : steps){
-			step.execute(Panel.getInstance(), this);
 		}
 	}
 	
