@@ -140,7 +140,32 @@ public class Tiles{
 		LINE_RIGHT = 0x5E,
 		LINE_BOTTOM_LEFT = 0x5F,
 		LINE_BOTTOM = 0x60,
-		LINE_BOTTOM_RIGHT = 0x61;
+		LINE_BOTTOM_RIGHT = 0x61,
+		MARBLE = 0x62,
+		MARBLE_BRICKS = 0x63,
+		MARBLE_BRICKS_LEFT = 0x64,
+		MARBLE_BRICKS_RIGHT = 0x65,
+		MARBLE_BOTTOM = 0x66,
+		MARBLE_ROOF_TOP_LEFT = 0x67,
+		MARBLE_ROOF_BOTTOM_LEFT = 0x68,
+		MARBLE_ROOF_TOP = 0x69,
+		MARBLE_ROOF_TOP_DECORATED = 0x6A,
+		MARBLE_ROOF_BOTTOM = 0x6B,
+		MARBLE_ROOF_TOP_RIGHT = 0x6C,
+		MARBLE_ROOF_BOTTOM_RIGHT = 0x6D,
+		MARBLE_SEPARATOR_1 = 0x6E,
+		MARBLE_SEPARATOR_2 = 0x6F,
+		MARBLE_SEPARATOR_3 = 0x70,
+		MARBLE_WINDOW = 0x71,
+		MARBLE_WINDOW_SM = 0x72,
+		WINDOW_SM_1 = 0x73,
+		WINDOW_SM_2 = 0x74,
+		WINDOW_SM_3 = 0x75,
+		MARBLE_WINDOW_LG = 0x76,
+		MARBLE_WINDOW_TOP_LEFT_1 = 0x77,
+		MARBLE_WINDOW_TOP_LEFT_2 = 0x78,
+		MARBLE_WINDOW_TOP_RIGHT_1 = 0x79,
+		MARBLE_WINDOW_TOP_RIGHT_2 = 0x7A;
 	public static void loadTiles(){
 		new Tile(new ImageIcon(new BufferedImage(Tile.SIZE,Tile.SIZE,BufferedImage.TYPE_INT_ARGB)),EMPTY);
 		
@@ -257,6 +282,33 @@ public class Tiles{
 		new Tile(LINE_BOTTOM_LEFT,retrieve("tiles/lines/6"),EMPTY);
 		new Tile(LINE_BOTTOM,retrieve("tiles/lines/7"),EMPTY);
 		new Tile(LINE_BOTTOM_RIGHT,retrieve("tiles/lines/8"),EMPTY);
+		
+		new Tile(MARBLE,retrieve("tiles/intro/city/marble"),FULL);
+		new Tile(MARBLE_BRICKS,retrieve("tiles/intro/city/marble_bricks"),FULL);
+		new Tile(MARBLE_BRICKS_LEFT,retrieve("tiles/intro/city/marble_bricks_end/0"),FULL);
+		new Tile(MARBLE_BRICKS_RIGHT,retrieve("tiles/intro/city/marble_bricks_end/1"),FULL);
+		new Tile(MARBLE_BOTTOM,retrieve("tiles/intro/city/marble_bottom"),FULL);
+		new Tile(MARBLE_ROOF_TOP_LEFT,retrieve("tiles/intro/city/marble_rooftop/0"),RIGHT);
+		new Tile(MARBLE_ROOF_BOTTOM_LEFT,retrieve("tiles/intro/city/marble_rooftop/4"),RIGHT);
+		new Tile(MARBLE_ROOF_TOP,retrieve("tiles/intro/city/marble_rooftop/2"),FULL);
+		new Tile(MARBLE_ROOF_TOP_DECORATED,retrieve("tiles/intro/city/marble_rooftop/1"),FULL);
+		new Tile(MARBLE_ROOF_BOTTOM,retrieve("tiles/intro/city/marble_rooftop/5"),FULL);
+		new Tile(MARBLE_ROOF_TOP_RIGHT,retrieve("tiles/intro/city/marble_rooftop/3"),LEFT);
+		new Tile(MARBLE_ROOF_BOTTOM_RIGHT,retrieve("tiles/intro/city/marble_rooftop/7"),LEFT);
+		new Tile(MARBLE_SEPARATOR_1,retrieve("tiles/intro/city/marble_separator"),FULL);
+		new Tile(MARBLE_SEPARATOR_2,retrieve("tiles/intro/city/marble_separator2"),FULL);
+		new Tile(MARBLE_SEPARATOR_3,retrieve("tiles/intro/city/marble_separator3"),FULL);
+		
+		new Tile(MARBLE_WINDOW,retrieve("tiles/intro/city/marble_window"),EMPTY);
+		new Tile(MARBLE_WINDOW_SM,retrieve("tiles/intro/city/marble_window_small"),EMPTY);
+		new Tile(WINDOW_SM_1,retrieve("tiles/intro/city/smallest_window"),FULL);
+		new Tile(WINDOW_SM_2,retrieve("tiles/intro/city/smallest_window2"),FULL);
+		new Tile(WINDOW_SM_3,retrieve("tiles/intro/city/smallest_window3"),FULL);
+		new Tile(MARBLE_WINDOW_LG,retrieve("tiles/intro/city/marble_window_large"),EMPTY);
+		new Tile(MARBLE_WINDOW_TOP_LEFT_1,retrieve("tiles/intro/city/marble_window_top/0"),FULL);
+		new Tile(MARBLE_WINDOW_TOP_LEFT_2,retrieve("tiles/intro/city/marble_window_top/1"),FULL);
+		new Tile(MARBLE_WINDOW_TOP_RIGHT_1,retrieve("tiles/intro/city/marble_window_top/2"),FULL);
+		new Tile(MARBLE_WINDOW_TOP_RIGHT_2,retrieve("tiles/intro/city/marble_window_top/3"),FULL);
 	}
 
 

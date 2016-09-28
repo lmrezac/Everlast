@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import com.ombda.Images;
 import com.ombda.NPC;
 import com.ombda.Panel;
+import com.ombda.Tile;
 
 public class CreateNPC implements ScriptStep{
 	private ImageIcon[] images;
@@ -23,8 +24,8 @@ public class CreateNPC implements ScriptStep{
 	}
 	@Override
 	public void execute(Panel game, Script script){
-		int x = Script.parseInt(script.evalVar(Script.parseString(strX)));
-		int y = Script.parseInt(script.evalVar(Script.parseString(strY)));
+		int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(strX)));
+		int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(strY)));
 		new NPC(0,0,hash,yminus,images,new Rectangle2D.Double(0,0,x,y));
 	}
 

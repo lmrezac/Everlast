@@ -230,9 +230,9 @@ public class Map{
 		this.height = newheight;
 		short[][] newfore = new short[newheight][newwidth], newback = new short[newheight][newwidth];
 		TileEntity[][] newte = new TileEntity[newheight][newwidth];
-		int startY = oldheight < height && bottom? height-oldheight : 0;
-		int startX = oldwidth < width && left? width-oldwidth : 0;
-		for(int y = startY; y < Math.min(oldheight,height); y++){
+		//int startY = oldheight < height && bottom? height-oldheight : 0;
+		//int startX = oldwidth < width && left? width-oldwidth : 0;
+		/*for(int y = startY; y < Math.min(oldheight,height); y++){
 			for(int x = startX; x < Math.min(oldwidth, width); x++){
 				newfore[y][x] = this.foreground[y-startY][x-startX];
 				newback[y][x] = this.background[y-startY][x-startX];
@@ -240,6 +240,59 @@ public class Map{
 				if(newte[y][x] != null){
 					newte[y][x].x = Tile.SIZE*x;
 					newte[y][x].y = Tile.SIZE*y;
+				}
+			}
+		}*/
+		if(bottom){
+			if(left){
+				for(int y = newheight-1, y2 = oldheight-1; y >= Math.max(0, newheight-oldheight); y--, y2--){
+					for(int x = newwidth-1, x2 = oldwidth-1; x >= Math.max(0,newwidth-oldwidth); x--, x2--){
+						newfore[y][x] = this.foreground[y2][x2];
+						newback[y][x] = this.background[y2][x2];
+						newte[y][x] = this.tileEntities[y2][x2];
+						if(newte[y][x] != null){
+							newte[y][x].x = Tile.SIZE*x;
+							newte[y][x].y = Tile.SIZE*y;
+						}
+					}
+				}
+			}else{
+				for(int y = newheight-1, y2 = oldheight-1; y >= Math.max(0, newheight-oldheight); y--, y2--){
+					for(int x = 0; x < newwidth; x++){
+						newfore[y][x] = this.foreground[y2][x];
+						newback[y][x] = this.background[y2][x];
+						newte[y][x] = this.tileEntities[y2][x];
+						if(newte[y][x] != null){
+							newte[y][x].x = Tile.SIZE*x;
+							newte[y][x].y = Tile.SIZE*y;
+						}
+					}
+				}
+			}
+		}else{
+			if(left){
+				for(int y = 0; y < newheight; y++){
+					for(int x = newwidth-1, x2 = oldwidth-1; x >= Math.max(0,newwidth-oldwidth); x--, x2--){
+						newfore[y][x] = this.foreground[y][x2];
+						newback[y][x] = this.background[y][x2];
+						newte[y][x] = this.tileEntities[y][x2];
+						if(newte[y][x] != null){
+							newte[y][x].x = Tile.SIZE*x;
+							newte[y][x].y = Tile.SIZE*y;
+						}
+					}
+				}
+			}else{
+				for(int y = 0; y < newheight; y++){
+					for(int x = 0; x < newwidth; x++){
+						newfore[y][x] = this.foreground[y][x];
+						newback[y][x] = this.background[y][x];
+						newte[y][x] = this.tileEntities[y][x];
+						if(newte[y][x] != null){
+							newte[y][x].x = Tile.SIZE*x;
+							newte[y][x].y = Tile.SIZE*y;
+						}
+					}
 				}
 			}
 		}

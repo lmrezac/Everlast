@@ -6,12 +6,16 @@ import java.awt.Shape;
 import com.ombda.Collideable;
 import com.ombda.Facing;
 import com.ombda.Player;
+import com.ombda.Tile;
 
 public class Triangle extends TileEntity{
 	int x1,y1,x2,y2,x3,y3;
 	int fromNorth, fromSouth, fromEast, fromWest;
 	public Triangle(int x, int y, int x1, int y1, int x2, int y2, int x3, int y3, int i, int j, int k, int l){
 		super(x, y);
+		x1 *= (Tile.SIZE/16); y1 *= (Tile.SIZE/16);
+		x2 *= (Tile.SIZE/16); y2 *= (Tile.SIZE/16);
+		x3 *= (Tile.SIZE/16); y3 *= (Tile.SIZE/16);
 		Polygon p = new Polygon();
 		p.addPoint(x1, y1);
 		p.addPoint(x2, y2);

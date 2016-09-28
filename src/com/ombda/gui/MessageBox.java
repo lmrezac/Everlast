@@ -115,14 +115,14 @@ public class MessageBox extends GUI{
 	public boolean isFinished(){ return finished/* index >= string.length && !waitingForInput*/; }
 	@Override
 	public void draw(Graphics2D g2d){
-		drawBox(g2d,0,200,32,7);
+		drawBox(g2d,0,400,32,7);
 		Color tint = null;
 		drawX = INIT_DRAW_X; drawY = INIT_DRAW_Y;
 		
 		for(int i = startIndexAt; i < index; i++){
 			char c = string[i];
 			if(c == '\n'){
-				drawY += 10;
+				drawY += 20;
 				drawX = INIT_DRAW_X;
 			}else if(c == '\t'){
 				g2d.drawImage(letters[' '],drawX,drawY,null);

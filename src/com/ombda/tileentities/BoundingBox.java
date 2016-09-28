@@ -4,12 +4,13 @@ import java.awt.geom.Rectangle2D;
 
 import com.ombda.Collideable;
 import com.ombda.Player;
+import com.ombda.Tile;
 
 public class BoundingBox extends TileEntity{
 	
 	public BoundingBox(int x, int y, int width, int height){
 		super(x, y);
-		this.boundingBox = new Rectangle2D.Double(0,0,width,height);
+		this.boundingBox = new Rectangle2D.Double(0,0,(Tile.SIZE/16)*width,(Tile.SIZE/16)*height);
 	}
 
 	@Override

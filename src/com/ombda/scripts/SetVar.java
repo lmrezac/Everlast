@@ -8,6 +8,8 @@ import com.ombda.NPC;
 import com.ombda.Panel;
 import com.ombda.Player;
 import com.ombda.Sprite;
+import com.ombda.Tile;
+
 import static com.ombda.Debug.*;
 public class SetVar implements ScriptStep{
 	private String[] args;
@@ -50,15 +52,15 @@ public class SetVar implements ScriptStep{
 				Map map = Map.get(mapname);
 				sprite.setMap(map);
 			}else if(var.equals("x")){
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				sprite.setPos(x, sprite.y);
 			}else if(var.equals("y")){
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				sprite.setPos(sprite.x, y);
 			}else if(var.equals("pos")){
 				testLength(5);
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[4])));
 				sprite.setPos(x,y);
 			}else throw new RuntimeException("Invalid sprite var: "+var);
 		}else if(args[1].equals("npc")){
@@ -81,10 +83,10 @@ public class SetVar implements ScriptStep{
 				Map map = Map.get(mapname);
 				npc.setMap(map);
 			}else if(var.equals("x")){
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				npc.setPos(x, npc.y);
 			}else if(var.equals("y")){
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
 				npc.setPos(npc.x, y);
 			}else if(var.equals("onInteracted")){
 				String str = "";
@@ -97,18 +99,18 @@ public class SetVar implements ScriptStep{
 				npc.onInteractedScript = new Script(Arrays.asList(Script.loadStep(str)));
 			}else if(var.equals("pos")){
 				testLength(5);
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[4])));
 				npc.setPos(x,y);
 			}else if(var.equals("dest")){
 				testLength(5);
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[4])));
 				npc.setDestination(x, y);
 			}else if(var.equals("xy")){
 				testLength(5);
-				int x = Script.parseInt(script.evalVar(Script.parseString(args[3])));
-				int y = Script.parseInt(script.evalVar(Script.parseString(args[4])));
+				int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[3])));
+				int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(args[4])));
 				npc.setDestination(x, y);
 				npc.setPos(x,y);
 			}else if(var.equals("facing")){
@@ -118,12 +120,12 @@ public class SetVar implements ScriptStep{
 			}else throw new RuntimeException("Invalid npc var: "+var);
 		}else if(args[1].equals("player.x")){
 			testLength(3);
-			int x = Script.parseInt(args[2]);
+			int x = (Tile.SIZE/16) * Script.parseInt(args[2]);
 			Player p = game.getPlayer();
 			p.setPos(x, p.y);
 		}else if(args[1].equals("player.y")){
 			testLength(3);
-			int y = Script.parseInt(args[2]);
+			int y = (Tile.SIZE/16) * Script.parseInt(args[2]);
 			Player p = game.getPlayer();
 			p.setPos(p.x, y);
 		}else if(args[1].equals("player.pos")){

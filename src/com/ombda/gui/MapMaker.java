@@ -29,7 +29,7 @@ public class MapMaker extends GUI implements InputListener{
 				getMap().save();
 			}
 		});
-		buttons.add(new Button("Tile",34,0){
+		buttons.add(new Button("Tile",68,0){
 			@Override
 			public void buttonPressed(){
 				debug("tile image pressed");
@@ -38,7 +38,7 @@ public class MapMaker extends GUI implements InputListener{
 				Panel.getInstance().setGUI(Panel.getInstance().input);
 			}
 		});
-		buttons.add(new Button("Quit",68,0){
+		buttons.add(new Button("Quit",136,0){
 			public void buttonPressed(){
 				Panel.getInstance().setGUI(Panel.getInstance().hud);
 			}
@@ -52,14 +52,15 @@ public class MapMaker extends GUI implements InputListener{
 	public void update(){
 		Panel panel = Panel.getInstance();
 		boolean[] keys = Frame.keys;
+		int speed = 2 * (keys[KeyEvent.VK_SHIFT]? 2 : 1);
 		if(keys[KeyEvent.VK_A])
-			panel.offsetX++;
+			panel.offsetX += speed;
 		if(keys[KeyEvent.VK_D])
-			panel.offsetX--;
+			panel.offsetX -= speed;
 		if(keys[KeyEvent.VK_W])
-			panel.offsetY++;
+			panel.offsetY += speed;
 		if(keys[KeyEvent.VK_S])
-			panel.offsetY--;
+			panel.offsetY -= speed;
 	}
 	
 	@Override
@@ -68,10 +69,10 @@ public class MapMaker extends GUI implements InputListener{
 		int x = e.getX();
 		int y = e.getY();
 		int[] coords = Panel.screenCoordsToImageCoords(x,y);
-		if(coords[1] > 30){
+		if(coords[1] > 60){
 		if(e.getButton() == MouseEvent.BUTTON1){
 
-			x = coords[0]-Panel.getInstance().offsetX-4;
+			x = coords[0]-Panel.getInstance().offsetX-8;
 			y = coords[1]-Panel.getInstance().offsetY-Tile.SIZE;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
@@ -80,7 +81,7 @@ public class MapMaker extends GUI implements InputListener{
 			getMap().setTileAt(x, y, layer, Tile.getTile(tileId));
 		}else if(e.getButton() == MouseEvent.BUTTON3){
 			
-			x = coords[0]-Panel.getInstance().offsetX-4;
+			x = coords[0]-Panel.getInstance().offsetX-8;
 			y = coords[1]-Panel.getInstance().offsetY-Tile.SIZE;
 			int layer;
 			if(Frame.keys[KeyEvent.VK_SHIFT])
@@ -121,8 +122,7 @@ public class MapMaker extends GUI implements InputListener{
 	public void mouseMoved(MouseEvent e){}
 
 	@Override
-	public void keyPressed(KeyEvent e){
-	}
+	public void keyPressed(KeyEvent e){}
 
 	@Override
 	public void keyReleased(KeyEvent e){}

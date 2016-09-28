@@ -8,6 +8,7 @@ import com.ombda.Images;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Sprite;
+import com.ombda.Tile;
 
 public class CreateSprite implements ScriptStep{
 	private int spriteId;
@@ -28,8 +29,8 @@ public class CreateSprite implements ScriptStep{
 		if(mapName != null)
 			map = Map.get(mapName);
 		else map = game.getPlayer().getMap();
-		int x = Script.parseInt(script.evalVar(Script.parseString(spriteX)));
-		int y = Script.parseInt(script.evalVar(Script.parseString(spriteY)));
+		int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(spriteX)));
+		int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(spriteY)));
 		Sprite s = new Sprite(x,y,spriteImage,spriteId);
 		
 		s.setMap(map);

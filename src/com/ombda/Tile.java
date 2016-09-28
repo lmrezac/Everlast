@@ -27,7 +27,7 @@ public class Tile implements Collideable, Interactable{
 	public Tile(short id, ImageIcon image, Shape boundingBox){
 		this.image = image;
 		this.boundingBox = boundingBox;
-		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: "+id);
+		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
 		tiles[id] = this;
 		this.id = id;
 	}

@@ -264,7 +264,7 @@ public class Script{
 	public static int parseInt(String str){
 		str = parseString(str);
 		if(str.endsWith("t")){
-			return Tile.SIZE*Integer.decode(str.substring(0, str.length()-1));
+			return 16*Integer.decode(str.substring(0, str.length()-1));
 		}else return Integer.decode(str);
 	}
 	public static String parseString(String str){

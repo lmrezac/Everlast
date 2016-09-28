@@ -10,6 +10,7 @@ import com.ombda.Images;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Sprite;
+import com.ombda.Tile;
 
 public class CreateCollideable implements ScriptStep{
 	private int spriteId;
@@ -32,10 +33,10 @@ public class CreateCollideable implements ScriptStep{
 		if(mapName != null)
 			map = Map.get(mapName);
 		else map = game.getPlayer().getMap();
-		int x = Script.parseInt(script.evalVar(Script.parseString(spriteX)));
-		int y = Script.parseInt(script.evalVar(Script.parseString(spriteY)));
-		int width = Script.parseInt(script.evalVar(Script.parseString(this.width)));
-		int height = Script.parseInt(script.evalVar(Script.parseString(this.height)));
+		int x = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(spriteX)));
+		int y = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(spriteY)));
+		int width = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(this.width)));
+		int height = (Tile.SIZE/16) * Script.parseInt(script.evalVar(Script.parseString(this.height)));
 		Sprite s = new CollideableSprite(x,y,spriteImage,spriteId,new Rectangle2D.Double(x,y,width,height));
 		
 		s.setMap(map);
@@ -47,7 +48,7 @@ public class CreateCollideable implements ScriptStep{
 	}
 
 
-	//format: sprite <int literal : id> <int : x> <int : y> <string literal : image name> <int : width> <int : height> [string literal : map name] 
+	//format: collideable <int literal : id> <int : x> <int : y> <string literal : image name> <int : width> <int : height> [string literal : map name] 
 	public static ScriptStep loadFromString(String[] args){
 		assert args[0].equals("sprite");
 		if(args.length != 8 && args.length != 7) throw new RuntimeException("Expected 8 arguments passed to script step: collideable (got:"+Arrays.toString(args)+")");

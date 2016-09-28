@@ -47,7 +47,8 @@ Temporary Items
 .apdisk
 
 # Custom directories
-bin/*
 .settings/*
 .classpath
 .project
+*.class
+bin/com/ombda/gui/MessageBox.class

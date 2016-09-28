@@ -46,7 +46,7 @@ public class Player extends NPC{
 	
 	
 	private void testCollision(){
-		if(noclip) return;
+		
 		Panel panel = Panel.getInstance();
 		//map border collisions
 		/*if(x < 0){
@@ -64,21 +64,22 @@ public class Player extends NPC{
 			y = map.height()*Tile.SIZE-boundingBox.getHeight();//lastY;
 		}*/
 		
-		image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
-		
-		List<Tile> tiles = new ArrayList<>();
-		Tile t = map.getTileAt((int)x, (int)y, 0);
-		if(t != null) tiles.add(t);
-		t = map.getTileAt((int)(x+boundingBox.getWidth()),(int)y,0);
-		if(t != null && !tiles.contains(t)) tiles.add(t);
-		t = map.getTileAt((int)x, (int)(y+boundingBox.getHeight()),0);
-		if(t != null && !tiles.contains(t)) tiles.add(t);
-		t = map.getTileAt((int)(x+boundingBox.getWidth()),(int)(y+boundingBox.getHeight()),0);
-		if(t != null && !tiles.contains(t)) tiles.add(t);
-		for(Tile tile : tiles){
-			tile.manageCollision(this);
+		if(!noclip){
+			image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
+			
+			List<Tile> tiles = new ArrayList<>();
+			Tile t = map.getTileAt((int)x, (int)y, 0);
+			if(t != null) tiles.add(t);
+			t = map.getTileAt((int)(x+boundingBox.getWidth()),(int)y,0);
+			if(t != null && !tiles.contains(t)) tiles.add(t);
+			t = map.getTileAt((int)x, (int)(y+boundingBox.getHeight()),0);
+			if(t != null && !tiles.contains(t)) tiles.add(t);
+			t = map.getTileAt((int)(x+boundingBox.getWidth()),(int)(y+boundingBox.getHeight()),0);
+			if(t != null && !tiles.contains(t)) tiles.add(t);
+			for(Tile tile : tiles){
+				tile.manageCollision(this);
+			}
 		}
-		
 		//scrolls the map
 		if(x+panel.offsetX > borderX_right){ //move panel.offset right
 			//if(panel.offsetX > map.width()*Tile.SIZE-PRF_WIDTH)
@@ -241,6 +242,7 @@ public class Player extends NPC{
 		if(y < 0){
 			y = 0;
 		}
+		if(noclip) return;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
 			Tile t;
@@ -266,6 +268,7 @@ public class Player extends NPC{
 		while((int)(this.x+this.boundingBox.getWidth()) >= Tile.SIZE*map.width()){
 			x--;// = Tile.SIZE*map.width() - this.boundingBox.getWidth()-1;
 		}
+		if(noclip) return;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
 			Tile t;
@@ -289,6 +292,7 @@ public class Player extends NPC{
 	private void testCollisionSouth(){
 		while((int)(this.y+this.boundingBox.getHeight()) >= Tile.SIZE*map.height())
 			y--;
+		if(noclip) return;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
 			Tile t;
@@ -312,6 +316,7 @@ public class Player extends NPC{
 	private void testCollisionWest(){
 		if(x < 0)
 			x = 0;
+		if(noclip) return;
 		Collection<Sprite> sprites =  map.getSprites();
 		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
 			Tile t;

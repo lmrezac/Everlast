@@ -10,9 +10,11 @@ import javax.swing.ImageIcon;
 import com.ombda.Frame;
 import com.ombda.Images;
 import com.ombda.Panel;
+import com.ombda.Tile;
 public abstract class Button implements MouseListener{
 	private ImageIcon normal, pressed;
 	private int x, y;
+	private int width, height;
 	private boolean isBeingPressed = false;
 	private String label;
 	public Button(String str,int x, int y){
@@ -22,6 +24,8 @@ public abstract class Button implements MouseListener{
 		
 		this.x = x;
 		this.y = y;
+		this.width = (Tile.SIZE/16) * normal.getIconWidth();
+		this.height = (Tile.SIZE/16) * normal.getIconHeight();
 		if(normal.getIconHeight() != pressed.getIconHeight() || normal.getIconWidth() != pressed.getIconWidth())
 			throw new RuntimeException("No hitbox provided, but images aren't the same size!");
 		//hitbox = new Rectangle2D.Double(x,y,image.getWidth(),image.getHeight());
@@ -35,7 +39,13 @@ public abstract class Button implements MouseListener{
 	}*/
 	
 	@Override
-	public void mouseClicked(MouseEvent e){}
+	public void mouseClicked(MouseEvent e){
+		/*int[] coords = Panel.screenCoordsToImageCoords(e.getX(), e.getY());
+		int x = coords[0], y = coords[1]-(int)(17*(Frame.HEIGHT/(double)Panel.getInstance().getParent().getHeight()));;
+		if(x >= this.x && y >= this.y && x <= this.x+normal.getIconWidth() && y <= this.y+normal.getIconHeight()){
+			isBeingPressed = true;
+		}*/
+	}
 	
 	@Override
 	public final void mouseEntered(MouseEvent e){}
@@ -48,7 +58,7 @@ public abstract class Button implements MouseListener{
 		int[] coords = Panel.screenCoordsToImageCoords(e.getX(), e.getY());
 		int x = coords[0], y = coords[1]-(int)(17*(Frame.HEIGHT/(double)Panel.getInstance().getParent().getHeight()));
 		
-		if(x >= this.x && x <= this.x+normal.getIconWidth() && y > this.y && y <= this.y+normal.getIconHeight()){
+		if(x >= this.x && x <= this.x+width && y > this.y && y <= this.y+height){
 			isBeingPressed = true;
 		}
 	}
@@ -58,7 +68,7 @@ public abstract class Button implements MouseListener{
 		int[] coords = Panel.screenCoordsToImageCoords(e.getX(), e.getY());
 		int x = coords[0], y = coords[1]-(int)(17*(Frame.HEIGHT/(double)Panel.getInstance().getParent().getHeight()));;
 		
-		if(isBeingPressed && x >= this.x && x <= this.x+normal.getIconWidth() && y > this.y && y <= this.y+normal.getIconHeight()){
+		if(isBeingPressed && x >= this.x && x <= this.x+width && y > this.y && y <= this.y+height){
 			isBeingPressed = false;
 			buttonPressed();
 		}

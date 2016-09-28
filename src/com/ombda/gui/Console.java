@@ -207,7 +207,7 @@ public class Console extends Input{
 						tileId = Short.parseShort(id);
 					}else if(id.matches("0x[\\dA-Za-z]+")){
 						tileId = Short.decode(id);
-					}else if(id.matches("[\\w_]+")){
+					}else if(id.toUpperCase().matches("[\\w_]+")){
 						Class<Tiles> c = Tiles.class;
 						try{
 							Field f = c.getDeclaredField(id);
@@ -301,13 +301,13 @@ public class Console extends Input{
 				String value = args.get(index);
 				Player player = panel.getPlayer();
 				if(var.equals("x")){
-					player.x = Integer.decode(value);
+					player.x = (Tile.SIZE/16) * Integer.decode(value);
 				}else if(var.equals("y")){
-					player.y = Integer.decode(value);
+					player.y = (Tile.SIZE/16) * Integer.decode(value);
 				}else if(var.equals("pos")){
-					int x = Integer.decode(value);
+					int x = (Tile.SIZE/16) * Integer.decode(value);
 					index++;
-					int y = Integer.decode(args.get(index));
+					int y = (Tile.SIZE/16) * Integer.decode(args.get(index));
 					player.setPos(x, y);
 				}else{
 					panel.msgbox.setMessage("Variable "+var+" does not exist."+WAIT);
@@ -341,10 +341,10 @@ public class Console extends Input{
 						Map map = Map.get(mapname);
 						sprite.setMap(map);
 					}else if(var.equals("x")){
-						int x = Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						sprite.setPos(x, sprite.y);
 					}else if(var.equals("y")){
-						int y = Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						sprite.setPos(sprite.x, y);
 					}else throw new RuntimeException("Invalid sprite var: "+var);
 				}catch(RuntimeException ex){
@@ -369,15 +369,15 @@ public class Console extends Input{
 						Map map = Map.get(mapname);
 						npc.setMap(map);
 					}else if(var.equals("x")){
-						int x = Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						npc.setPos(x, npc.y);
 					}else if(var.equals("y")){
-						int y = Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						npc.setPos(npc.x, y);
 					}else if(var.equals("dest")){
-						int x = Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						index++;
-						int y = Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
 						npc.setDestination(x, y);
 					}else throw new RuntimeException("Invalid NPC var: "+var);
 				}catch(RuntimeException ex){
@@ -593,6 +593,8 @@ public class Console extends Input{
 						message = "set map <map name>\nChanges the current map.";
 					}else if(cmd2.equals("gui")){
 						message = "set gui <gui name>\nOpens the specified gui.";
+					}else if(cmd2.equals("map.size")){
+						message = "set map.size <width> <height> [vert|horiz]\nSets the map size. vert adds layers to the top,\nhoriz adds layers to the left.";
 					}else if(cmd2.matches("\\w+.\\w+")){
 						message = "set <object>.<variable> <value>\nChanges an object's properties.";
 					}else{
