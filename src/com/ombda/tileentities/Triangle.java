@@ -13,6 +13,9 @@ public class Triangle extends TileEntity{
 	int fromNorth, fromSouth, fromEast, fromWest;
 	public Triangle(int x, int y, int x1, int y1, int x2, int y2, int x3, int y3, int i, int j, int k, int l){
 		super(x, y);
+		this.x1 = x1; this.y1 = y1;
+		this.x2 = x2; this.y2 = y2;
+		this.x3 = x3; this.y3 = y3;
 		x1 *= (Tile.SIZE/16); y1 *= (Tile.SIZE/16);
 		x2 *= (Tile.SIZE/16); y2 *= (Tile.SIZE/16);
 		x3 *= (Tile.SIZE/16); y3 *= (Tile.SIZE/16);
@@ -21,9 +24,7 @@ public class Triangle extends TileEntity{
 		p.addPoint(x2, y2);
 		p.addPoint(x3, y3);
 		this.boundingBox = (Shape)p;
-		this.x1 = x1; this.y1 = y1;
-		this.x2 = x2; this.y2 = y2;
-		this.x3 = x3; this.y3 = y3;
+		
 		this.fromNorth = i;
 		this.fromSouth = k;
 		this.fromEast = j;
@@ -32,7 +33,6 @@ public class Triangle extends TileEntity{
 
 	@Override
 	public void manageCollision(Collideable c){
-		System.out.println("collision");
 		if(c instanceof Player){
 			Player p = (Player)c;
 			Facing d = p.getDirection();
