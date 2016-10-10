@@ -179,13 +179,13 @@ public class Images{
 			for(String str : lines){
 				str = str.trim();
 				if(str.startsWith("define ")){
-					String[] args = Script.scanLine(str);
-					assert args[0].equals("define");
-					if(args.length <= 2) throw new RuntimeException("Invalid define statement in file "+f.getAbsolutePath()+", must have indexes.");
-					String name = Script.parseString(args[1]);
+					List<String> args = Script.scanLine(str);
+					assert args.get(0).equals("define");
+					if(args.size() <= 2) throw new RuntimeException("Invalid define statement in file "+f.getAbsolutePath()+", must have indexes.");
+					String name = Script.evalString(args.get(1));
 					List<BufferedImage> subimages = new ArrayList<>();
-					for(int i = 2; i < args.length; i++){
-						String index = args[i];
+					for(int i = 2; i < args.size(); i++){
+						String index = args.get(i);
 						int j = index.indexOf('-');
 						if(j == -1){
 							subimages.add(frames.get(Integer.parseInt(index)));

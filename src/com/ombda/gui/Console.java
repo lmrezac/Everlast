@@ -326,7 +326,7 @@ public class Console extends Input{
 						map_name = panel.getPlayer().getMap().toString();
 						i = -1;
 					}else
-						map_name = Script.parseString(selector.substring(0,i));
+						map_name = Script.evalString(selector.substring(0,i));
 					int j = selector.indexOf('.',i+1);
 					if(j == -1)
 						throw new RuntimeException("Invalid sprite selector.");
@@ -337,14 +337,14 @@ public class Console extends Input{
 					index++;
 					if(var.equals("map")){
 						String mapname;
-							mapname = Script.parseString(args.get(index));
+							mapname = Script.evalString(args.get(index));
 						Map map = Map.get(mapname);
 						sprite.setMap(map);
 					}else if(var.equals("x")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						sprite.setPos(x, sprite.y);
 					}else if(var.equals("y")){
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						sprite.setPos(sprite.x, y);
 					}else throw new RuntimeException("Invalid sprite var: "+var);
 				}catch(RuntimeException ex){
@@ -365,19 +365,19 @@ public class Console extends Input{
 					index++;
 					if(var.equals("map")){
 						String mapname;
-						mapname = Script.parseString(args.get(index));
+						mapname = Script.evalString(args.get(index));
 						Map map = Map.get(mapname);
 						npc.setMap(map);
 					}else if(var.equals("x")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						npc.setPos(x, npc.y);
 					}else if(var.equals("y")){
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						npc.setPos(npc.x, y);
 					}else if(var.equals("dest")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						index++;
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.parseString(args.get(index)));
+						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 						npc.setDestination(x, y);
 					}else throw new RuntimeException("Invalid NPC var: "+var);
 				}catch(RuntimeException ex){

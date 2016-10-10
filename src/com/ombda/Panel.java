@@ -117,7 +117,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			int i = name.indexOf('.');
 			if(i != -1)
 				name = name.substring(0, i);
-			Script.load(name,Files.read(file));
+			Script.compile(name,Files.read(file));
 		}
 		/*new Script("map_test3",Arrays.<ScriptStep>asList(
 			new ScriptStep(){
@@ -306,7 +306,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public void update(){
 		if(currentScript != null){
 			
-			currentScript.execute(this);
+			currentScript.execute(currentScript);
 			if(currentScript.done())
 				currentScript = null;
 		}

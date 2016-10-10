@@ -6,18 +6,23 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import com.ombda.scripts.Function;
+import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
+import com.ombda.scripts.Struct;
+import com.ombda.scripts.VarNotExists;
 import com.ombda.tileentities.Doorway;
 import com.ombda.tileentities.TileEntity;
 import com.ombda.tileentities.Triangle;
 import com.ombda.tileentities.Wall;
 
-public class Map{
+public class Map extends Struct{
 	private short[][] foreground, background;
 	private int width = 0, height = 0;
 	private String name;
@@ -27,6 +32,7 @@ public class Map{
 	private TileEntity[][] tileEntities;
 	private Color clr;
 	public Map(String name, int width, int height, Color clr){
+		super(Scope.map_type,Arrays.asList("width","height","toString"));
 		this.name = name;
 		this.width = width;
 		this.height = height;
@@ -37,6 +43,7 @@ public class Map{
 		maps.put(name, this);
 	}
 	public Map(String name){
+		super(Scope.map_type,Arrays.asList("width","height","toString"));
 		this.name = name;
 		File f = new File(Files.localize("maps\\"+name));
 		if(!f.exists()) throw new RuntimeException("Directory maps\\"+name+" doesn't exist!");
@@ -61,6 +68,30 @@ public class Map{
 		if(!f.exists())
 			throw new RuntimeException("Entity info file for map "+name+" doesn't exist!");
 		loadEntities(Files.read(f));
+	}
+	private final Function toString = new Function(null,null,false){
+		@Override
+		public int args_length(){ return 0; }
+		@Override
+		public String call(Scope script,List<String> values){
+			return Map.this.name;
+		}
+	};
+	@Override
+	public String getVar(String varname, Scope scopeIn){
+		if(varname.equals("width"))
+			return Integer.toString(Map.this.width);
+		else if(varname.equals("height"))
+			return Integer.toString(Map.this.height);
+		else if(varname.equals("tostring"))
+			return toString.getIdStr();
+		else if(varname.equals("name"))
+			return name;
+		else throw new VarNotExists("Variable "+varname+" does not exist in map "+Map.this.name);
+	}
+	@Override
+	public void setVar(String varname, String value, boolean isfinal, Scope scopeIn){
+		throw new RuntimeException("Cannot set variable "+varname+" in map "+Map.this.name);
 	}
 	public Color getBackground(){
 		return clr;
