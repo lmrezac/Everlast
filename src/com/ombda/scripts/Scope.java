@@ -9,7 +9,7 @@ import com.ombda.Facing;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Tile;
-
+import static com.ombda.Debug.debug;;
 public class Scope{
 	public static final Scope globalScope;
 	public static List<Scope> interns;
@@ -18,6 +18,7 @@ public class Scope{
 	public static Map map;
 	public static final FacingStruct facing_N, facing_NE, facing_E, facing_SE, facing_S, facing_SW, facing_W, facing_NW;
 	public static final StructTemplate player_type, map_type, facing_type;
+	public static boolean require_class = false, require_brackets = false;
 	static{
 		interns = new ArrayList<>();
 		facing_type = new StructTemplate("Facing",false);
@@ -177,10 +178,23 @@ public class Scope{
 			}
 		};
 		globalScope = new Scope(true){
+			@Override
 			public void setVar(String name, String value, boolean finalVar,Scope scopeIn){
-			//	if(finalVar) throw new RuntimeException("Cannot create a final var in the global scope");
-			//	if(value.startsWith(Script.REF) || name.startsWith("class ") || name.contains(".")) throw new RuntimeException("Global scope can only hold string variables.");
 				super.setVar(name, value, finalVar, scopeIn);
+				debug("set var "+name+" to "+value+" in global scope");
+				getVar(name,scopeIn);
+			}
+			@Override
+			public String getVar(String name, Scope scopeIn){
+				try{
+					debug("getting var "+name+" in global scope");
+					String result = super.getVar(name,scopeIn);
+					debug("\tvalue = "+result);
+					return result;
+				}catch(VarNotExists ex){
+					this.setVar(name,"0",false, scopeIn);
+					return "0";
+				}
 			}
 		};
 	}
@@ -248,7 +262,7 @@ public class Scope{
 		}
 		if(varname.contains("operator"))
 			varname = varname.replaceAll("operator(?! )","operator ");
-		if(!varname.startsWith("class ") && varname.contains(".")) varname = "class "+varname;
+		if(!varname.startsWith("class ") && !require_class && varname.contains(".")) varname = "class "+varname;
 		if(varname.startsWith("class ")){
 			varname = varname.substring(6);
 			int i = varname.indexOf('.');
@@ -276,7 +290,7 @@ public class Scope{
 					throw new RuntimeException("Subscope of name "+varname+" doesn't exist!");
 				if(scope instanceof Function)
 					throw new RuntimeException("Cannot set variable of a function.");
-				if(!var.startsWith("class ") && var.contains("."))
+				if(!var.startsWith("class ") && !require_class && var.contains("."))
 					var = "class "+var;
 				scope.setVar(var,value,isfinal,scopeIn);
 			}
@@ -297,7 +311,7 @@ public class Scope{
 			varname = varname.replaceAll("operator(?! )","operator ");
 		if(varname.equals("class") || varname.equals("class "))
 			throw new RuntimeException("Expected subscope name after class");
-		if(!varname.startsWith("class ") && varname.contains(".")) varname = "class "+varname;
+		if(!varname.startsWith("class ") && !require_class && varname.contains(".")) varname = "class "+varname;
 		//System.out.println("Get var "+varname);
 		if(varname.startsWith("class ")){
 			varname = varname.substring(6);
@@ -337,7 +351,7 @@ public class Scope{
 	public void deleteVar(String varname){
 		if(varname.contains("operator"))
 			varname = varname.replaceAll("operator(?! )","operator ");
-		if(!varname.startsWith("class ") && varname.contains(".")) varname = "class "+varname;
+		if(!varname.startsWith("class ") && !require_class && varname.contains(".")) varname = "class "+varname;
 		if(varname.startsWith("class ")){
 			varname = varname.substring(6);
 			int i = varname.indexOf('.');
@@ -365,7 +379,7 @@ public class Scope{
 					throw new VarNotExists("Subscope of name "+varname+" doesn't exist.");
 				if(scope instanceof Function)
 					throw new RuntimeException("Cannot get/delete variable from scope of function.");
-				if(!var.startsWith("class ") && var.contains("."))
+				if(!var.startsWith("class ") && !require_class && var.contains("."))
 					var = "class "+var;
 				scope.deleteVar(var);
 			}
@@ -378,9 +392,9 @@ public class Scope{
 	public String evalVars(String line){
 		Scope currentScope = this.getCurrentScope();
 		String str = line;
-		if(!isString(str)){
-			if(currentScope.vars.containsKey(str) || str.startsWith("class ") || str.contains(".")){
-					if(!str.startsWith("class ") && str.contains(".")) str = "class "+str;
+		if(!isString(str) && !require_brackets){
+			if(currentScope.vars.containsKey(str) || ((str.startsWith("class ") || (!require_class && str.contains("."))) && !str.contains("${"))){
+					if(!str.startsWith("class ") && !require_class && str.contains(".")) str = "class "+str;
 					return currentScope.getVar(str,currentScope);
 			}
 		}
@@ -396,17 +410,17 @@ public class Scope{
 		return str;
 	}
 	public void evalArgs(List<String> args){
+	//	debug("before: "+args);
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
-			if(arg.contains(".") && ((i > 0 && !args.get(i-1).equals("class")) || i==0)){
-				
+			if(!arg.contains("${") && !require_brackets && !require_class && arg.contains(".") && ((i > 0 && !args.get(i-1).equals("class")) || i==0)){
 				args.add(i,"class");
 			}
 		}
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
-			if(arg.endsWith("class") || arg.endsWith("operator")){
+			if(!require_brackets && (arg.endsWith("class") || arg.endsWith("operator"))){
 				if(i+1 >= args.size())
 					throw new RuntimeException("Keyword class expects a variable name!");
 				arg += " "+evalString(args.remove(i+1));
@@ -415,9 +429,11 @@ public class Scope{
 						throw new RuntimeException("Keyword class/operator expects a variable/operator name!");
 					arg += " "+evalString(args.remove(i+1));
 				}
-				arg = currentScope.getVar(arg,currentScope);
-				args.set(i,arg);
-			}
+				try{
+					arg = currentScope.getVar(arg,currentScope);
+					args.set(i,arg);
+				}catch(VarNotExists ex){}
+			}//else args.set(i,evalVars(arg));
 		}
 		evalMath(args);
 		for(int i = 0; i < args.size()-1; i++){

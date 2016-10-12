@@ -110,7 +110,7 @@ public class ListScope extends Scope{
 		if(varname.equals("size")) return Integer.toString(this.size);
 		if(varname.equals("add") || varname.equals("addAt") || varname.equals("removeAt"))
 			return super.getVar(varname,scopeIn);
-		if(!varname.startsWith("class ") && varname.contains(".")) varname = "class "+varname;
+		if(!varname.startsWith("class ") && !require_class && varname.contains(".")) varname = "class "+varname;
 		if(varname.startsWith("class ")){
 			varname = varname.substring(6);
 			int i = varname.indexOf('.');

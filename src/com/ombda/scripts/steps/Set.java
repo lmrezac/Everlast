@@ -27,6 +27,7 @@ public class Set extends ScriptStep{
 	public void execute(Scope script){
 		List<String> newargs = new ArrayList<String>(args);
 		script.evalArgs(newargs);
+		
 		if(varname.startsWith("npc ")){
 			if(index) throw new RuntimeException("Syntax");
 			varname = varname.substring(4);
@@ -36,13 +37,13 @@ public class Set extends ScriptStep{
 			NPC npc = NPC.getNPC(id);
 			varname = varname.substring(i+1);
 			if(varname.equals("map")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc map do not evaluate into a single value.");
-				String mapname = args.get(0);
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc map do not evaluate into a single value.");
+				String mapname = newargs.get(0);
 				Map map = Map.get(mapname);
 				npc.setMap(map);
 			}else if(varname.equals("facing")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc facing do not evaluate into a single value.");
-				String value = args.get(0);
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc facing do not evaluate into a single value.");
+				String value = newargs.get(0);
 				if(!value.startsWith(Script.REF))
 					throw new RuntimeException("Expected facing value, got : "+value);
 				Scope scope = Scope.getId(value);
@@ -54,44 +55,44 @@ public class Set extends ScriptStep{
 				FacingStruct facing = (FacingStruct)struct;
 				npc.setDirection(facing.facing);
 			}else if(varname.equals("x")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
-				int x = Script.parseInt(args.get(0));
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
+				int x = Script.parseInt(newargs.get(0));
 				npc.x = x;
 				System.out.println("Set npc "+Integer.toHexString(id)+" x to "+x);
 			}else if(varname.equals("y")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
-				int y = Script.parseInt(args.get(0));
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
+				int y = Script.parseInt(newargs.get(0));
 				npc.y = y;
 				System.out.println("Set npc "+Integer.toHexString(id)+" y to "+y);
 			}else if(varname.equals("pos")){
-				if(args.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
-				int x = Script.parseInt(args.get(0));
-				int y = Script.parseInt(args.get(1));
+				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
+				int x = Script.parseInt(newargs.get(0));
+				int y = Script.parseInt(newargs.get(1));
 				npc.setPos(x, y);
 				System.out.println("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
 			}else if(varname.equals("dest")){
-				if(args.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
-				int x = Script.parseInt(args.get(0));
-				int y = Script.parseInt(args.get(1));
+				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
+				int x = Script.parseInt(newargs.get(0));
+				int y = Script.parseInt(newargs.get(1));
 				npc.setDestination(x,y);
 				System.out.println("Set npc "+Integer.toHexString(id)+" dest to ("+x+","+y+")");
 			}else if(varname.equals("onInteracted")){
-				if(args.isEmpty() || args.get(0).equals("null")){
+				if(newargs.isEmpty() || newargs.get(0).equals("null")){
 					npc.onInteractedScript = null;
 				}else{
 					String line = "";
-					for(int j = 0; j < args.size(); j++){
-						line += args.get(j);
-						if(j != args.size()-1) line += " ";
+					for(int j = 0; j < newargs.size(); j++){
+						line += newargs.get(j);
+						if(j != newargs.size()-1) line += " ";
 					}
 					List<String> lines = new ArrayList<>();
 					lines.add(line);
 					npc.onInteractedScript = Script.compile(null,lines);
 				}
 			}else if(varname.equals("xy")){
-				if(args.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
-				int x = Script.parseInt(args.get(0));
-				int y = Script.parseInt(args.get(1));
+				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
+				int x = Script.parseInt(newargs.get(0));
+				int y = Script.parseInt(newargs.get(1));
 				npc.setPos(x, y);
 				npc.setDestination(x, y);
 				System.out.println("Set npc "+Integer.toHexString(id)+" pos and dest to ("+x+","+y+")");
@@ -116,24 +117,24 @@ public class Set extends ScriptStep{
 				varname = varname.substring(p+1);
 			}
 			if(varname.equals("map")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc map do not evaluate into a single value.");
-				String mapname = args.get(0);
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc map do not evaluate into a single value.");
+				String mapname = newargs.get(0);
 				Map map = Map.get(mapname);
 				sprite.setMap(map);
 			}else if(varname.equals("x")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
-				int x = Script.parseInt(args.get(0));
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
+				int x = Script.parseInt(newargs.get(0));
 				sprite.x = x;
 				System.out.println("Set sprite "+Integer.toHexString(id)+" x to "+x);
 			}else if(varname.equals("y")){
-				if(args.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
-				int y = Script.parseInt(args.get(0));
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
+				int y = Script.parseInt(newargs.get(0));
 				sprite.y = y;
 				System.out.println("Set sprite "+Integer.toHexString(id)+" y to "+y);
 			}else if(varname.equals("pos")){
-				if(args.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
-				int x = Script.parseInt(args.get(0));
-				int y = Script.parseInt(args.get(1));
+				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
+				int x = Script.parseInt(newargs.get(0));
+				int y = Script.parseInt(newargs.get(1));
 				sprite.setPos(x, y);
 				System.out.println("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
 			}else throw new RuntimeException("Invalid sprite varname: "+varname);
@@ -141,7 +142,7 @@ public class Set extends ScriptStep{
 			if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set [] do not evaluate into an index and a value");
 			if(finalvar) throw new RuntimeException("Cannot set a final index.");
 			if(!varname.startsWith("class ")) varname = "class "+varname;
-			script.setVar(varname+"."+args.get(0),args.get(1),script);
+			script.setVar(varname+"."+newargs.get(0),newargs.get(1),script);
 		}else{
 			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set do not evaluate into a single value! "+newargs);
 			if(finalvar) script.setFinalVar(varname,newargs.get(0),script);

@@ -44,7 +44,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 	private Player player;
 	private String player_name;
-	private Script currentScript = null;
 	private Map map;
 	private GUI gui;
 	public GUI previous;
@@ -56,7 +55,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public MessageBox msgbox;
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
-	private boolean running = true;
+	boolean running = true;
 	private int FPS = 60;
 	private int mouseX = 0, mouseY = 0;
 	public static final double borderX_left = (3.0/8)*(double)PRF_WIDTH;
@@ -96,11 +95,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		loadScripts();
 		
 		loadSaveFile();
-		
-		
-		
-		
-		
+
 		debug("New Panel created!");
 	}
 	private void loadScripts(){
@@ -153,8 +148,14 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			guiID = "mapcreator"; 
 			Panel.noScreenDebug = true;
 		}
+		debug(gui.toString());
 	}
+	private Script currentScript = null;
+	private List<Script> scripts = new ArrayList<>();
 	public void runScript(Script s){
+		debug("running new script");
+		if(currentScript != null && !currentScript.done())
+			scripts.add(currentScript);
 		this.currentScript = s;
 	}
 	public void loadSaveFile(){
@@ -167,7 +168,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				debug("Error creating save file at "+f.getAbsolutePath());
 				if(printStackTrace)
 					e.printStackTrace();
-				System.exit(0);
+				throw new FatalError();
 			}
 			Files.write(f.getAbsolutePath(), Arrays.asList("player","test"));
 			System.out.println(Files.read(f));
@@ -191,7 +192,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				debug("Error creating save file at "+f.getAbsolutePath());
 				if(printStackTrace)
 					e.printStackTrace();
-				System.exit(0);
+				throw new FatalError();
 			}
 		}
 		List<String> lines = new ArrayList<>();
@@ -237,7 +238,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		debug(e.getMessage());
 		if(printStackTrace)
 			e.printStackTrace();
-		System.exit(0);
+		throw new FatalError();
 	}
 	}
 	public static boolean noScreenDebug = false;
@@ -307,11 +308,23 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(currentScript != null){
 			
 			currentScript.execute(currentScript);
-			if(currentScript.done())
-				currentScript = null;
+			if(currentScript.done()){
+				currentScript.reset();
+				if(scripts.isEmpty())
+					currentScript = null;
+				else{
+					
+					currentScript = scripts.remove(scripts.size()-1);
+					while(!scripts.isEmpty() && currentScript.done()){
+						currentScript = scripts.remove(scripts.size()-1);
+						
+					}
+					if(scripts.isEmpty() && currentScript.done()) 
+						currentScript = null;
+				}
+			}
 		}
 		if(!gui.pauseGame()){
-			
 			if(!gui.blockInput()){
 				
 				
@@ -336,9 +349,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		long beforeTime, timeDiff, sleep;
 
 		beforeTime = System.currentTimeMillis();
-
+		
 		while(running){
-
 			update();
 			repaint();
 
@@ -353,7 +365,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				Thread.sleep(sleep);
 			}catch(InterruptedException e){
 				System.out.println("Interrupted: " + e.getMessage());
-				return;
+			
 			}
 
 			beforeTime = System.currentTimeMillis();
@@ -362,7 +374,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		debug(e.getMessage());
 		if(printStackTrace)
 			e.printStackTrace();
-		System.exit(0);
+		throw new FatalError();
 	}
 	}
 	
@@ -430,7 +442,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			}
 			else setGUI(console);
 		}else{
-			gui.keyTyped(e);
 			if(e.getKeyChar() == 'z' && gui == hud){
 				Frame.keys[KeyEvent.VK_Z] = false;
 				Collection<Sprite> sprites = map.getSprites();
@@ -460,6 +471,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 					}
 				}
 			}
+			gui.keyTyped(e);
+			
 		}
 		
 	}

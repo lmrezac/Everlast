@@ -15,14 +15,19 @@ public class If extends ScriptStep{
 		this.falseSteps = elsesteps;
 	}
 	public void execute(Scope scope){
-		System.out.println("If scope = "+scope.toString());
+		//System.out.println("If scope = "+scope.toString());
 		List<String> newargs = new ArrayList<>(args);
 		scope.evalArgs(newargs);
+		System.out.println("If: args = "+args+" result = "+newargs);
 		if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : if do not evaluate into one argument : "+newargs);
 		if(newargs.get(0).equals("0"))
-			for(ScriptStep step : falseSteps)
+			for(int i = 0; i < falseSteps.size(); i++){
+				ScriptStep step = falseSteps.get(i);
 				step.execute(scope);
-		else for(ScriptStep step : trueSteps)
-				step.execute(scope);
+			}
+		else for(int i = 0; i < trueSteps.size(); i++){
+			ScriptStep step = trueSteps.get(i);
+			step.execute(scope);
+		}	
 	}
 }

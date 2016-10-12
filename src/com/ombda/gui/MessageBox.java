@@ -1,22 +1,27 @@
 package com.ombda.gui;
 
+import static com.ombda.Debug.debug;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.ombda.Images;
+import com.ombda.Frame;
+import com.ombda.MessageListener;
 import com.ombda.Panel;
 
-import static com.ombda.Debug.*;
-
 public class MessageBox extends GUI{
-	
+	private List<MessageListener> listeners = new ArrayList<>();
+	public void addInputListener(MessageListener listener){
+		if(!listeners.contains(listener))
+			listeners.add(listener);
+	}
+	public void removeInputListener(MessageListener l){
+		listeners.remove(l);
+	}
 	@Override
 	public void mouseClicked(MouseEvent e){}
 
@@ -44,6 +49,7 @@ public class MessageBox extends GUI{
 			if((e.getKeyCode() == KeyEvent.VK_Z || e.getKeyCode() == KeyEvent.VK_ENTER) && zReleased){
 				startIndexAt = index;
 				waitingForInput = false;
+				Frame.keys[e.getKeyCode()] = false;
 			}
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_Z){
@@ -79,7 +85,7 @@ public class MessageBox extends GUI{
 
 	@Override
 	public boolean pauseGame(){
-		return true;
+		return false;
 	}
 	
 	private char[] string;
@@ -99,8 +105,10 @@ public class MessageBox extends GUI{
 		waitingForInput = false;
 		indexWait = 0;
 		finished = false;
+		//debug(str);
 	}
-	
+	public void update(){
+	}
 	protected static final int INIT_DRAW_X = 16, INIT_DRAW_Y = 416;
 	protected int index = 1, drawX = INIT_DRAW_X, drawY = INIT_DRAW_Y;
 	protected int indexWait = 0, arrowWait = 0;
@@ -234,8 +242,11 @@ public class MessageBox extends GUI{
 					Panel.getInstance().setGUI(Panel.getInstance().previous);
 				else*/ 
 				finished = true;
+				for(int i = listeners.size()-1; i >= 0; i--){
+					listeners.get(i).onMessageFinish();
+				}
 				if(closeWhenDone)
-				Panel.getInstance().setGUI(Panel.getInstance().hud);
+					Panel.getInstance().setGUI(Panel.getInstance().hud);
 			}
 		}
 		if(debug && !Panel.noScreenDebug){

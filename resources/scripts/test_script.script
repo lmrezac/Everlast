@@ -1,1 +1,1 @@
-set npc 0xAA.pos 2t 2t
+msg "test" *wait

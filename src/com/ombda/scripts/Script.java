@@ -5,7 +5,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-import com.ombda.scripts.steps.*;
+import com.ombda.Panel;
+import com.ombda.scripts.steps.Assert;
+import com.ombda.scripts.steps.CreateCollideable;
+import com.ombda.scripts.steps.CreateNPC;
+import com.ombda.scripts.steps.CreateSprite;
+import com.ombda.scripts.steps.CreateStruct;
+import com.ombda.scripts.steps.Define;
+import com.ombda.scripts.steps.DefineScript;
+import com.ombda.scripts.steps.DeleteVar;
+import com.ombda.scripts.steps.If;
+import com.ombda.scripts.steps.Msg;
+import com.ombda.scripts.steps.Return;
+import com.ombda.scripts.steps.RunFunction;
+import com.ombda.scripts.steps.RunScript;
+import com.ombda.scripts.steps.ScriptStep;
+import com.ombda.scripts.steps.Set;
+import com.ombda.scripts.steps.SetScope;
+import com.ombda.scripts.steps.SetScript;
+import com.ombda.scripts.steps.While;
 
 public class Script extends Scope{
 	private static HashMap<String,Script> scripts = new HashMap<>();
@@ -34,10 +52,22 @@ public class Script extends Scope{
 	}
 	public void reset(){
 		index = 0;
+		this.currentScope = this;
 	}
 	public void execute(Scope script){
-		if(index == steps.size()) index = 0;
+		if(index == steps.size()) throw new RuntimeException("Script was not reset!");
 		ScriptStep step = steps.get(index);
+		if(step instanceof Msg && step.done()){
+			index++;
+			execute(script);
+			return;
+		}
+		System.out.println("step = "+step.getClass().getSimpleName());
+		if(index+1 < steps.size()){
+			if(steps.get(index+1) instanceof Msg){
+				Panel.getInstance().msgbox.closeWhenDone = false;
+			}
+		}else Panel.getInstance().msgbox.closeWhenDone = true;
 		step.execute(script);
 		if(step.done()){
 			index++;
@@ -47,6 +77,8 @@ public class Script extends Scope{
 		return index == steps.size();
 	}
 	public void run(){
+		System.out.println("called!");
+		new Exception().printStackTrace();
 		while(!done()){
 			execute(this.currentScope);
 		}
@@ -293,6 +325,7 @@ public class Script extends Scope{
 			List<ScriptStep> trueSteps = new ArrayList<>(), falseSteps = new ArrayList<>();
 			boolean elseEncountered = false;
 			if(i+1 < lines.size() && args.get(args.size()-1).equals("then")){
+				
 				args.remove(args.size()-1);
 				for(i = i+1; i < lines.size(); i++){
 					if(lines.get(i).equals("end if") && depth == 0) break;
@@ -383,8 +416,12 @@ public class Script extends Scope{
 			if(!globalScope.finalvars.get(name) && !globalScope.vars.get(name).startsWith(Script.REF))
 				result += '"'+name+"\"=\""+globalScope.vars.get(name)+"\" ";
 		}
-		result = result.substring(0,result.length()-1);
+		if(result.length() > 1) result = result.substring(0,result.length()-1);
+		System.out.println(result);
 		return result;
+	}
+	public String toString(){
+		return description+":done="+done();
 	}
 }
 

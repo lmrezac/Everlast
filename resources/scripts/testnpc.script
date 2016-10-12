@@ -1,10 +1,10 @@
-msg Hey, buddy. This street is my turf. *line I'd turn around if I were you. *wait
-if equals ${hoodlum_jeff_talk_count} 1
+msg "Hey, buddy. This street is my turf." *line "I'd turn around if I were you." *wait
+if ${global.hoodlum_jeff_talk_count} = 1
 msg "(Wasn't this guy just across the street" *line "only a moment ago?)" *wait
-if equals ${hoodlum_jeff_talk_count} 2
+if ${global.hoodlum_jeff_talk_count} = 2
 msg "(How did he get across the street so fast...?!)" *wait
-if equals ${hoodlum_jeff_talk_count} 3
+if ${global.hoodlum_jeff_talk_count} = 3
 msg "(What is this sorcery?!)" *wait
-if ${hoodlum_jeff_talk_count} > 3
+if ${global.hoodlum_jeff_talk_count} > 3
 msg "(....How?!?)" *wait
-set hoodlum_jeff_talk_count add ${hoodlum_jeff_talk_count} 1 
+set global.hoodlum_jeff_talk_count ${global.hoodlum_jeff_talk_count} + 1 

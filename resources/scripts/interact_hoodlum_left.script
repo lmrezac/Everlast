@@ -1,5 +1,5 @@
-if equals ${hoodlum_jeff_talk_last} left
+if ${global.hoodlum_jeff_talk_last} = left
 msg "Din'cha hear me, bub? Scram!" *wait
-if notequals ${hoodlum_jeff_talk_last} left
-script testnpc
+if ${global.hoodlum_jeff_talk_last} not= left
+script testnpc 
 set hoodlum_jeff_talk_last left

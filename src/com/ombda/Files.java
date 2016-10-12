@@ -55,8 +55,7 @@ public class Files{
 			debug("Error reading "+file.getAbsolutePath());
 			if(printStackTrace)
 				e.printStackTrace();
-			System.exit(0);
-			return null;
+			throw new FatalError();
 		}
 	}
 	
@@ -68,8 +67,7 @@ public class Files{
 			debug("Error reading "+str);
 			if(printStackTrace)
 				e.printStackTrace();
-			System.exit(0);
-			return null;
+			throw new FatalError();
 		}
 	}
 	
@@ -83,7 +81,7 @@ public class Files{
 			debug("Error writing to file "+new File(filename).getAbsolutePath());
 			if(printStackTrace)
 				e.printStackTrace();
-			System.exit(0);
+			throw new FatalError();
 		}
 		print = new PrintStream(out);
 		for(String s : list)

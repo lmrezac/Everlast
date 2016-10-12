@@ -66,7 +66,7 @@ public class Input extends MessageBox{
 			Panel panel = Panel.getInstance();
 			panel.setGUI(panel.previous);
 			for(int i = listeners.size()-1; i >= 0; i--){
-				listeners.get(i).onInput(this.getMessage());
+				listeners.get(i).onInput(getMessage());
 			}
 		}
 	}

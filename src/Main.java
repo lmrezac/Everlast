@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 import java.io.PrintStream;
 
 import com.ombda.Debug;
+import com.ombda.FatalError;
 import com.ombda.Frame;
 
 public class Main{
@@ -18,6 +19,8 @@ public class Main{
 				theFrame.setVisible(true);
 			}
 		});
+		}catch(FatalError ex){
+			throw ex;
 		}catch(Exception e){
 			Debug.debug(e.getMessage());
 			if(Debug.printStackTrace)

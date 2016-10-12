@@ -24,7 +24,7 @@ public class CreateNPC extends ScriptStep{
 		ImageIcon[] images = new ImageIcon[16];
 		for(int i = 4; i < 20; i++){
 			String loc = Script.evalString(args.get(i));
-			images[i-5] = Images.retrieve(loc);
+			images[i-4] = Images.retrieve(loc);
 		}
 		return images;
 	}
