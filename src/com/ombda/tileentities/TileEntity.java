@@ -11,9 +11,12 @@ import com.ombda.Updateable;
 
 public abstract class TileEntity extends Entity implements Collideable, Updateable, Interactable{
 	protected Shape boundingBox = new Rectangle2D.Double(0, 0, Tile.SIZE, Tile.SIZE);
-	public TileEntity(int x, int y){
+	protected boolean disableCollisions;
+	public TileEntity(int x, int y,boolean disableCollisions){
 		super(Tile.SIZE*x,Tile.SIZE*y);
+		this.disableCollisions = disableCollisions;
 	}
+	public boolean disableTileCollisions(){ return disableCollisions;}
 
 	@Override
 	public boolean doesPointCollide(int x, int y){

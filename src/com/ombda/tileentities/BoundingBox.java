@@ -8,8 +8,8 @@ import com.ombda.Tile;
 
 public class BoundingBox extends TileEntity{
 	
-	public BoundingBox(int x, int y, int width, int height){
-		super(x, y);
+	public BoundingBox(int x, int y, boolean disableCollisions, int width, int height){
+		super(x, y, disableCollisions);
 		this.boundingBox = new Rectangle2D.Double(0,0,(Tile.SIZE/16)*width,(Tile.SIZE/16)*height);
 	}
 

@@ -17,19 +17,28 @@ public class Tile implements Collideable, Interactable{
 	private Shape boundingBox;
 	public final short id;
 	//public static final int NO_COLLIDE = Color.white.getRGB(), COLLIDE = Color.black.getRGB(), WATER = Color.gray.getRGB();
-	public Tile(ImageIcon image, Shape boundingBox){
+	/*public Tile(ImageIcon image, Shape boundingBox){
 		this.image = image;
 		this.boundingBox = boundingBox;
 		while(tiles[id_count] != null) id_count++;
 		tiles[id_count] = this;
 		id = id_count;
-	}
+	}*/
 	public Tile(short id, ImageIcon image, Shape boundingBox){
 		this.image = image;
 		this.boundingBox = boundingBox;
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
 		tiles[id] = this;
 		this.id = id;
+	}
+	public Tile(short id, ImageIcon image){
+		this(id,image,Tiles.EMPTY);
+	}
+	public Tile(short id, String image, Shape boundingBox){
+		this(id,Images.retrieve(image),boundingBox);
+	}
+	public Tile(short id, String image){
+		this(id,image,Tiles.EMPTY);
 	}
 	public Tile(int i, ImageIcon retrieve, Shape boundingBox){
 		this((short)i,retrieve,boundingBox);
@@ -46,11 +55,13 @@ public class Tile implements Collideable, Interactable{
 	public boolean doesPointCollide(int x, int y){
 		if(hasTileEntity(x/SIZE,y/SIZE)){
 			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/SIZE, y/SIZE);
-			if(te != null)
+			if(te != null){
 				if(te.getBoundingBox().contains(x % SIZE,y % SIZE)){
 					te.manageCollision(Panel.getInstance().getPlayer());
 					return true;
 				}
+				if(te.disableTileCollisions()) return false;
+			}
 		}
 		x %= SIZE;
 		y %= SIZE;

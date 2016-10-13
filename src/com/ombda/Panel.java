@@ -273,7 +273,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		gui.draw(g2d);
 		if(debug && !noScreenDebug){
 			long temp = 0;
-			drawDebugString(g2d,"player ("+Math.round(player.x)+","+Math.round(player.y)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
+			drawDebugString(g2d,"player ("+Math.round(player.x)/(Tile.SIZE/16)+","+Math.round(player.y)/(Tile.SIZE/16)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
 			drawDebugString(g2d,"map {width:"+map.width()+", height:"+map.height()+"}",0,22);
 			drawDebugString(g2d,"offset X = "+(int)offsetX+" offset Y = "+(int)offsetY,0,34);
 			drawDebugString(g2d,"facing: "+player.getDirection(),0,46);

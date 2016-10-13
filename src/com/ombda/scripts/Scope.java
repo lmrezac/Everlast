@@ -768,7 +768,7 @@ public class Scope{
 	}
 	public static int parseInt(String str){
 		if(str.endsWith("t"))
-			return Tile.SIZE * Integer.decode(str.substring(0,str.length()-1));
+			return 16 * Integer.decode(str.substring(0,str.length()-1));
 		return Integer.decode(str);
 	}
 	public static double parseDouble(String str){

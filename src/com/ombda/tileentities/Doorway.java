@@ -10,8 +10,8 @@ public class Doorway extends TileEntity{
 	private String mapname;
 	private int tilex, tiley;
 	private boolean onCollision;
-	public Doorway(int x, int y, String map, int tilex, int tiley, boolean onCollision){
-		super(x, y);
+	public Doorway(int x, int y, boolean disableCollisions, String map, int tilex, int tiley, boolean onCollision){
+		super(x, y, disableCollisions);
 		this.tilex = tilex;
 		this.tiley = tiley;
 		this.mapname = map;

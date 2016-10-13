@@ -29,7 +29,7 @@ public class Sprite extends Entity{
 	
 	public Sprite(int x, int y, ImageIcon bimg,int hash){
 		this(hash,bimg,x,y);
-		System.out.println("New Sprite created at ("+x+","+y+")");
+		System.out.println("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
 	}
 	public Sprite(ImageIcon bimg,int hash){
 		this(0,0,bimg,hash);

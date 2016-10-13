@@ -1,15 +1,15 @@
-13 8 door test3 42 16
-6 9 wall W
-18 9 wall E
-6 10 wall W
-18 10 wall E
-6 11 wall W
-18 11 wall E
-6 12 wall W
-18 12 wall E
-6 13 wall W
-18 13 wall E
-6 14 wall W
-18 14 wall E
-6 15 wall W
-18 15 wall E
+13 8 false door test3 42 16
+6 9 false wall W
+18 9 false wall E
+6 10 false wall W
+18 10 false wall E
+6 11 false wall W
+18 11 false wall E
+6 12 false wall W
+18 12 false wall E
+6 13 false wall W
+18 13 false wall E
+6 14 false wall W
+18 14 false wall E
+6 15 false wall W
+18 15 false wall E

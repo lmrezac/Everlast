@@ -9,8 +9,8 @@ import com.ombda.Tile;
 
 public class Wall extends TileEntity{
 	private Facing dir;
-	public Wall(int x, int y,Facing direction){
-		super(x,y);
+	public Wall(int x, int y,boolean disableCollisions,Facing direction){
+		super(x,y,disableCollisions);
 		this.dir = direction;
 		if(direction == Facing.N)
 			boundingBox = new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/16);

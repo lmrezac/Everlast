@@ -149,6 +149,7 @@ public class Map extends Struct{
 			throw new RuntimeException("Invalid tile y"+tiley);
 		if(tileEntities[tiley][tilex] != null)
 			throw new RuntimeException("Multiple tile entities found at ["+tilex+","+tiley+"]");
+		boolean disableCollisions = Boolean.parseBoolean(args.remove(0));
 		String cmd = args.remove(0);
 		if(cmd.equals("warp")){
 			if(args.size() != 3)
@@ -160,7 +161,7 @@ public class Map extends Struct{
 			if(!f.exists() || !f.isDirectory())
 				throw new RuntimeException("There is no map called "+map);
 			
-			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,map,dx,dy,true);
+			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,disableCollisions,map,dx,dy,true);
 		}else if(cmd.equals("door")){
 			if(args.size() != 3)
 				throw new RuntimeException("tile entity warp requires 3 values : destination map, destination tile x, destination tile y.");
@@ -171,20 +172,20 @@ public class Map extends Struct{
 			if(!f.exists() || !f.isDirectory())
 				throw new RuntimeException("There is no map called "+map);
 			
-			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,map,dx,dy,false);
+			tileEntities[tiley][tilex] = new Doorway(tilex,tiley,disableCollisions,map,dx,dy,false);
 		}else if(cmd.equals("wall")){
 			if(args.size() != 1)
 				throw new RuntimeException("tile entity wall requires 3 values : tile x, tile y, direction");
 			Facing f = Facing.fromString(args.get(0));
-			tileEntities[tiley][tilex] = new Wall(tilex,tiley,f);
+			tileEntities[tiley][tilex] = new Wall(tilex,tiley,disableCollisions,f);
 		}else if(cmd.equals("triangle")){
 			if(args.size() != 10)
 				throw new RuntimeException("tile entity triangle requires 12 values : tile x, tile y, x1, y1, x2, y2, x3, y3, fromNorth, fromEast, fromSouth, fromWest");
-			tileEntities[tiley][tilex] = new Triangle(tilex,tiley,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)),Integer.parseInt(args.get(2)),Integer.parseInt(args.get(3)),Integer.parseInt(args.get(4)),Integer.parseInt(args.get(5)),Integer.parseInt(args.get(6)),Integer.parseInt(args.get(7)),Integer.parseInt(args.get(8)),Integer.parseInt(args.get(9)));
+			tileEntities[tiley][tilex] = new Triangle(tilex,tiley,disableCollisions,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)),Integer.parseInt(args.get(2)),Integer.parseInt(args.get(3)),Integer.parseInt(args.get(4)),Integer.parseInt(args.get(5)),Integer.parseInt(args.get(6)),Integer.parseInt(args.get(7)),Integer.parseInt(args.get(8)),Integer.parseInt(args.get(9)));
 		}else if(cmd.equals("box")){
 			if(args.size() != 2)
 				throw new RuntimeException("tile entity box requires 4 values : tile x, tile y, width, height");
-			tileEntities[tiley][tilex] = new com.ombda.tileentities.BoundingBox(tilex,tiley,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)));
+			tileEntities[tiley][tilex] = new com.ombda.tileentities.BoundingBox(tilex,tiley,disableCollisions,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)));
 		}else throw new RuntimeException("Invalid tile entity : "+cmd);
 		debug("new tile entity created at ["+tilex+","+tiley+"] : "+tileEntities[tiley][tilex].save());
 	}
@@ -204,7 +205,7 @@ public class Map extends Struct{
 		for(int y = 0; y < height; y++){
 			for(int x = 0; x < width; x++){
 				if(tileEntities[y][x] != null)
-					lines.add(x+" "+y+" "+tileEntities[y][x].save());
+					lines.add(x+" "+y+" "+tileEntities[y][x].disableTileCollisions()+" "+tileEntities[y][x].save());
 			}
 		}
 		Files.write("maps\\"+name+"\\tileEntities.info", lines);
