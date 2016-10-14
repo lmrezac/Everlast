@@ -2,9 +2,11 @@ package com.ombda;
 
 import static com.ombda.Debug.debug;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -122,6 +124,32 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	@Override
 	public void draw(Graphics2D g, int offsetX, int offsetY){
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y-yminus+offsetY,null);
+	}
+	@Override
+	public void drawBoundingBox(Graphics2D g, int offsetX, int offsetY){
+		Rectangle2D b = boundingBox.getBounds2D();
+		double Xadd = b.getX();
+		double Yadd = b.getY();
+		BufferedImage image = new BufferedImage((int)(Xadd >= 0? Xadd : 0)+(int)b.getWidth()+1,(int)(Yadd >= 0? Yadd : 0)+(int)b.getHeight()+1,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = image.createGraphics();
+		g2d.setColor(Color.red);
+		if(Xadd < 0){
+			g2d.translate(-Xadd,0);
+			if(Yadd < 0){
+				g2d.translate(0,-Yadd);
+				g2d.draw(boundingBox);
+				g2d.translate(0, Yadd);
+			}else{
+				g2d.draw(boundingBox);
+			}
+			g2d.translate(Xadd,0);
+		}else if(Yadd < 0){
+			g2d.translate(0,-Yadd);
+			g2d.draw(boundingBox);
+			g2d.translate(0,Yadd);
+		}else g2d.draw(boundingBox);
+		g2d.dispose();
+		g.drawImage(image,(int)x,(int)y,null);
 	}
 	@Override
 	public void onInteracted(Player p, int x, int y){

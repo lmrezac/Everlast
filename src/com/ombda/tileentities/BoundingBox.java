@@ -10,7 +10,7 @@ public class BoundingBox extends TileEntity{
 	
 	public BoundingBox(int x, int y, boolean disableCollisions, int width, int height){
 		super(x, y, disableCollisions);
-		this.boundingBox = new Rectangle2D.Double(0,0,(Tile.SIZE/16)*width,(Tile.SIZE/16)*height);
+		setBoundingBox(new Rectangle2D.Double(0,0,(Tile.SIZE/16)*width,(Tile.SIZE/16)*height));
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class BoundingBox extends TileEntity{
 
 	@Override
 	public String save(){
-		return "box "+((Rectangle2D.Double)this.boundingBox).getWidth()+" "+((Rectangle2D.Double)this.boundingBox).getHeight();
+		return "box "+((Rectangle2D.Double)getBoundingBox()).getWidth()+" "+((Rectangle2D.Double)getBoundingBox()).getHeight();
 	}
 
 }

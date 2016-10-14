@@ -22,7 +22,11 @@ import com.ombda.scripts.Script;
 
 public class Console extends Input{
 	private Panel panel;
-	
+	private static class CmdException extends RuntimeException{
+		public CmdException(String msg){
+			super(msg);
+		}
+	}
 	public Console(){
 		setMessage("§o> §0");
 		panel = Panel.getInstance();
@@ -79,6 +83,8 @@ public class Console extends Input{
 			cmdDelete(args);
 		}else if(args.get(0).equals("load")){
 			cmdLoad(args);
+		}else if(args.get(0).equals("drawBoxes")){
+			cmdBoxes(args);
 		}else{
 			debug("unknown command");
 			panel.msgbox.setMessage("Error: unknown command"+WAIT);
@@ -86,23 +92,22 @@ public class Console extends Input{
 			panel.setGUI(panel.msgbox);
 		}
 		}catch(IndexOutOfBoundsException ef){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
+			panel.msgbox.setMessage(SECTION+"rError: param count"+WAIT);
 			panel.msgbox.instant();
 			panel.setGUI(panel.msgbox);
 			if(printStackTrace){
 				ef.printStackTrace();
 			}else debug(ef.getMessage());
+		}catch(CmdException ex){
+			panel.msgbox.setMessage(SECTION+"r"+ex.getMessage()+WAIT);
+			panel.msgbox.instant();
+			panel.setGUI(panel.msgbox);
 		}
 		reset();
 	}
 	
 	private void cmdGui(List<String> args){
-		if(args.size() < 2){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
-		}
+		if(args.size() < 2) throw new IndexOutOfBoundsException();
 		if(args.get(1).equals("msgbox")){
 			String display = ""+WAIT;
 			if(args.size() > 2){
@@ -130,14 +135,11 @@ public class Console extends Input{
 			reset();
 		}else if(args.get(1).equals("mapcreator")){
 			panel.setGUI(panel.mapcreator);
+			panel.drawBoundingBoxes = true; 
 			reset();
 		}else if(args.get(1).equals("console")){
-			panel.msgbox.setMessage("Cannot set gui to "+args.get(1)+WAIT);
-			panel.setGUI(panel.msgbox);
-		}else{
-			panel.msgbox.setMessage("No such gui id: "+args.get(1));
-			panel.setGUI(panel.msgbox);
-		}
+			throw new CmdException("Cannot set gui to "+args.get(1));
+		}else throw new CmdException("No such gui id: "+args.get(1));
 	}
 	
 	private void cmdNoclip(List<String> args){
@@ -149,9 +151,7 @@ public class Console extends Input{
 			else if(arg.equals("on")||arg.equals("true")||arg.matches("\\d+"))
 				p.noclip = true;
 			else{
-				panel.msgbox.setMessage("Invalid value given"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
+				throw new CmdException("Invalid value given");
 			}
 		}else{
 			p.noclip = !p.noclip;
@@ -859,6 +859,19 @@ public class Console extends Input{
 		if(args.size() != 1 && !args.get(1).equals("game"))
 			throw new RuntimeException("cannot load "+args.get(1));
 		Panel.getInstance().loadSaveFile();
+	}
+	private void cmdBoxes(List<String> args){
+		args.remove(0);
+		if(args.isEmpty()){
+			Panel.getInstance().drawBoundingBoxes = !Panel.getInstance().drawBoundingBoxes;
+		}else{
+			String val = args.get(0);
+			if(val.equals("0") || val.equals("false"))
+				Panel.getInstance().drawBoundingBoxes = false;
+			else if(val.equals("1") || val.equals("true"))
+				Panel.getInstance().drawBoundingBoxes = true;
+			else throw 
+		}
 	}
 	
 	@Override

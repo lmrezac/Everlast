@@ -1,8 +1,7 @@
 package com.ombda;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 
@@ -61,7 +60,10 @@ public class Sprite extends Entity{
 	}
 	public void draw(Graphics2D g, int offsetX, int offsetY){
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y+offsetY,null);
-	
+	}
+	public void drawBoundingBox(Graphics2D g, int offsetX, int offsetY){
+		g.setColor(Color.red);
+		g.drawRect((int)x+offsetX,(int)y+offsetY, image.getIconWidth(),image.getIconHeight());
 	}
 	public String toString(){
 		return "sprite "+map.toString()+".0x"+Integer.toHexString(hash);

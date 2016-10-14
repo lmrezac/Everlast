@@ -13,13 +13,13 @@ public class Wall extends TileEntity{
 		super(x,y,disableCollisions);
 		this.dir = direction;
 		if(direction == Facing.N)
-			boundingBox = new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/16);
+			setBoundingBox(new Rectangle2D.Double(0,0,Tile.SIZE,Tile.SIZE/16));
 		else if(direction == Facing.E)
-			boundingBox = new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16, 0, Tile.SIZE/16, Tile.SIZE);
+			setBoundingBox(new Rectangle2D.Double(Tile.SIZE-Tile.SIZE/16, 0, Tile.SIZE/16, Tile.SIZE));
 		else if(direction == Facing.S)
-			boundingBox = new Rectangle2D.Double(0, Tile.SIZE-Tile.SIZE/16, Tile.SIZE, Tile.SIZE/16);
+			setBoundingBox(new Rectangle2D.Double(0, Tile.SIZE-Tile.SIZE/16, Tile.SIZE, Tile.SIZE/16));
 		else if(direction == Facing.W)
-			boundingBox = new Rectangle2D.Double(0, 0, Tile.SIZE/16, Tile.SIZE);
+			setBoundingBox(new Rectangle2D.Double(0, 0, Tile.SIZE/16, Tile.SIZE));
 	}
 
 	@Override

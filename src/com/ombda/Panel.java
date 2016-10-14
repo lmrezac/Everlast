@@ -51,13 +51,13 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public Input input;
 	public Console console;
 	public MapMaker mapcreator;
-	public String guiID;
 	public MessageBox msgbox;
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	boolean running = true;
 	private int FPS = 60;
 	private int mouseX = 0, mouseY = 0;
+	public boolean drawBoundingBoxes = false;
 	public static final double borderX_left = (3.0/8)*(double)PRF_WIDTH;
 	public static final double borderX_right = (5.0/8)*(double)PRF_WIDTH;
 	public static final double borderY_top = (3.0/8)*(double)PRF_HEIGHT;
@@ -89,7 +89,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		mapcreator = new MapMaker();
 		gui = hud;
 		previous = hud;
-		guiID = "hud";
 		
 		Tiles.loadTiles();
 		loadScripts();
@@ -140,14 +139,13 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public void setGUI(GUI gui){
 		previous = this.gui;
 		this.gui = gui;
-		if(gui == hud) guiID = "hud";
+		
+		/*if(gui == hud) guiID = "hud";
 		else if(gui == msgbox) guiID = "msgbox";
 		else if(gui == console) guiID = "console";
 		else if(gui == input) guiID = "input";
-		else if(gui == mapcreator){
-			guiID = "mapcreator"; 
-			Panel.noScreenDebug = true;
-		}
+		else if(gui == mapcreator)
+			guiID = "mapcreator";*/
 		debug(gui.toString());
 	}
 	private Script currentScript = null;
@@ -260,6 +258,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 					double h = s.y+s.spriteHeight();
 					if(h <= minY){
 						s.draw(g2d, offsetX, offsetY);
+						if(drawBoundingBoxes)
+							s.drawBoundingBox(g2d, offsetX, offsetY);
 						sprites.remove(i);
 					}
 				}
@@ -268,21 +268,33 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			
 			map.drawForeground(g2d,offsetX,offsetY);
 			
+			if(drawBoundingBoxes)
+				map.drawTileEntities(g2d,offsetX,offsetY);
+			
 			Tiles.incrementAnimationFrames();
 		}
 		gui.draw(g2d);
 		if(debug && !noScreenDebug){
 			long temp = 0;
-			drawDebugString(g2d,"player ("+Math.round(player.x)/(Tile.SIZE/16)+","+Math.round(player.y)/(Tile.SIZE/16)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
-			drawDebugString(g2d,"map {width:"+map.width()+", height:"+map.height()+"}",0,22);
-			drawDebugString(g2d,"offset X = "+(int)offsetX+" offset Y = "+(int)offsetY,0,34);
-			drawDebugString(g2d,"facing: "+player.getDirection(),0,46);
-			drawDebugString(g2d,"border Y : ["+borderY_top+";"+borderY_bottom+"]",0,58);
-			drawDebugString(g2d,"fpms:"+(((temp = System.currentTimeMillis())-lastFrame)),0,70);
-			int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
-			int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
-			drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,82);
-			drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,94);
+			int size = 12;
+			if(gui == mapcreator){
+				drawDebugString(g2d,"map "+map.toString()+" {width:"+map.width()+", height:"+map.height()+"}",0,10);
+				int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
+				int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
+				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+size);
+				drawDebugString(g2d,"layer: "+(Frame.keys[KeyEvent.VK_SHIFT]? "FOREGROUND" : "BACKGROUND"),0,10+2*size);
+			}else{
+				drawDebugString(g2d,"player ("+Math.round(player.x)/(Tile.SIZE/16)+","+Math.round(player.y)/(Tile.SIZE/16)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
+				drawDebugString(g2d,"map "+map.toString()+" {width:"+map.width()+", height:"+map.height()+"}",0,10+size);
+				drawDebugString(g2d,"offset X = "+(int)offsetX+" offset Y = "+(int)offsetY,0,10+2*size);
+				drawDebugString(g2d,"facing: "+player.getDirection(),0,10+3*size);
+				drawDebugString(g2d,"border Y : ["+borderY_top+";"+borderY_bottom+"]",0,10+4*size);
+				drawDebugString(g2d,"fpms:"+(((temp = System.currentTimeMillis())-lastFrame)),0,10+5*size);
+				int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
+				int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
+				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+6*size);
+				drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,10+7*size);	
+			}
 			lastFrame = temp;
 		}
 		Toolkit.getDefaultToolkit().sync();

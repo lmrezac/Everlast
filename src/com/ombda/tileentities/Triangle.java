@@ -23,7 +23,7 @@ public class Triangle extends TileEntity{
 		p.addPoint(x1, y1);
 		p.addPoint(x2, y2);
 		p.addPoint(x3, y3);
-		this.boundingBox = (Shape)p;
+		setBoundingBox(p);
 		
 		this.fromNorth = i;
 		this.fromSouth = k;

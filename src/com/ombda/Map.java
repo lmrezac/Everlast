@@ -4,6 +4,7 @@ import static com.ombda.Debug.debug;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -362,6 +363,16 @@ public class Map extends Struct{
 			for(int y = 0; y < height; y++){
 				Tile t = getTileAt(Tile.SIZE*x,Tile.SIZE*y,1);
 				t.draw(g2d, Tile.SIZE*x+offsetX, Tile.SIZE*y+offsetY);
+			}
+		}
+	}
+	public void drawTileEntities(Graphics2D g2d, int offsetX, int offsetY){
+		for(int x = 0; x < width; x++){
+			for(int y = 0; y < height; y++){
+				TileEntity te = tileEntities[y][x];
+				if(te != null){
+					te.draw(g2d,offsetX,offsetY);
+				}
 			}
 		}
 	}
