@@ -1,5 +1,6 @@
 package com.ombda;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Shape;
@@ -48,6 +49,18 @@ public class Tile implements Collideable, Interactable{
 	}
 	public void draw(Graphics2D g, int x, int y){
 		g.drawImage(frame,x,y,null);
+	}
+	public void drawBoundingBox(Graphics2D g, int x, int y){
+		if(x >= 0 && y >= 0 && hasTileEntity(x/SIZE,y/SIZE)){
+			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/SIZE, y/SIZE);
+			if(te != null){
+				if(te.disableTileCollisions()) return;
+			}
+		}
+		g.translate(x, y);
+		g.setColor(new Color(255,128,0,128));
+		g.fill(getBoundingBox());
+		g.translate(-x, -y);
 	}
 	public String toString(){
 		return "[object Tile]";

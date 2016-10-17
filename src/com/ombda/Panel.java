@@ -246,7 +246,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(gui.drawMap()){
 			map.drawBackground(g2d,offsetX,offsetY);
 		
-			
+
+			if(drawBoundingBoxes)
+				map.drawTileEntities(g2d,offsetX,offsetY);
 		
 			List<Sprite> sprites = new ArrayList<>(map.getSprites());
 			
@@ -268,8 +270,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			
 			map.drawForeground(g2d,offsetX,offsetY);
 			
-			if(drawBoundingBoxes)
-				map.drawTileEntities(g2d,offsetX,offsetY);
 			
 			Tiles.incrementAnimationFrames();
 		}

@@ -133,7 +133,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		BufferedImage image = new BufferedImage((int)(Xadd >= 0? Xadd : 0)+(int)b.getWidth()+1,(int)(Yadd >= 0? Yadd : 0)+(int)b.getHeight()+1,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2d = image.createGraphics();
 		g2d.setColor(Color.red);
-		if(Xadd < 0){
+		/*if(Xadd < 0){
 			g2d.translate(-Xadd,0);
 			if(Yadd < 0){
 				g2d.translate(0,-Yadd);
@@ -147,9 +147,10 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			g2d.translate(0,-Yadd);
 			g2d.draw(boundingBox);
 			g2d.translate(0,Yadd);
-		}else g2d.draw(boundingBox);
+		}else g2d.draw(boundingBox);*/
+		g2d.draw(boundingBox);
 		g2d.dispose();
-		g.drawImage(image,(int)x,(int)y,null);
+		g.drawImage(image,(int)x+offsetX,(int)y+offsetY,null);
 	}
 	@Override
 	public void onInteracted(Player p, int x, int y){

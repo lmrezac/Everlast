@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ombda.Debug;
 import com.ombda.Map;
 import com.ombda.NPC;
 import com.ombda.Panel;
@@ -210,15 +211,12 @@ public class Console extends Input{
 					}else if(id.toUpperCase().matches("[\\w_]+")){
 						Class<Tiles> c = Tiles.class;
 						try{
-							Field f = c.getDeclaredField(id);
+							Field f = c.getDeclaredField(id.toUpperCase());
 							try{
 								Object obj = f.get(null);
 								if(!(obj instanceof Short)){
-									panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-									panel.msgbox.instant();
-									panel.setGUI(panel.msgbox);
 									reset();
-									return;
+									throw new CmdException("Invalid tile id given");
 								}else{
 									tileId = (short)obj;
 								}
@@ -231,11 +229,8 @@ public class Console extends Input{
 							}
 							
 						}catch(NoSuchFieldException ex){
-							panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-							panel.msgbox.instant();
-							panel.setGUI(panel.msgbox);
 							reset();
-							return;
+							throw new CmdException("Invalid tile id given");
 						}catch(SecurityException f){
 							debug(f.getMessage());
 							if(printStackTrace){
@@ -245,11 +240,8 @@ public class Console extends Input{
 							return;
 						}
 					}else{
-						panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-						panel.msgbox.instant();
-						panel.setGUI(panel.msgbox);
 						reset();
-						return;
+						throw new CmdException("Invalid tile id given");
 					}
 					
 					Map map = panel.getPlayer().getMap();
@@ -289,9 +281,7 @@ public class Console extends Input{
 					Map newMap = Map.get(str2);
 					panel.setMap(newMap);
 				}catch(RuntimeException e){
-					panel.msgbox.setMessage(e.getMessage()+WAIT);
-					panel.msgbox.instant();
-					panel.setGUI(panel.msgbox);
+					throw new CmdException(e.getMessage());
 				}
 			}else if(args.get(index).startsWith("player.")){
 				int i = args.get(index).indexOf('.');
@@ -310,85 +300,72 @@ public class Console extends Input{
 					int y = (Tile.SIZE/16) * Integer.decode(args.get(index));
 					player.setPos(x, y);
 				}else{
-					panel.msgbox.setMessage("Variable "+var+" does not exist."+WAIT);
-					panel.msgbox.instant();
-					panel.setGUI(panel.msgbox);
+					throw new CmdException("Variable "+var+" does not exist.");
 				}
 			}else if(args.get(index).equals("sprite")){
 				index++;
 				String selector = args.get(index);
 				int i = selector.indexOf('.');
-				try{
-					if(i == -1)
-						throw new RuntimeException("Invalid sprite selector.");
-					String map_name;
-					if(selector.matches("(0x|#)?[A-Za-z\\d]+\\.(x|y|map)")){
-						map_name = panel.getPlayer().getMap().toString();
-						i = -1;
-					}else
-						map_name = Script.evalString(selector.substring(0,i));
-					int j = selector.indexOf('.',i+1);
-					if(j == -1)
-						throw new RuntimeException("Invalid sprite selector.");
-					int hash = Script.parseInt(selector.substring(i+1, j));
-					String var = selector.substring(j+1);
-					Map sprite_map = Map.get(map_name);
-					Sprite sprite = sprite_map.getSprite(hash);
-					index++;
-					if(var.equals("map")){
-						String mapname;
-							mapname = Script.evalString(args.get(index));
-						Map map = Map.get(mapname);
-						sprite.setMap(map);
-					}else if(var.equals("x")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						sprite.setPos(x, sprite.y);
-					}else if(var.equals("y")){
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						sprite.setPos(sprite.x, y);
-					}else throw new RuntimeException("Invalid sprite var: "+var);
-				}catch(RuntimeException ex){
-					panel.msgbox.setMessage(ex.getMessage()+WAIT);
-					panel.msgbox.instant();
-					panel.setGUI(panel.msgbox);
-				}
+				if(i == -1)
+					throw new CmdException("Invalid sprite selector.");
+				String map_name;
+				if(selector.matches("(0x|#)?[A-Za-z\\d]+\\.(x|y|map)")){
+					map_name = panel.getPlayer().getMap().toString();
+					i = -1;
+				}else
+					map_name = Script.evalString(selector.substring(0,i));
+				int j = selector.indexOf('.',i+1);
+				if(j == -1)
+					throw new CmdException("Invalid sprite selector.");
+				int hash = Script.parseInt(selector.substring(i+1, j));
+				String var = selector.substring(j+1);
+				Map sprite_map = Map.get(map_name);
+				Sprite sprite = sprite_map.getSprite(hash);
+				index++;
+				if(var.equals("map")){
+					String mapname;
+						mapname = Script.evalString(args.get(index));
+					Map map = Map.get(mapname);
+					sprite.setMap(map);
+				}else if(var.equals("x")){
+					int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
+					sprite.setPos(x, sprite.y);
+				}else if(var.equals("y")){
+					int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
+					sprite.setPos(sprite.x, y);
+				}else throw new CmdException("Invalid sprite var: "+var);
+			
 			}else if(args.get(index).equals("npc")){
 				index++;
 				String selector = args.get(index);
 				int i = selector.indexOf('.');
-				try{
-					if(i == -1)
-						throw new RuntimeException("Invalid NPC selector.");
-					int hash = Script.parseInt(selector.substring(0, i));
-					String var = selector.substring(i+1);
-					NPC npc = NPC.getNPC(hash);
+			
+				if(i == -1)
+					throw new CmdException("Invalid NPC selector.");
+				int hash = Script.parseInt(selector.substring(0, i));
+				String var = selector.substring(i+1);
+				NPC npc = NPC.getNPC(hash);
+				index++;
+				if(var.equals("map")){
+					String mapname;
+					mapname = Script.evalString(args.get(index));
+					Map map = Map.get(mapname);
+					npc.setMap(map);
+				}else if(var.equals("x")){
+					int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
+					npc.setPos(x, npc.y);
+				}else if(var.equals("y")){
+					int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
+					npc.setPos(npc.x, y);
+				}else if(var.equals("dest")){
+					int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
 					index++;
-					if(var.equals("map")){
-						String mapname;
-						mapname = Script.evalString(args.get(index));
-						Map map = Map.get(mapname);
-						npc.setMap(map);
-					}else if(var.equals("x")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						npc.setPos(x, npc.y);
-					}else if(var.equals("y")){
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						npc.setPos(npc.x, y);
-					}else if(var.equals("dest")){
-						int x = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						index++;
-						int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
-						npc.setDestination(x, y);
-					}else throw new RuntimeException("Invalid NPC var: "+var);
-				}catch(RuntimeException ex){
-					panel.msgbox.setMessage(ex.getMessage()+WAIT);
-					panel.msgbox.instant();
-					panel.setGUI(panel.msgbox);
-				}
+					int y = (Tile.SIZE/16) * Script.parseInt(Script.evalString(args.get(index)));
+					npc.setDestination(x, y);
+				}else throw new CmdException("Invalid NPC var: "+var);
+				
 			}else{
-				panel.msgbox.setMessage("Error: cannot set a "+args.get(1)+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
+				throw new CmdException("Error: cannot set a "+args.get(1));
 			}
 	}
 	
@@ -425,15 +402,12 @@ public class Console extends Input{
 		}else if(id.matches("[\\w_]+")){
 			Class<Tiles> c = Tiles.class;
 			try{
-				Field f = c.getDeclaredField(id);
+				Field f = c.getDeclaredField(id.toUpperCase());
 				try{
 					Object obj = f.get(null);
 					if(!(obj instanceof Short)){
-						panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-						panel.msgbox.instant();
-						panel.setGUI(panel.msgbox);
 						reset();
-						return;
+						throw new CmdException("Invalid tile ID given");
 					}else{
 						tileId = (short)obj;
 					}
@@ -446,11 +420,8 @@ public class Console extends Input{
 				}
 				
 			}catch(NoSuchFieldException ex){
-				panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
 				reset();
-				return;
+				throw new CmdException("Invalid tile ID given");
 			}catch(SecurityException f){
 				debug(f.getMessage());
 				if(printStackTrace){
@@ -460,21 +431,15 @@ public class Console extends Input{
 				return;
 			}
 		}else{
-			panel.msgbox.setMessage("Invalid tile ID given"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
 			reset();
-			return;
+			throw new CmdException("Invalid tile ID given");
 		}
 		Map map = panel.getPlayer().getMap();
 		Tile t = Tile.getTile(tileId);
 		
 		if(x1 > x2 || y1 > y2){
-			panel.msgbox.setMessage("Invalid coordinates given"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
 			reset();
-			return;
+			throw new CmdException("Invalid coordinates given");
 		}
 		if(y1 == y2){
 			for(int x = x1; x < x2; x++){
@@ -495,9 +460,7 @@ public class Console extends Input{
 	
 	private void cmdSave(List<String> args){
 		if(args.size() > 2){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
+			throw new CmdException("Error: param count");
 		}else{
 			if(args.size() == 1 || args.get(1).equals("game")){
 				panel.saveGame();
@@ -511,19 +474,14 @@ public class Console extends Input{
 			}else if(args.get(1).equals("map")){
 				panel.getPlayer().getMap().save();
 			}else{
-				panel.msgbox.setMessage("Don't know how to save '"+args.get(1)+"'"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
+				throw new CmdException("Don't know how to save '"+args.get(1)+"'");
 			}
 		}
 	}
 	
 	private void cmdDebug(List<String> args){
 		if(args.size() < 2){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("Error: param count");
 		}else{
 			String arg = args.get(1);
 			if(arg.equals("off")||arg.equals("false")||arg.equals("0"))
@@ -637,6 +595,10 @@ public class Console extends Input{
 				message = "tileEntity <tile x> <tile y> <name> [parameters]\nCreates a tile entity.";
 			}else if(cmd.equals("delete")){
 				message = "delete <sprite : npc : tileEntity> <selectors>\nDeletes something.";
+			}else if(cmd.equals("drawBoxes")){
+				message = "drawBoxes <true|false>\nDraw entity bounding boxes.";
+			}else if(cmd.equals("load")){
+				message = "load game\nLoads your save file.";
 			}else{
 				message = "Unknown command '"+cmd+"'.";
 			}
@@ -650,9 +612,7 @@ public class Console extends Input{
 	private void cmdTestfor(List<String> args){
 		args.remove(0);
 		if(args.size() > 2 || args.size() == 0){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
+			throw new CmdException("Error: param count");
 		}else{
 			boolean found = false;
 			if(args.size() == 1){
@@ -691,7 +651,7 @@ public class Console extends Input{
 						arg = arg.substring(0, arg.length()-1);
 					int i = arg.indexOf(",");
 					if(i == -1)
-						throw new RuntimeException("Invalid point : "+arg);
+						throw new CmdException("Invalid point : "+arg);
 					int tilex = Integer.parseInt(arg.substring(0,i));
 					int tiley = Integer.parseInt(arg.substring(i+1));
 					found = panel.getPlayer().getMap().getTileEntityAt(tilex, tiley) != null;
@@ -705,9 +665,7 @@ public class Console extends Input{
 				panel.msgbox.instant();
 				panel.setGUI(panel.msgbox);
 			}else{
-				panel.msgbox.setMessage(msg+" was not found"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
+				throw new CmdException(msg+" was not found");
 			}
 		}
 	}
@@ -715,10 +673,7 @@ public class Console extends Input{
 	private void cmdScript(List<String> args){
 		assert args.get(0).equals("script");
 		if(args.size() == 1){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("Error: param count");
 		}
 		String str = "";
 		for(int i = 1; i < args.size(); i++){
@@ -730,36 +685,27 @@ public class Console extends Input{
 			Script s = Script.getScript(str);
 			Panel.getInstance().runScript(s);
 		}catch(RuntimeException e){
-			panel.msgbox.setMessage(e.getMessage()+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
+			if(Debug.printStackTrace)
+			e.printStackTrace();
+			throw new CmdException(e.getMessage());
 		}
 	}
 	
 	private void cmdNewMap(List<String> args){
 		args.remove(0);
 		if(args.size() != 4){
-			panel.msgbox.setMessage("Error: param count"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("Error: param count");
 		}
 		String mapname = args.get(0);
 		int width = Integer.parseInt(args.get(1));
 		int height = Integer.parseInt(args.get(2));
 		if(width == 0 || height == 0){
-			panel.msgbox.setMessage("Error: invalid width/height"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("Error: invalid width/height");
 		}
 		Color clr;
 		String colorstr = args.get(3);
 		if(colorstr.length() != 6){
-			panel.msgbox.setMessage("Error: invalid color literal"+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("Error: invalid color literal");
 		}
 		int byte1 = Integer.parseInt(colorstr.substring(0,2),16);
 		int byte2 = Integer.parseInt(colorstr.substring(2,4),16);
@@ -767,10 +713,7 @@ public class Console extends Input{
 		clr = new Color(byte1,byte2,byte3);
 		File f = new File(com.ombda.Files.localize("maps\\"+mapname));
 		if(f.exists() && !f.isDirectory()){
-			panel.msgbox.setMessage("File maps\\"+mapname+" already exists, and is not a directory."+WAIT);
-			panel.msgbox.instant();
-			panel.setGUI(panel.msgbox);
-			return;
+			throw new CmdException("File maps\\"+mapname+" already exists, and is not a directory.");
 		}
 		if(!f.exists()){
 			f.mkdir();
@@ -783,33 +726,24 @@ public class Console extends Input{
 			try{
 				f.createNewFile();
 			}catch(IOException e){
-				panel.msgbox.setMessage(SECTION+"rIOException : see console"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
 				e.printStackTrace();
-				return;
+				throw new CmdException("IOException : see console");
 			}
 		f = new File(com.ombda.Files.localize("maps\\"+mapname+"\\back.map"));
 		if(!f.exists())
 			try{
 				f.createNewFile();
 			}catch(IOException e){
-				panel.msgbox.setMessage(GUI.SECTION+"rIOException : see console"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
 				e.printStackTrace();
-				return;
+				throw new CmdException("IOException : see console");
 			}
 		f = new File(com.ombda.Files.localize("maps\\"+mapname+"\\tileEntities.info"));
 		if(!f.exists())
 			try{
 				f.createNewFile();
 			}catch(IOException e){
-				panel.msgbox.setMessage(GUI.SECTION+"rIOException : see console"+WAIT);
-				panel.msgbox.instant();
-				panel.setGUI(panel.msgbox);
 				e.printStackTrace();
-				return;
+				throw new CmdException("IOException : see console");
 			}
 		Map map = new Map(mapname,width,height,clr);
 		map.save();
@@ -848,16 +782,16 @@ public class Console extends Input{
 				int tiley = Integer.parseInt(args.get(2));
 				Map map = panel.getPlayer().getMap();
 				map.deleteTileEntityAt(tilex, tiley);
-			}
+			}else throw new CmdException("Cannot delete "+args.get(0));
 		}catch(RuntimeException ex){
-			if(ex instanceof IndexOutOfBoundsException)
+			if(ex instanceof IndexOutOfBoundsException || ex instanceof CmdException)
 				throw ex;
 		}
 	}
 	
 	private void cmdLoad(List<String> args){
 		if(args.size() != 1 && !args.get(1).equals("game"))
-			throw new RuntimeException("cannot load "+args.get(1));
+			throw new CmdException("cannot load "+args.get(1));
 		Panel.getInstance().loadSaveFile();
 	}
 	private void cmdBoxes(List<String> args){
@@ -870,7 +804,7 @@ public class Console extends Input{
 				Panel.getInstance().drawBoundingBoxes = false;
 			else if(val.equals("1") || val.equals("true"))
 				Panel.getInstance().drawBoundingBoxes = true;
-			else throw 
+			else throw new CmdException("Invalid argument");
 		}
 	}
 	
