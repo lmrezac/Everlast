@@ -8,10 +8,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import com.ombda.Collideable;
-import com.ombda.Entity;
 import com.ombda.Interactable;
 import com.ombda.Tile;
 import com.ombda.Updateable;
+import com.ombda.entities.Entity;
 
 public abstract class TileEntity extends Entity implements Collideable, Updateable, Interactable{
 	private Shape boundingBox;

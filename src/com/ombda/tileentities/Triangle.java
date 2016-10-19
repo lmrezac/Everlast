@@ -5,8 +5,8 @@ import java.awt.Shape;
 
 import com.ombda.Collideable;
 import com.ombda.Facing;
-import com.ombda.Player;
 import com.ombda.Tile;
+import com.ombda.entities.Player;
 
 public class Triangle extends TileEntity{
 	int x1,y1,x2,y2,x3,y3;

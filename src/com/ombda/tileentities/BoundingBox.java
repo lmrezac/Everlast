@@ -3,8 +3,8 @@ package com.ombda.tileentities;
 import java.awt.geom.Rectangle2D;
 
 import com.ombda.Collideable;
-import com.ombda.Player;
 import com.ombda.Tile;
+import com.ombda.entities.Player;
 
 public class BoundingBox extends TileEntity{
 	

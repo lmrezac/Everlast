@@ -1,4 +1,6 @@
-package com.ombda;
+package com.ombda.entities;
+
+import com.ombda.Map;
 
 public abstract class Entity{
 	public double x, y;

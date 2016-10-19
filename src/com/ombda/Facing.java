@@ -15,6 +15,7 @@ public enum Facing{
 		return name;
 	}
 	public static Facing fromString(String facing){
+		facing = facing.toUpperCase();
 		if(facing.equals("N") || facing.equals("NORTH"))
 			return Facing.N;
 		else if(facing.equals("S") || facing.equals("SOUTH"))

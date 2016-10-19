@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import com.ombda.entities.Player;
+
 public class MapOld{
 	private Tilemap tilemap;
 	private int[][][] layers;

@@ -6,24 +6,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.ombda.Panel;
-import com.ombda.scripts.steps.Assert;
-import com.ombda.scripts.steps.CreateCollideable;
-import com.ombda.scripts.steps.CreateNPC;
-import com.ombda.scripts.steps.CreateSprite;
-import com.ombda.scripts.steps.CreateStruct;
-import com.ombda.scripts.steps.Define;
-import com.ombda.scripts.steps.DefineScript;
-import com.ombda.scripts.steps.DeleteVar;
-import com.ombda.scripts.steps.If;
-import com.ombda.scripts.steps.Msg;
-import com.ombda.scripts.steps.Return;
-import com.ombda.scripts.steps.RunFunction;
-import com.ombda.scripts.steps.RunScript;
-import com.ombda.scripts.steps.ScriptStep;
-import com.ombda.scripts.steps.Set;
-import com.ombda.scripts.steps.SetScope;
-import com.ombda.scripts.steps.SetScript;
-import com.ombda.scripts.steps.While;
+import com.ombda.scripts.steps.*;
 
 public class Script extends Scope{
 	private static HashMap<String,Script> scripts = new HashMap<>();
@@ -55,7 +38,13 @@ public class Script extends Scope{
 		this.currentScope = this;
 	}
 	public void execute(Scope script){
-		if(index == steps.size()) throw new RuntimeException("Script was not reset!");
+		if(index == steps.size()){
+			if(Panel.getInstance().currentScript == this){
+				Panel.getInstance().resetScript();
+				return;
+			}else 
+				throw new RuntimeException("Script was not reset!");
+		}
 		ScriptStep step = steps.get(index);
 		if(step instanceof Msg && step.done()){
 			index++;
@@ -118,7 +107,7 @@ public class Script extends Scope{
 	public static Script compile(String name,final List<String> lines){
 		for(int index = 0; index < lines.size(); index++){
 			String line = lines.get(index).trim();
-			if(line.startsWith("#")){
+			if(line.startsWith("#") || line.isEmpty()){
 				lines.remove(index);
 				index--;
 			}else{
@@ -185,6 +174,8 @@ public class Script extends Scope{
 			steps.add(new CreateSprite(args));
 		else if(cmd.equals("collideable"))
 			steps.add(new CreateCollideable(args));
+		else if(cmd.equals("wait"))
+			steps.add(new Wait(args));
 		else if(cmd.equals("set")){
 			if(args.isEmpty()) throw new RuntimeException("script step : set needs a minimum of two arguments.");
 			String subcmd = args.get(0);

@@ -13,12 +13,12 @@ import java.util.List;
 
 import com.ombda.Debug;
 import com.ombda.Map;
-import com.ombda.NPC;
 import com.ombda.Panel;
-import com.ombda.Player;
-import com.ombda.Sprite;
 import com.ombda.Tile;
 import com.ombda.Tiles;
+import com.ombda.entities.NPC;
+import com.ombda.entities.Player;
+import com.ombda.entities.Sprite;
 import com.ombda.scripts.Script;
 
 public class Console extends Input{

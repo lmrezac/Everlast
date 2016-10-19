@@ -4,8 +4,8 @@ import java.awt.geom.Rectangle2D;
 
 import com.ombda.Collideable;
 import com.ombda.Facing;
-import com.ombda.Player;
 import com.ombda.Tile;
+import com.ombda.entities.Player;
 
 public class Wall extends TileEntity{
 	private Facing dir;

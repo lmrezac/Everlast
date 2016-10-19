@@ -38,7 +38,7 @@ public class Scope{
 				public int args_length(){ return 0; }
 				@Override
 				public String call(Scope script,List<String> values){
-					com.ombda.Player p = Panel.getInstance().getPlayer();
+					com.ombda.entities.Player p = Panel.getInstance().getPlayer();
 					return "player@("+Scope.toString(p.x)+","+Scope.toString(p.y)+")["+p.getDirection().toString()+"]{"+p.getMap().toString()+"}";
 				}
 			};

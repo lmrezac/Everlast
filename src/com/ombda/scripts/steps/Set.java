@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.Map;
-import com.ombda.NPC;
 import com.ombda.Panel;
-import com.ombda.Sprite;
 import com.ombda.Tile;
+import com.ombda.entities.NPC;
+import com.ombda.entities.Sprite;
 import com.ombda.scripts.FacingStruct;
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
@@ -89,6 +89,19 @@ public class Set extends ScriptStep{
 					List<String> lines = new ArrayList<>();
 					lines.add(line);
 					npc.onInteractedScript = Script.compile(null,lines);
+				}
+			}else if(varname.equals("onUpdate")){
+				if(newargs.isEmpty() || newargs.get(0).equals("null")){
+					npc.updateScript = null;
+				}else{
+					String line = "";
+					for(int j = 0; j < newargs.size(); j++){
+						line += newargs.get(j);
+						if(j != newargs.size()-1) line += " ";
+					}
+					List<String> lines = new ArrayList<>();
+					lines.add(line);
+					npc.updateScript = Script.compile(null,lines);
 				}
 			}else if(varname.equals("xy")){
 				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");

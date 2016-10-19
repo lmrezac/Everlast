@@ -1,4 +1,4 @@
-package com.ombda;
+package com.ombda.entities;
 
 import static com.ombda.Debug.debug;
 
@@ -11,18 +11,24 @@ import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 
+import com.ombda.Collideable;
+import com.ombda.Facing;
+import com.ombda.Interactable;
+import com.ombda.Panel;
+import com.ombda.Updateable;
 import com.ombda.scripts.Script;
 
 
 public class NPC extends Sprite implements Updateable, Collideable, Interactable{
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
-	public Script onInteractedScript = null;
+	public Script onInteractedScript = null, updateScript = null;
 	private int destX, destY;
 	protected double lastX, lastY;
 	protected Rectangle2D boundingBox;
 	private int id;
 	protected ImageIcon[] images;
 	protected Facing direction;
+	public double speed = 1;
 	protected int yminus;
 	public NPC(int x, int y,int hash, int yminus,ImageIcon[] animations,Rectangle2D box){
 		//animations == [N still, NE still, E still, SE still, S still, SW still, W still, NW still, N walk, NE walk, E walk, SE walk, S walk, SW walk, W walk, NW walk]
@@ -57,20 +63,21 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	public void update(){
 		double newx = x, newy = y;
 		if(x != destX){
+			
 			if(x < destX)
-				newx = x+1;
+				newx = x+speed;
 			else if(x > destX)
-				newx = x-1;
+				newx = x-speed;
 		}
 		if(y != destY){
 			if(y < destY)
-				newy = y+1;
+				newy = y+speed;
 			else if(y > destY)
-				newy = y-1;
+				newy = y-speed;
 		}
 		setPos(newx,newy);
 		
-		if(lastX < x ){
+		/*if(lastX < x ){
 			if(lastY < y)
 				direction = Facing.SE;
 			else if(lastY > y)
@@ -86,7 +93,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			direction = Facing.S;
 		else if(lastY > y)
 			direction = Facing.N;
-		
+		*/
 		this.image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
 	}
 	public void setPos(double x, double y){
@@ -123,6 +130,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	
 	@Override
 	public void draw(Graphics2D g, int offsetX, int offsetY){
+		if(image == null) return;
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y-yminus+offsetY,null);
 	}
 	@Override

@@ -2,13 +2,18 @@ sprite 0x02 1331 224 tiles/intro/city/pole test3
 sprite 0x03 1171 24t tiles/intro/city/pole test3
 sprite 0x04 90t 13t tiles/intro/city/awning test3
 collideable 0x06 98t 12t tiles/intro/city/garbage_can_spilled 22 20 test3
-npc 0x01 14 32 0 error error npcs/hoodlum_reversed error error error npcs/hoodlum error error error error error error error error error
+npc 0x01 14 32 0 east:npcs/hoodlum_reversed west:npcs/hoodlum
 set npc 0x01.map test3
 set npc 0x01.xy 84t 5t
 set npc 0x01.facing Facing.west
 set npc 0x01.onInteracted script interact_hoodlum_right
-npc 0x05 14 32 0 error error npcs/hoodlum_reversed error error error npcs/hoodlum error error error error error error error error error
+npc 0x05 14 32 0 east:npcs/hoodlum_reversed west:npcs/hoodlum
 set npc 0x05.map test3
 set npc 0x05.xy 72t 5t
 set npc 0x05.facing Facing.east
 set npc 0x05.onInteracted script interact_hoodlum_left
+npc 0x06 48 96 0 every:south:car2
+set npc 0x06.map test3
+set npc 0x06.facing Facing.south
+set npc 0x06.xy 74t -5t
+set npc 0x06.dest 1192 10t

@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import com.ombda.entities.Entity;
+import com.ombda.entities.Sprite;
 import com.ombda.scripts.Function;
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;

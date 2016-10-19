@@ -1,1 +1,3 @@
 msg "test" *wait
+wait 2s
+msg "done" *wait

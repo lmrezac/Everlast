@@ -61,7 +61,7 @@ public class Images{
 				if(f2.exists()){
 					image = evaluateAnimFile(null,f2,load(f,true));
 				}else{
-					image = new ImageIcon(f.getAbsolutePath());
+					image = new ImageIcon(load(f,true));
 				}
 				debug("Loaded image "+name+" as "+f.getAbsolutePath());
 				images.put(name, image);
@@ -232,8 +232,10 @@ public class Images{
 		}
 		try {
 			BufferedImage bimg = ImageIO.read(file);
-			if(!file.getName().endsWith("base.png"))
+			if(!file.getName().endsWith("base.png")){
+				debug("scaling "+file.getName());
 				return toBufferedImage(bimg.getScaledInstance(bimg.getWidth()*2,bimg.getHeight()*2,0));
+			}
 			return bimg;
 		} catch (IOException e) {
 			if(debug){

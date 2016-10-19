@@ -17,6 +17,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -28,6 +29,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.ombda.entities.Player;
+import com.ombda.entities.Sprite;
 import com.ombda.gui.Console;
 import com.ombda.gui.GUI;
 import com.ombda.gui.HUD;
@@ -148,7 +151,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			guiID = "mapcreator";*/
 		debug(gui.toString());
 	}
-	private Script currentScript = null;
+	public Script currentScript = null;
 	private List<Script> scripts = new ArrayList<>();
 	public void runScript(Script s){
 		debug("running new script");
@@ -240,7 +243,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	}
 	}
 	public static boolean noScreenDebug = false;
-	private long lastFrame = System.currentTimeMillis();
+	public long lastFrame = System.currentTimeMillis();
 	private void paintOffscreen(Graphics2D g2d){
 		
 		if(gui.drawMap()){
@@ -315,25 +318,28 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 	public static final double dist = Math.sqrt(.5);
 	
-
+	public void resetScript(){
+		debug("reset script");
+		currentScript.reset();
+		if(scripts.isEmpty())
+			currentScript = null;
+		else{
+			
+			currentScript = scripts.remove(scripts.size()-1);
+			while(!scripts.isEmpty() && currentScript.done()){
+				currentScript = scripts.remove(scripts.size()-1);
+				
+			}
+			if(scripts.isEmpty() && currentScript.done()) 
+				currentScript = null;
+		}
+	}
 	public void update(){
 		if(currentScript != null){
-			
+
 			currentScript.execute(currentScript);
-			if(currentScript.done()){
-				currentScript.reset();
-				if(scripts.isEmpty())
-					currentScript = null;
-				else{
-					
-					currentScript = scripts.remove(scripts.size()-1);
-					while(!scripts.isEmpty() && currentScript.done()){
-						currentScript = scripts.remove(scripts.size()-1);
-						
-					}
-					if(scripts.isEmpty() && currentScript.done()) 
-						currentScript = null;
-				}
+			if(currentScript != null && currentScript.done()){
+				resetScript();
 			}
 		}
 		if(!gui.pauseGame()){
@@ -458,21 +464,21 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				Frame.keys[KeyEvent.VK_Z] = false;
 				Collection<Sprite> sprites = map.getSprites();
 				int x, y;
-				if(player.direction == Facing.N){
-					x = (int)(player.x+(player.boundingBox.getWidth()/2));
+				if(player.getDirection() == Facing.N){
+					x = (int)(player.x+(((Rectangle2D)player.getBoundingBox()).getWidth()/2));
 					y = (int)(player.y-1);
 					
-				}else if(player.direction == Facing.E){
-					x = (int)(player.x+player.boundingBox.getWidth());
-					y = (int)(player.y+(player.boundingBox.getHeight()/2));
+				}else if(player.getDirection() == Facing.E){
+					x = (int)(player.x+((Rectangle2D)player.getBoundingBox()).getWidth());
+					y = (int)(player.y+(((Rectangle2D)player.getBoundingBox()).getHeight()/2));
 					
-				}else if(player.direction == Facing.S){
-					x = (int)(player.x+(player.boundingBox.getWidth()/2));
-					y = (int)(player.y+player.boundingBox.getHeight());
+				}else if(player.getDirection() == Facing.S){
+					x = (int)(player.x+(((Rectangle2D)player.getBoundingBox()).getWidth()/2));
+					y = (int)(player.y+((Rectangle2D)player.getBoundingBox()).getHeight());
 					
-				}else if(player.direction == Facing.W){
+				}else if(player.getDirection() == Facing.W){
 					x = (int)(player.x-1);
-					y = (int)(player.y+(player.boundingBox.getHeight()/2));	
+					y = (int)(player.y+(((Rectangle2D)player.getBoundingBox()).getHeight()/2));	
 					
 				}else return;
 				

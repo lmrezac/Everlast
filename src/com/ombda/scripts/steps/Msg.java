@@ -15,7 +15,6 @@ public class Msg extends ScriptStep implements MessageListener{
 		this.executed = false;
 	}
 	public void execute(Scope script){
-		System.out.println("called");
 		if(executed) return;
 		executed = true;
 		String result = "";
@@ -46,7 +45,6 @@ public class Msg extends ScriptStep implements MessageListener{
 		game.msgbox.waitingForInput = false;
 	}
 	public void onMessageFinish(){
-		System.out.println("finished message");
 		isDone = true;
 		executed = false;
 		Panel.getInstance().msgbox.removeInputListener(this);

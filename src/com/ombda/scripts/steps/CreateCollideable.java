@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
-import com.ombda.CollideableSprite;
 import com.ombda.Images;
 import com.ombda.Map;
 import com.ombda.Panel;
-import com.ombda.Sprite;
 import com.ombda.Tile;
+import com.ombda.entities.CollideableSprite;
+import com.ombda.entities.Sprite;
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
 

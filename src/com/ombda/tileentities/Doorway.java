@@ -3,8 +3,8 @@ package com.ombda.tileentities;
 import com.ombda.Collideable;
 import com.ombda.Map;
 import com.ombda.Panel;
-import com.ombda.Player;
 import com.ombda.Tile;
+import com.ombda.entities.Player;
 
 public class Doorway extends TileEntity{
 	private String mapname;

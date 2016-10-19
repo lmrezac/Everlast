@@ -1,9 +1,13 @@
-package com.ombda;
+package com.ombda.entities;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 import javax.swing.ImageIcon;
+
+import com.ombda.Map;
+import com.ombda.Point;
+import com.ombda.Tile;
 
 public class Sprite extends Entity{
 	

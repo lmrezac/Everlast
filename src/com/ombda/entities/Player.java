@@ -1,4 +1,4 @@
-package com.ombda;
+package com.ombda.entities;
 
 import static com.ombda.Frame.keys;
 import static com.ombda.Panel.borderX_left;
@@ -7,12 +7,19 @@ import static com.ombda.Panel.borderY_bottom;
 import static com.ombda.Panel.borderY_top;
 import static com.ombda.Panel.dist;
 import static java.awt.event.KeyEvent.*;
+
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+
+import com.ombda.Collideable;
+import com.ombda.Facing;
+import com.ombda.Images;
+import com.ombda.Panel;
+import com.ombda.Tile;
 
 public class Player extends NPC{
 	

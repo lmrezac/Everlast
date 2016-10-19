@@ -1,8 +1,10 @@
-package com.ombda;
+package com.ombda.entities;
 
 import java.awt.Shape;
 
 import javax.swing.ImageIcon;
+
+import com.ombda.Collideable;
 
 public class CollideableSprite extends Sprite implements Collideable{
 	private Shape boundingBox;

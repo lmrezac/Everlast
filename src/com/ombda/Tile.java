@@ -7,6 +7,7 @@ import java.awt.Shape;
 
 import javax.swing.ImageIcon;
 
+import com.ombda.entities.Player;
 import com.ombda.tileentities.TileEntity;
 
 public class Tile implements Collideable, Interactable{
