@@ -1,5 +1,6 @@
 package com.ombda.scripts.steps;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.MessageListener;
@@ -18,13 +19,34 @@ public class Msg extends ScriptStep implements MessageListener{
 		if(executed) return;
 		executed = true;
 		String result = "";
-		for(int i = 0; i < args.size(); i++){
-			String arg = args.get(i);
+		List<String> newargs = new ArrayList<>(args);
+		int index;
+		while((index = newargs.indexOf("(")) != -1){
+			int depth = 1;
+			List<String> subargs = new ArrayList<>();
+			while(!newargs.isEmpty()){
+				if(newargs.get(index+1).equals("(")){
+					depth++;
+				}
+				else if(newargs.get(index+1).equals(")")){
+					depth--;
+				}
+				if(depth == 0) break;
+				subargs.add(script.evalVars(newargs.remove(index+1)));
+			}
+			newargs.remove(index+1);
+			newargs.remove(index);
+			script.evalMath(subargs);
+			
+			newargs.addAll(index,subargs);
+		}
+		for(int i = 0; i < newargs.size(); i++){
+			String arg = newargs.get(i);
 			if(arg.equals("*wait"))
 				result += MessageBox.WAIT;
 			else if(arg.equals("*char")){
 				i++;
-				String chs = args.get(i);
+				String chs = newargs.get(i);
 				int c = Script.parseInt(script.evalVars(chs));
 				result += (char)c;
 			}else if(arg.equals("*line")){
@@ -32,7 +54,7 @@ public class Msg extends ScriptStep implements MessageListener{
 			}else{
 				result += script.evalVars(arg);
 				
-				if(i != args.size()-1)
+				if(i != newargs.size()-1)
 					result += ' ';
 				
 			}

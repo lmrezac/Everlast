@@ -9,6 +9,8 @@ import com.ombda.Facing;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Tile;
+import com.ombda.entities.NPC;
+
 import static com.ombda.Debug.debug;;
 public class Scope{
 	public static final Scope globalScope;
@@ -307,6 +309,32 @@ public class Scope{
 		setVar(varname,value,true,scopeIn);
 	}
 	public String getVar(String varname,Scope scopeIn){
+		if(varname.startsWith("npc ") && varname.contains(".")){
+			varname = varname.substring(4);
+			int i = varname.indexOf('.');
+			String id = varname.substring(0,i);
+			varname = varname.substring(i+1);
+			NPC npc = NPC.getNPC(Script.parseInt(id));
+			if(varname.equals("xy") || varname.equals("pos")){
+				ListScope xy = new ListScope(2);
+				xy.setVar("0", Script.toString(npc.x/(Tile.SIZE/16)), scopeIn);
+				xy.setVar("1", Script.toString(npc.y/(Tile.SIZE/16)), scopeIn);
+				return xy.getIdStr();
+			}else if(varname.equals("x") || varname.equals("pos.x")){
+				return Script.toString(npc.x/(Tile.SIZE/16));
+			}else if(varname.equals("y") || varname.equals("pos.y")){
+				return Script.toString(npc.y/(Tile.SIZE/16));
+			}else if(varname.equals("dest")){
+				ListScope xy = new ListScope(2);
+				xy.setVar("0", Script.toString(npc.destX/(Tile.SIZE/16)), scopeIn);
+				xy.setVar("1", Script.toString(npc.destY/(Tile.SIZE/16)), scopeIn);
+				return xy.getIdStr();
+			}else if(varname.equals("facing")){
+				return npc.getDirection().getStruct().getIdStr();
+			}else if(varname.equals("dest.x")){
+				
+			}else throw new RuntimeException("Cannot set variable "+varname+" in npc");
+		}
 		if(varname.contains("operator"))
 			varname = varname.replaceAll("operator(?! )","operator ");
 		if(varname.equals("class") || varname.equals("class "))
@@ -414,7 +442,8 @@ public class Scope{
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
-			if(!arg.contains("${") && !require_brackets && !require_class && arg.contains(".") && ((i > 0 && !args.get(i-1).equals("class")) || i==0)){
+			
+			if(!arg.contains("${") && !require_brackets && !require_class && arg.contains(".") && ((i > 0 && !args.get(i-1).equals("class") && !args.get(i-1).equals("npc")) || i==0)){
 				args.add(i,"class");
 			}
 		}
@@ -433,7 +462,9 @@ public class Scope{
 					arg = currentScope.getVar(arg,currentScope);
 					args.set(i,arg);
 				}catch(VarNotExists ex){}
-			}//else args.set(i,evalVars(arg));
+			}else if(!require_brackets && arg.equals("npc")){
+				args.set(i,currentScope.getVar(arg+" "+args.remove(i+1),currentScope));
+			}
 		}
 		evalMath(args);
 		for(int i = 0; i < args.size()-1; i++){
@@ -454,7 +485,7 @@ public class Scope{
 			return str.substring(0,str.length()-2);
 		return str;
 	}
-	private void evalMath(List<String> args){
+	public void evalMath(List<String> args){
 		int index;
 		while((index = args.indexOf("(")) != -1){
 			int depth = 1;

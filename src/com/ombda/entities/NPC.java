@@ -22,7 +22,7 @@ import com.ombda.scripts.Script;
 public class NPC extends Sprite implements Updateable, Collideable, Interactable{
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
 	public Script onInteractedScript = null, updateScript = null;
-	private int destX, destY;
+	public int destX, destY;
 	protected double lastX, lastY;
 	protected Rectangle2D boundingBox;
 	private int id;
@@ -77,7 +77,8 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		}
 		setPos(newx,newy);
 		
-		/*if(lastX < x ){
+		
+		if(lastX < x ){
 			if(lastY < y)
 				direction = Facing.SE;
 			else if(lastY > y)
@@ -93,8 +94,15 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			direction = Facing.S;
 		else if(lastY > y)
 			direction = Facing.N;
-		*/
+		
 		this.image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
+		
+		if(updateScript != null){
+			updateScript.execute(updateScript);
+			if(updateScript.done()){
+				updateScript.reset();
+			}
+		}
 	}
 	public void setPos(double x, double y){
 		lastX = this.x;

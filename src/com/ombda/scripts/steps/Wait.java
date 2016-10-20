@@ -4,16 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.scripts.Scope;
-import com.ombda.scripts.Script;
+import com.ombda.scripts.VarNotExists;
 
 public class Wait extends ScriptStep{
 	private List<String> args;
 	private double waiting = 0, time = -1;
+	private boolean until = false, done = false;
 	public Wait(List<String> args){
+		if(args.isEmpty()) throw new RuntimeException("Script step: wait needs at least 1 argument");
+		if(args.get(0).equals("until")){
+			until = true;
+			args.remove(0);
+		}
 		this.args = args;
 	}
 	@Override
 	public void execute(Scope script) {
+		if(until){
+			List<String> newargs = new ArrayList<>(args);
+			try{
+			script.evalArgs(newargs);
+			}catch(VarNotExists ex){
+				throw new VarNotExists(ex.getMessage()+" args = "+newargs);
+			}
+			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step: wait do not evaluate into a single value");
+			if(!newargs.get(0).equals("0")){
+				done = true;
+			}
+			return;
+		}
 		if(waiting == 0){
 			List<String> newargs = new ArrayList<>(args);
 			script.evalArgs(newargs);
@@ -34,6 +53,13 @@ public class Wait extends ScriptStep{
 	}
 	@Override
 	public boolean done(){
+		if(until){
+			if(done){
+				done = false;
+				return true;
+			}
+			return false;
+		}
 		if(waiting != 0 && time >= waiting){
 			waiting = 0;
 			time = -1;

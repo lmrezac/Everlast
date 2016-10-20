@@ -18,7 +18,7 @@ public class Set extends ScriptStep{
 	private boolean index = false;
 	private List<String> args;
 	private boolean finalvar;
-	public Set(boolean b,List<String> args){ 
+	public Set(boolean b,List<String> args){
 		finalvar = b;
 		if(args.get(0).equals("[]")){index = true;args.remove(0);}
 		varname = evalVarName(args,false);
@@ -28,7 +28,7 @@ public class Set extends ScriptStep{
 	public void execute(Scope script){
 		List<String> newargs = new ArrayList<String>(args);
 		script.evalArgs(newargs);
-		
+		String varname = this.varname;
 		if(varname.startsWith("npc ")){
 			if(index) throw new RuntimeException("Syntax");
 			varname = varname.substring(4);
@@ -42,6 +42,9 @@ public class Set extends ScriptStep{
 				String mapname = newargs.get(0);
 				Map map = Map.get(mapname);
 				npc.setMap(map);
+			}else if(varname.equals("speed")){
+				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step: set npc do not evaluate into a single value.");
+				npc.speed = Script.parseDouble(newargs.get(0));
 			}else if(varname.equals("facing")){
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc facing do not evaluate into a single value.");
 				String value = newargs.get(0);
@@ -158,7 +161,7 @@ public class Set extends ScriptStep{
 			if(!varname.startsWith("class ")) varname = "class "+varname;
 			script.setVar(varname+"."+newargs.get(0),newargs.get(1),script);
 		}else{
-			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set do not evaluate into a single value! "+newargs);
+			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set do not evaluate into a single value! set="+varname+" args="+newargs);
 			if(finalvar) script.setFinalVar(varname,newargs.get(0),script);
 			else script.setVar(varname,newargs.get(0),script);
 		}

@@ -1,0 +1,3 @@
+set npc 0x06.xy 74t -5t
+set npc 0x06.dest 1192 10t
+wait until npc 0x06.x = 1192 and npc 0x06.y = 10t

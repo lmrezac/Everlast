@@ -1,3 +1,2 @@
-msg "test" *wait
-wait 2s
-msg "done" *wait
+msg ${npc 0x06.x} ${npc 0x06.y} *wait
+#pause
