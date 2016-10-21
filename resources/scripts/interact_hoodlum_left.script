@@ -2,4 +2,4 @@ if ${global.hoodlum_jeff_talk_last} = left
 msg "Din'cha hear me, bub? Scram!" *wait
 if ${global.hoodlum_jeff_talk_last} not= left
 script testnpc 
-set hoodlum_jeff_talk_last left
+set global.hoodlum_jeff_talk_last left

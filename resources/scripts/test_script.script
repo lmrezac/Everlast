@@ -1,2 +1,4 @@
-msg ${npc 0x06.x} ${npc 0x06.y} *wait
-#pause
+set script function test ()
+	msg "test" *wait
+end script function test
+test

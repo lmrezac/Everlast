@@ -85,7 +85,7 @@ public class MessageBox extends GUI{
 
 	@Override
 	public boolean pauseGame(){
-		return false;
+		return true;
 	}
 	
 	private char[] string;

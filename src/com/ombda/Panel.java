@@ -48,7 +48,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	private Player player;
 	private String player_name;
 	private Map map;
-	private GUI gui;
+	public GUI gui;
 	public GUI previous;
 	public HUD hud;
 	public Input input;
@@ -61,6 +61,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	private int FPS = 60;
 	private int mouseX = 0, mouseY = 0;
 	public boolean drawBoundingBoxes = false;
+	public String step = null;
 	public static final double borderX_left = (3.0/8)*(double)PRF_WIDTH;
 	public static final double borderX_right = (5.0/8)*(double)PRF_WIDTH;
 	public static final double borderY_top = (3.0/8)*(double)PRF_HEIGHT;
@@ -151,13 +152,12 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			guiID = "mapcreator";*/
 		debug(gui.toString());
 	}
-	public Script currentScript = null;
 	private List<Script> scripts = new ArrayList<>();
 	public void runScript(Script s){
+		if(!scripts.contains(s)){
+			scripts.add(s);
+		}
 		debug("running new script");
-		if(currentScript != null && !currentScript.done())
-			scripts.add(currentScript);
-		this.currentScript = s;
 	}
 	public void loadSaveFile(){
 	
@@ -296,7 +296,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
 				int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
 				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+6*size);
-				drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,10+7*size);	
+				drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,10+7*size);
+				drawDebugString(g2d,"step = "+step,0,10+9*size);
 			}
 			lastFrame = temp;
 		}
@@ -318,29 +319,37 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 	public static final double dist = Math.sqrt(.5);
 	
-	public void resetScript(){
+	/*public void resetScript(){
 		debug("reset script");
-		currentScript.reset();
-		if(scripts.isEmpty())
-			currentScript = null;
-		else{
+		for(int i = currentScripts.size()-1; i>=0; i--){
+			currentScripts.get(i).reset();
+		}
+		currentScripts.clear();
+		if(!scripts.isEmpty()){
 			
-			currentScript = scripts.remove(scripts.size()-1);
-			while(!scripts.isEmpty() && currentScript.done()){
-				currentScript = scripts.remove(scripts.size()-1);
+			currentScripts.add(scripts.remove(scripts.size()-1));
+			while(!scripts.isEmpty() && currentScript().done()){
+				currentScripts.set(currentScripts().size()-1,scripts.remove(scripts.size()-1);
 				
 			}
 			if(scripts.isEmpty() && currentScript.done()) 
 				currentScript = null;
 		}
-	}
+	}*/
 	public void update(){
-		if(currentScript != null){
-
-			currentScript.execute(currentScript);
+		if(!scripts.isEmpty()){
+			for(int i = scripts.size()-1; i>=0; i--){
+				Script script = scripts.get(i);
+				script.execute(script);
+				if(script.done()){
+					script.reset();
+					scripts.remove(i);
+				}
+			}
+			/*currentScript.execute(currentScript);
 			if(currentScript != null && currentScript.done()){
 				resetScript();
-			}
+			}*/
 		}
 		if(!gui.pauseGame()){
 			if(!gui.blockInput()){

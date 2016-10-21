@@ -39,19 +39,16 @@ public class Script extends Scope{
 	}
 	public void execute(Scope script){
 		if(index == steps.size()){
-			if(Panel.getInstance().currentScript == this){
-				Panel.getInstance().resetScript();
-				return;
-			}else 
 				throw new RuntimeException("Script was not reset!");
 		}
+		System.out.println("executing script");
 		ScriptStep step = steps.get(index);
 		if(step instanceof Msg && step.done()){
 			index++;
 			execute(script);
 			return;
 		}
-		System.out.println("step = "+step.getClass().getSimpleName());
+		Panel.getInstance().step = step.getClass().getSimpleName();
 		if(index+1 < steps.size()){
 			if(steps.get(index+1) instanceof Msg){
 				Panel.getInstance().msgbox.closeWhenDone = false;
@@ -370,7 +367,12 @@ public class Script extends Scope{
 		}
 		else if(cmd.equals("end"))
 			throw new RuntimeException("Invalid end statement : "+lines.get(i)+" : check your names!");
-		else throw new RuntimeException("There is no script step of name "+cmd+"; line = "+lines.get(i));
+		else{
+			if(!isReservedWord(cmd)){
+				args.add(0,cmd);
+				steps.add(new RunFunction(args));
+			}else throw new RuntimeException("There is no script step of name "+cmd+"; line = "+lines.get(i));
+		}
 		return i;
 	}
 	public static Script getScript(String name){
