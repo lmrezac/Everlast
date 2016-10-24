@@ -4,13 +4,19 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Shape;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 
 import com.ombda.entities.Player;
+import com.ombda.scripts.Function;
+import com.ombda.scripts.Scope;
+import com.ombda.scripts.Script;
+import com.ombda.scripts.Struct;
 import com.ombda.tileentities.TileEntity;
 
-public class Tile implements Collideable, Interactable{
+public class Tile extends Struct implements Collideable, Interactable{
 	public static final int SIZE = 32;
 	public static Tile[] tiles = new Tile[0xFF];
 	private static short id_count = 0;
@@ -18,20 +24,28 @@ public class Tile implements Collideable, Interactable{
 	private Image frame = null;
 	private Shape boundingBox;
 	public final short id;
-	//public static final int NO_COLLIDE = Color.white.getRGB(), COLLIDE = Color.black.getRGB(), WATER = Color.gray.getRGB();
-	/*public Tile(ImageIcon image, Shape boundingBox){
-		this.image = image;
-		this.boundingBox = boundingBox;
-		while(tiles[id_count] != null) id_count++;
-		tiles[id_count] = this;
-		id = id_count;
-	}*/
-	public Tile(short id, ImageIcon image, Shape boundingBox){
-		this.image = image;
+	public Tile(short id, ImageIcon img, Shape boundingBox){
+		super(Scope.tile_type, Arrays.asList("id","isAnimated","getAnimationFrame"));
+		this.setFinalVar("isAnimated", new Function(null,null,false){
+			public int args_length(){ return 0; }
+			public String call(Scope scopeIn, List<String> args){
+				return image instanceof AnimatedImage? "1" : "0";
+			}
+		}.getIdStr(), this);
+		this.setFinalVar("getAnimationFrame", new Function(null,null,false){
+			public int args_length(){ return 0; }
+			public String call(Scope scopeIn, List<String> args){
+				if(!(image instanceof AnimatedImage)) return "0";
+				return Script.toString(((AnimatedImage)image).animationIndex());
+			}
+		}.getIdStr(), this);
+		
+		this.image = img;
 		this.boundingBox = boundingBox;
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
 		tiles[id] = this;
 		this.id = id;
+		super.setVar("id",Short.toString(this.id),false,this);
 	}
 	public Tile(short id, ImageIcon image){
 		this(id,image,Tiles.EMPTY);
@@ -44,6 +58,12 @@ public class Tile implements Collideable, Interactable{
 	}
 	public Tile(int i, ImageIcon retrieve, Shape boundingBox){
 		this((short)i,retrieve,boundingBox);
+	}
+	public void setVar(String varname, String value, boolean isfinal, Scope scope){
+		if(varname.equals("id")){
+			throw new RuntimeException("Cannot set variable id, it is final");
+		}
+		super.setVar(varname,value,isfinal,scope);
 	}
 	public void incrementFrame(){
 		frame = image.getImage();
@@ -65,6 +85,9 @@ public class Tile implements Collideable, Interactable{
 	}
 	public String toString(){
 		return "[object Tile]";
+	}
+	public ImageIcon getIcon(){
+		return image;
 	}
 	public boolean doesPointCollide(int x, int y){
 		if(hasTileEntity(x/SIZE,y/SIZE)){

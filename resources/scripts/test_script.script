@@ -1,4 +1,1 @@
-set script function test ()
-	msg "test" *wait
-end script function test
-test
+msg ( map.getTile ( 81 13 1 ) .isAnimated ) *wait

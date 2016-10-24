@@ -45,7 +45,8 @@ public class Script extends Scope{
 		ScriptStep step = steps.get(index);
 		if(step instanceof Msg && step.done()){
 			index++;
-			execute(script);
+			if(index != steps.size())
+				execute(script);
 			return;
 		}
 		Panel.getInstance().step = step.getClass().getSimpleName();

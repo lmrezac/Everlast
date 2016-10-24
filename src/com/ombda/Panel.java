@@ -340,10 +340,15 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(!scripts.isEmpty()){
 			for(int i = scripts.size()-1; i>=0; i--){
 				Script script = scripts.get(i);
-				script.execute(script);
 				if(script.done()){
 					script.reset();
 					scripts.remove(i);
+				}else{
+					script.execute(script);
+					if(script.done()){
+						script.reset();
+						scripts.remove(i);
+					}
 				}
 			}
 			/*currentScript.execute(currentScript);

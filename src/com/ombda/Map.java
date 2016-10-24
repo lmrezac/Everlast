@@ -80,6 +80,17 @@ public class Map extends Struct{
 			return Map.this.name;
 		}
 	};
+	private final Function getTile = new Function(null,null,false){
+		public int args_length(){ return 3; }
+		public String call(Scope script, List<String> values){
+			int x = Script.parseInt(values.get(0));
+			int y = Script.parseInt(values.get(1));
+			int layer = Script.parseInt(values.get(2));
+			if(layer == 0)
+				return Tile.getTile(background[y][x]).getIdStr();
+			else return Tile.getTile(foreground[y][x]).getIdStr();
+		}
+	};
 	@Override
 	public String getVar(String varname, Scope scopeIn){
 		if(varname.equals("width"))
@@ -88,6 +99,8 @@ public class Map extends Struct{
 			return Integer.toString(Map.this.height);
 		else if(varname.equals("tostring"))
 			return toString.getIdStr();
+		else if(varname.equals("getTile"))
+			return getTile.getIdStr();
 		else if(varname.equals("name"))
 			return name;
 		else throw new VarNotExists("Variable "+varname+" does not exist in map "+Map.this.name);
@@ -142,7 +155,6 @@ public class Map extends Struct{
 		}
 	}
 	public void doTileEntity(List<String> args){
-		
 		if(args.size() < 3) throw new RuntimeException("Expected x and y for tile entity");
 		int tilex = Integer.parseInt(args.remove(0));
 		int tiley = Integer.parseInt(args.remove(0));

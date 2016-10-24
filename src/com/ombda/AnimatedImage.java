@@ -42,4 +42,7 @@ public class AnimatedImage extends ImageIcon{
 	public int getIconWidth(){
 		return width;
 	}
+	public int animationIndex() {
+		return index;
+	}
 }
