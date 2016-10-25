@@ -61,7 +61,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return direction;
 	}
 	public void update(){
-		System.out.println(Panel.getInstance().gui.pauseGame());
+		//System.out.println(Panel.getInstance().gui.pauseGame());
 		double newx = x, newy = y;
 		if(x != destX){
 			

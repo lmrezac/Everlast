@@ -542,7 +542,8 @@ public class Scope{
 	}
 
 	public void evalArgs(List<String> args){
-	//	debug("before: "+args);
+		
+		//debug("before: "+args);
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
@@ -571,16 +572,11 @@ public class Scope{
 				}
 			}else if(!require_brackets && arg.equals("npc")){
 				args.set(i, currentScope.getVar(arg + " " + args.remove(i + 1), currentScope));
-			}else if(i > 0 && arg.startsWith(".") && arg.length()>1 && args.get(i-1).startsWith(Script.REF)){
-				debug("test");
-				Scope scope = Scope.getId(args.get(i-1));
-				args.remove(i);
-				i--;
-				debug("args before = "+args);
-				args.set(i,scope.getVar(arg.substring(1),currentScope));
-				debug("args after = "+args);
 			}
+			
+			
 		}
+		
 		evalMath(args);
 		for(int i = 0; i < args.size() - 1; i++){
 			String arg = evalVars(args.get(i));
@@ -603,6 +599,7 @@ public class Scope{
 	}
 
 	public void evalMath(List<String> args){
+		
 		int index;
 		while((index = args.indexOf("(")) != -1){
 			int depth = 1;
@@ -625,6 +622,7 @@ public class Scope{
 		}
 		List<String> lastPass = new ArrayList<String>();
 		while(!args.equals(lastPass)){
+			lastPass = new ArrayList<String>(args);
 			for(index = args.size() - 1; index >= 0; index--){
 				String arg = evalVars(args.get(index));
 				if(arg.startsWith(Script.REF)){
@@ -652,6 +650,14 @@ public class Scope{
 						if(!(scope instanceof Function))
 							throw new RuntimeException("Value after function declaration MUST be a function value.");
 						args.set(index, scope.getIdStr());
+					}
+					if(index+1 < args.size() && args.get(index+1).startsWith(".") && args.get(index+1).length()>1 && args.get(index).startsWith(Script.REF)){
+					
+						Scope scope = Scope.getId(args.get(index));
+						String val = args.remove(index+1);
+				//		index--;
+						args.set(index,arg = scope.getVar(val.substring(1),getCurrentScope()));
+		
 					}
 				}else if(arg.equals("new")){
 					if(index >= args.size() - 1)
@@ -702,9 +708,11 @@ public class Scope{
 						list.setVar(toString(j), values.get(j), getCurrentScope());
 
 					args.set(index, list.getIdStr());
+			
 				}else
 					args.set(index, arg);
 			} // functions
+			
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("^")){
@@ -775,6 +783,7 @@ public class Scope{
 				}
 			} // + -
 			for(index = 1; index < args.size() - 1; index++){
+				
 				String arg = args.get(index);
 				if(arg.equals("=") || arg.equals("not=")){
 
@@ -788,6 +797,7 @@ public class Scope{
 							String arg1_ = evalVars(arg1);
 							String arg2_ = evalVars(arg2);
 							double x = parseDouble(arg1_), y = parseDouble(arg2_);
+							debug("x = "+x+" y = "+y+" arg = "+arg);
 							if(arg1_.endsWith("t"))
 								x /= Tile.SIZE / 16;
 							if(arg2_.endsWith("t"))
@@ -804,8 +814,14 @@ public class Scope{
 									args.set(index, args.get(index).equals("0")? "1" : "0");
 							}
 						}
-					if(string)
-						args.set(index, (arg.equals("not=")? !arg1.equals(arg2) : arg1.equals(arg2))? "1" : "0");
+					if(string){
+						if(arg1.startsWith(Script.REF)|| arg2.startsWith(Script.REF) ){
+							args.add(index+1,arg);
+							args.add(index+2,arg2);
+							index+=2;
+						}else
+							args.set(index, (arg.equals("not=")? !arg1.equals(arg2) : arg1.equals(arg2))? "1" : "0");
+					}
 				}else if(arg.equals("<") || arg.equals("<=") || arg.equals(">") || arg.equals(">=")){
 					index--;
 					String arg1 = args.get(index);
@@ -815,6 +831,7 @@ public class Scope{
 					if(!string)
 						try{
 							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
+							debug("x = "+x+" y = "+y+" arg = "+arg);
 							args.set(index, (arg.equals("<")? (x < y) : arg.equals("<=")? (x <= y) : arg.equals(">")? (x > y) : (x >= y))? "1" : "0");
 						}catch(NumberFormatException e){
 							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
@@ -822,6 +839,7 @@ public class Scope{
 					if(string){
 						args.add(index + 1, arg);
 						args.add(index + 2, arg2);
+						index = index+2;
 					}
 				}
 			} // = < > <= >= not=
@@ -888,7 +906,6 @@ public class Scope{
 					}
 				}
 			} // or
-			lastPass = new ArrayList<String>(args);
 		}
 	}
 

@@ -1,1 +1,1 @@
-msg ( map.getTile ( 81 13 1 ) .isAnimated ) *wait
+msg ( map.getTile ( 81 13 1 ) .getAnimationFrame ) *wait

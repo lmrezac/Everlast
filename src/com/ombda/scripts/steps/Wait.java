@@ -27,7 +27,9 @@ public class Wait extends ScriptStep{
 			}catch(VarNotExists ex){
 				throw new VarNotExists(ex.getMessage()+" args = "+newargs,ex);
 			}
+		
 			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step: wait do not evaluate into a single value");
+			System.out.println("args = "+args+" newargs  = "+newargs);
 			if(!newargs.get(0).equals("0")){
 				done = true;
 			}

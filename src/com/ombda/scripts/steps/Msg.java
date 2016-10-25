@@ -36,7 +36,7 @@ public class Msg extends ScriptStep implements MessageListener{
 			}
 			newargs.remove(index+1);
 			newargs.remove(index);
-			script.evalMath(subargs);
+			script.evalArgs(subargs);
 			
 			newargs.addAll(index,subargs);
 		}

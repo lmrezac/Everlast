@@ -35,8 +35,11 @@ public class Tile extends Struct implements Collideable, Interactable{
 		this.setFinalVar("getAnimationFrame", new Function(null,null,false){
 			public int args_length(){ return 0; }
 			public String call(Scope scopeIn, List<String> args){
-				if(!(image instanceof AnimatedImage)) return "0";
-				return Script.toString(((AnimatedImage)image).animationIndex());
+				String result;
+				if(!(image instanceof AnimatedImage)) result = "0";
+				result = Script.toString(((AnimatedImage)image).animationIndex());
+				System.out.println("Getanimationframe = "+result);
+				return result;
 			}
 		}.getIdStr(), this);
 		

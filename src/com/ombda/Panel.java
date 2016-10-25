@@ -157,7 +157,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(!scripts.contains(s)){
 			scripts.add(s);
 		}
-		debug("running new script");
+		//debug("running new script");
 	}
 	public void loadSaveFile(){
 	

@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -212,21 +213,40 @@ public class MessageBox extends GUI{
 				if(bold){
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth(null)+1, drawY+9);
+						BufferedImage letter;
+						if(c >= letters.length)
+							letter = letters['?'];
+						else letter = letters[c];
+						g2d.drawLine(drawX, drawY+9, drawX+letter.getWidth(null)+1, drawY+9);
 					}
-					g2d.drawImage(tint(letters[c],tint),drawX,drawY,null);
-					g2d.drawImage(tint(letters[c],tint),drawX+1,drawY,null);
+					BufferedImage letter;
+					if(c >= letters.length)
+						letter = letters['?'];
+					else letter = letters[c];
+					g2d.drawImage(tint(letter,tint),drawX,drawY,null);
+					g2d.drawImage(tint(letter,tint),drawX+1,drawY,null);
 					
 					drawX++;
 				}else{
 					if(underline){
 						g2d.setColor(underlineColor);
-						g2d.drawLine(drawX, drawY+9, drawX+letters[c].getWidth(null), drawY+9);
+						BufferedImage letter;
+						if(c >= letters.length)
+							letter = letters['?'];
+						else letter = letters[c];
+						g2d.drawLine(drawX, drawY+9, drawX+letter.getWidth(null), drawY+9);
 					}
-					g2d.drawImage(tint(letters[c],tint),drawX,drawY,null);
+					BufferedImage letter;
+					if(c >= letters.length)
+						letter = letters['?'];
+					else letter = letters[c];
+					g2d.drawImage(tint(letter,tint),drawX,drawY,null);
 				}
-				
-				drawX += letters[c].getWidth(null);
+				BufferedImage letter;
+				if(c >= letters.length)
+					letter = letters['?'];
+				else letter = letters[c];
+				drawX += letter.getWidth(null);
 			}
 		}
 		

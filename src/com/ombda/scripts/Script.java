@@ -41,7 +41,7 @@ public class Script extends Scope{
 		if(index == steps.size()){
 				throw new RuntimeException("Script was not reset!");
 		}
-		System.out.println("executing script");
+		//System.out.println("executing script");
 		ScriptStep step = steps.get(index);
 		if(step instanceof Msg && step.done()){
 			index++;
@@ -415,7 +415,7 @@ public class Script extends Scope{
 		return result;
 	}
 	public String toString(){
-		return description+":done="+done();
+		return description;
 	}
 }
 
