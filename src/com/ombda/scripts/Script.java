@@ -166,6 +166,8 @@ public class Script extends Scope{
 		}
 		if(cmd.equals("msg"))
 			steps.add(new Msg(args));
+		else if(cmd.equals("print"))
+			steps.add(new PrintToConsole(args));
 		else if(cmd.equals("npc"))
 			steps.add(new CreateNPC(args));
 		else if(cmd.equals("sprite"))

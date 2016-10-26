@@ -10,7 +10,7 @@ public class ListScope extends Scope{
 		if(size < 0) throw new RuntimeException("Invalid size : "+size);
 		variadicsize = false;
 		this.size = size;
-		super.setFinalVar("size", Scope.toString(size),this);
+		super.setVar("size", Scope.toString(size), true, this);
 	}
 	public ListScope(){
 		super(false);
@@ -58,7 +58,7 @@ public class ListScope extends Scope{
 						throw new IndexOutOfBoundsException("Index "+id+", size "+size);
 					this.size = id;
 				}
-				super.setVar("class "+varname, value,scopeIn);
+				super.setVar("class "+varname, value,false,scopeIn);
 			}else{
 				varname = varname.substring(0,i);
 				if(!varname.matches("\\d+"))
@@ -72,7 +72,7 @@ public class ListScope extends Scope{
 						throw new IndexOutOfBoundsException("Index "+id+", size "+size);
 					this.size = id;
 				}
-				super.setVar("class "+varname, value,scopeIn);
+				super.setVar("class "+varname, value,false,scopeIn);
 			}
 		}else{
 			if(!varname.matches("\\d+"))
@@ -86,7 +86,7 @@ public class ListScope extends Scope{
 					throw new IndexOutOfBoundsException("Index "+id+", size "+size);
 				this.size = id;
 			}
-			super.setVar(varname,value,scopeIn);
+			super.setVar(varname,value,false,scopeIn);
 		}
 	}
 	public void addAt(int index,String value){

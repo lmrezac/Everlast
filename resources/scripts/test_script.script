@@ -1,6 +1,1 @@
-set script function testAnimationFrame ()
-	set x map.getTile 81 13 1 .getAnimationFrame
-	return x >= 4 and x <= 6
-end script function testAnimationFrame
-wait until testAnimationFrame
-msg "green" *wait
+print npc 0x01.pos = { 1344 80 }

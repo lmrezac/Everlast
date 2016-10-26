@@ -6,7 +6,7 @@ import java.util.Locale;
 public class Debug extends PrintStream{
 	public static boolean debug = true;
 	public static boolean printStackTrace = true;
-	private static PrintStream parent = System.out;
+	public static PrintStream parent = System.out;
 	public Debug(){
 		super(System.out);
 		System.setOut(this);

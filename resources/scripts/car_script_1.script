@@ -2,9 +2,11 @@ set script function testAnimationFrame ()
 	set x map.getTile 81 13 1 .getAnimationFrame
 	return x >= 4 and x <= 6
 end script function testAnimationFrame
+set npc 0x06.speed 1
 while 1 do
 set npc 0x06.xy 74t -5t
 set npc 0x06.dest 1192 10t
 wait until npc 0x06.x = 1192 and npc 0x06.y = 10t
 wait until testAnimationFrame
+set npc 0x06.dest 1192 36t
 end while

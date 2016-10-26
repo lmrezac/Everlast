@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.ombda.Facing;
 import com.ombda.Map;
@@ -393,7 +394,10 @@ public class Scope{
 			}else if(varname.equals("facing")){
 				return npc.getDirection().getStruct().getIdStr();
 			}else if(varname.equals("dest.x")){
-
+				return Script.toString(npc.destX);
+			}else if(varname.equals("dest.y")){
+				return Script.toString(npc.destY);
+			//}else if(varname.equals("))
 			}else
 				throw new RuntimeException("Cannot set variable " + varname + " in npc");
 		}
@@ -442,6 +446,7 @@ public class Scope{
 				}else{
 					value = vars.get(varname);
 				}
+				//debug("varname = "+varname);
 				if(value == null || !value.startsWith(Script.REF))
 					throw new VarNotExists("Scoped variable " + varname + " does not exist.");
 				Scope scope = getId(value);
@@ -530,11 +535,11 @@ public class Scope{
 			vars.remove(varname);
 		}
 	}
-
+	private static Pattern number = Pattern.compile("-?((\\d+\\.\\d*)|(\\d*\\.\\d+))");
 	public String evalVars(String line){
 		Scope currentScope = this.getCurrentScope();
 		String str = line;
-		if(!isString(str) && !require_brackets && !str.matches("-?((\\d+(\\.\\d+)?)|(\\d*\\.\\d+))")){
+		if(!isString(str) && !require_brackets && !number.matcher(str).find()){
 			if(currentScope.vars.containsKey(str) || ((!str.startsWith("npc ") && (str.startsWith("class ") || (!require_class && str.indexOf(".") > 0)) && !str.contains("${")))){
 
 				if(str.indexOf(".") > 0 && !str.startsWith("class ") && !str.startsWith(".") && !require_class && !str.startsWith("npc "))
@@ -555,7 +560,6 @@ public class Scope{
 	}
 
 	public void evalArgs(List<String> args){
-		if(args.size() == 1)debug("args = "+args);
 		//debug("before: "+args);
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
@@ -589,10 +593,6 @@ public class Scope{
 			
 			
 		}
-		if(args.size() == 1){
-			debug("args = "+args);
-			debug("scope = "+currentScope.getId());
-		}
 		evalMath(args);
 		for(int i = 0; i < args.size() - 1; i++){
 			String arg = evalVars(args.get(i));
@@ -615,7 +615,6 @@ public class Scope{
 	}
 
 	public void evalMath(List<String> args){
-		if(args.size() == 1) debug("args = "+args);
 		int index;
 		while((index = args.indexOf("(")) != -1){
 			int depth = 1;
@@ -645,7 +644,6 @@ public class Scope{
 					if((index != 0 && !args.get(index - 1).equals("function")) || index == 0){
 						Scope scope = getId(arg);
 						if(scope instanceof Function){
-							if(args.size() == 1)debug("calling function");
 							Function func = (Function) scope;
 							int size = func.args_length();
 							List<String> values = new ArrayList<>();
@@ -712,8 +710,8 @@ public class Scope{
 					}else
 						throw new RuntimeException("Invalid type name: " + name);
 				}else if(arg.equals("{")){
-					if(index >= args.size() - 2)
-						throw new RuntimeException("Expected parenthesis after collect");
+					//if(index >= args.size() - 2)
+					//	throw new RuntimeException("Expected parenthesis after collect");
 					args.remove(index);
 					List<String> values = new ArrayList<>();
 
@@ -814,7 +812,7 @@ public class Scope{
 							String arg1_ = evalVars(arg1);
 							String arg2_ = evalVars(arg2);
 							double x = parseDouble(arg1_), y = parseDouble(arg2_);
-							if(args.size() == 1) debug("args = "+args+"x = "+x+" y = "+y+" arg = "+arg);
+							
 							if(arg1_.endsWith("t"))
 								x /= Tile.SIZE / 16;
 							if(arg2_.endsWith("t"))
@@ -833,9 +831,20 @@ public class Scope{
 						}
 					if(string){
 						if(arg1.startsWith(Script.REF)|| arg2.startsWith(Script.REF) ){
-							args.add(index+1,arg);
-							args.add(index+2,arg2);
-							index+=2;
+							Scope sarg1 = Scope.getId(arg1);
+							
+							if(!(sarg1 instanceof Function)){
+								if(arg2.startsWith(Script.REF)){
+									error
+								}
+							}else if(arg2.startsWith(Script.REF)){
+								
+							}else{
+								args.add(index+1,arg);
+								args.add(index+2,arg2);
+								index+=2;
+							}
+							
 						}else
 							args.set(index, (arg.equals("not=")? !arg1.equals(arg2) : arg1.equals(arg2))? "1" : "0");
 					}
@@ -848,7 +857,6 @@ public class Scope{
 					if(!string)
 						try{
 							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
-							debug("x = "+x+" y = "+y+" arg = "+arg);
 							args.set(index, (arg.equals("<")? (x < y) : arg.equals("<=")? (x <= y) : arg.equals(">")? (x > y) : (x >= y))? "1" : "0");
 						}catch(NumberFormatException e){
 							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
