@@ -12,7 +12,7 @@ public class Script extends Scope{
 	private static HashMap<String,Script> scripts = new HashMap<>();
 	public static final String REF = "ǂ";
 	protected Scope currentScope;
-	private List<Scope> pastScopes = new ArrayList<>();
+	List<Scope> pastScopes = new ArrayList<>();
 	protected List<ScriptStep> steps;
 	public int index = 0;
 	private String description;

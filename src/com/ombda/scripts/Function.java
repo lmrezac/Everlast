@@ -39,6 +39,7 @@ public class Function extends Script{
 			step.execute(this.currentScope);
 		}
 		this.vars.clear();
+		this.finalvars.clear();
 		return returnedValue;
 	}
 	public boolean done(){

@@ -29,9 +29,8 @@ public class RunScript extends ScriptStep{
 				throw new RuntimeException("Value passed to script step : script MUST be a script!");
 			script = (Script)scope;
 		}
-		script.setScope(scopeIn);
-		//script.run();
-		//script.exitScope();
+		//TODO If the below line is uncommented, then when the script is called, it will have the wrong scope for some reason.
+		///script.setScope(scopeIn);
 		Panel.getInstance().runScript(script);
 	}
 	

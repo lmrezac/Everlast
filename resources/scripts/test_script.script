@@ -1,1 +1,6 @@
-msg ( map.getTile ( 81 13 1 ) .getAnimationFrame ) *wait
+set script function testAnimationFrame ()
+	set x map.getTile 81 13 1 .getAnimationFrame
+	return x >= 4 and x <= 6
+end script function testAnimationFrame
+wait until testAnimationFrame
+msg "green" *wait

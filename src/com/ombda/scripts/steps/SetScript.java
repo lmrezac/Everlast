@@ -41,5 +41,6 @@ public class SetScript extends ScriptStep{
 		else thing = new Script(steps);
 		if(finalvar) script.setFinalVar(varname,thing.getIdStr(),script);
 		else script.setVar(varname,thing.getIdStr(),script);
+		System.out.println("function created: "+varname+" "+thing.getId()+" in scope "+script.getId());
 	}
 }

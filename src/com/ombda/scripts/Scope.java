@@ -368,8 +368,8 @@ public class Scope{
 		setVar(varname, value, true, scopeIn);
 	}
 
-	public String getVar(String varname, Scope scopeIn){
-
+	public String getVar(String varnameIn, Scope scopeIn){
+		String varname = varnameIn;
 		if(varname.startsWith("npc ") && varname.indexOf(".") > 0){
 			varname = varname.substring(4);
 			int i = varname.indexOf('.');
@@ -466,8 +466,21 @@ public class Scope{
 					value = map.getIdStr();
 			}else
 				value = vars.get(varname);
-			if(value == null)
+			if(value == null){
+				if(this instanceof Script){
+					Script script = (Script)this;
+					if(!script.pastScopes.isEmpty()){
+						Scope scope = script.pastScopes.get(script.pastScopes.size()-1);
+						if(scope == scopeIn){
+							if(script.pastScopes.size() > 1)
+							scope = script.pastScopes.get(script.pastScopes.size()-2);
+							else throw new VarNotExists("Variable " + varname + " doesn't exist!");
+						}
+						return scope.getVar(varnameIn, scopeIn);
+					}
+				}
 				throw new VarNotExists("Variable " + varname + " doesn't exist!");
+			}
 			return value;
 		}
 	}
@@ -542,7 +555,7 @@ public class Scope{
 	}
 
 	public void evalArgs(List<String> args){
-		
+		if(args.size() == 1)debug("args = "+args);
 		//debug("before: "+args);
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
@@ -572,11 +585,14 @@ public class Scope{
 				}
 			}else if(!require_brackets && arg.equals("npc")){
 				args.set(i, currentScope.getVar(arg + " " + args.remove(i + 1), currentScope));
-			}
+			}else args.set(i,currentScope.evalVars(arg));
 			
 			
 		}
-		
+		if(args.size() == 1){
+			debug("args = "+args);
+			debug("scope = "+currentScope.getId());
+		}
 		evalMath(args);
 		for(int i = 0; i < args.size() - 1; i++){
 			String arg = evalVars(args.get(i));
@@ -599,7 +615,7 @@ public class Scope{
 	}
 
 	public void evalMath(List<String> args){
-		
+		if(args.size() == 1) debug("args = "+args);
 		int index;
 		while((index = args.indexOf("(")) != -1){
 			int depth = 1;
@@ -629,6 +645,7 @@ public class Scope{
 					if((index != 0 && !args.get(index - 1).equals("function")) || index == 0){
 						Scope scope = getId(arg);
 						if(scope instanceof Function){
+							if(args.size() == 1)debug("calling function");
 							Function func = (Function) scope;
 							int size = func.args_length();
 							List<String> values = new ArrayList<>();
@@ -797,7 +814,7 @@ public class Scope{
 							String arg1_ = evalVars(arg1);
 							String arg2_ = evalVars(arg2);
 							double x = parseDouble(arg1_), y = parseDouble(arg2_);
-							debug("x = "+x+" y = "+y+" arg = "+arg);
+							if(args.size() == 1) debug("args = "+args+"x = "+x+" y = "+y+" arg = "+arg);
 							if(arg1_.endsWith("t"))
 								x /= Tile.SIZE / 16;
 							if(arg2_.endsWith("t"))
