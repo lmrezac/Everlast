@@ -37,7 +37,7 @@ public class Define extends ScriptStep{
 				template.setFinalVar(varname,defaultValue,script);
 			else{
 				template.setVar(varname,defaultValue,script);
-			//	System.out.println("Set variable "+varname+" in struct "+template.getName()+" to "+defaultValue);
+			//	debug("Set variable "+varname+" in struct "+template.getName()+" to "+defaultValue);
 			}
 			if(!template.isClass && !isPublic) throw new RuntimeException("Cannot set private variable in struct.");
 			template.staticPublicVars.put(varname,isPublic);

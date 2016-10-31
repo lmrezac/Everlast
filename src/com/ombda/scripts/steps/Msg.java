@@ -74,10 +74,10 @@ public class Msg extends ScriptStep implements MessageListener{
 	private boolean isDone = false;
 	@Override
 	public boolean done(){
-		/*System.out.println("called!");
+		/*debug("called!");
 		if(Panel.getInstance().msgbox.isFinished()){
 			executed = false;
-			System.out.println("finished executing message");
+			debug("finished executing message");
 			//MessageBox box = Panel.getInstance().msgbox;
 			return true;
 		}

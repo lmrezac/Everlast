@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.Debug;
+import com.ombda.Images;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Tile;
@@ -140,6 +141,11 @@ public class Console extends Input{
 			reset();
 		}else if(args.get(1).equals("console")){
 			throw new CmdException("Cannot set gui to "+args.get(1));
+		}else if(args.get(1).equals("img")){
+			if(args.size() != 3) throw new CmdException("Need another argument");
+			panel.img.setImage(Images.retrieve(args.get(2)));
+			panel.setGUI(panel.img);
+			reset();
 		}else throw new CmdException("No such gui id: "+args.get(1));
 	}
 	

@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import com.ombda.Panel;
 import com.ombda.scripts.steps.*;
-
+import static com.ombda.Debug.debug;
 public class Script extends Scope{
 	private static HashMap<String,Script> scripts = new HashMap<>();
 	public static final String REF = "ǂ";
@@ -41,7 +41,7 @@ public class Script extends Scope{
 		if(index == steps.size()){
 				throw new RuntimeException("Script was not reset!");
 		}
-		//System.out.println("executing script");
+		//debug("executing script");
 		ScriptStep step = steps.get(index);
 		if(step instanceof Msg && step.done()){
 			index++;
@@ -64,7 +64,7 @@ public class Script extends Scope{
 		return index == steps.size();
 	}
 	public void run(){
-		System.out.println("called!");
+		debug("called!");
 		new Exception().printStackTrace();
 		while(!done()){
 			execute(this.currentScope);
@@ -299,7 +299,7 @@ public class Script extends Scope{
 			String end = "end "+name;
 			List<ScriptStep> substeps = new ArrayList<>();
 			for(i = i+1; i < lines.size(); i++){
-			//	System.out.println("lines = '"+lines.get(i)+"' end = '"+end+"' == "+lines.get(i).equals(end));
+			//	debug("lines = '"+lines.get(i)+"' end = '"+end+"' == "+lines.get(i).equals(end));
 				if(lines.get(i).equals(end)) break;
 				List<String> subargs = scanLine(lines.get(i));
 				String subcmd2 = subargs.remove(0);
@@ -413,7 +413,7 @@ public class Script extends Scope{
 				result += '"'+name+"\"=\""+globalScope.vars.get(name)+"\" ";
 		}
 		if(result.length() > 1) result = result.substring(0,result.length()-1);
-		System.out.println(result);
+		debug(result);
 		return result;
 	}
 	public String toString(){

@@ -12,7 +12,7 @@ import com.ombda.scripts.FacingStruct;
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
 import com.ombda.scripts.Struct;
-
+import static com.ombda.Debug.debug;
 public class Set extends ScriptStep{
 	private String varname;
 	private boolean index = false;
@@ -45,6 +45,7 @@ public class Set extends ScriptStep{
 			}else if(varname.equals("speed")){
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step: set npc do not evaluate into a single value.");
 				npc.speed = Script.parseDouble(newargs.get(0));
+				debug("set npc "+id+" speed to "+npc.speed);
 			}else if(varname.equals("facing")){
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc facing do not evaluate into a single value.");
 				String value = newargs.get(0);
@@ -62,24 +63,24 @@ public class Set extends ScriptStep{
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
 				int x = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				npc.x = x;
-				System.out.println("Set npc "+Integer.toHexString(id)+" x to "+x);
+				debug("Set npc "+Integer.toHexString(id)+" x to "+x);
 			}else if(varname.equals("y")){
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				npc.y = y;
-				System.out.println("Set npc "+Integer.toHexString(id)+" y to "+y);
+				debug("Set npc "+Integer.toHexString(id)+" y to "+y);
 			}else if(varname.equals("pos")){
 				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
 				int x = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(1));
 				npc.setPos(x, y);
-				System.out.println("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
+				debug("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
 			}else if(varname.equals("dest")){
 				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
 				int x = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(1));
 				npc.setDestination(x,y);
-				System.out.println("Set npc "+Integer.toHexString(id)+" dest to ("+x+","+y+")");
+				debug("Set npc "+Integer.toHexString(id)+" dest to ("+x+","+y+")");
 			}else if(varname.equals("onInteracted")){
 				if(newargs.isEmpty() || newargs.get(0).equals("null")){
 					npc.onInteractedScript = null;
@@ -112,7 +113,7 @@ public class Set extends ScriptStep{
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(1));
 				npc.setPos(x, y);
 				npc.setDestination(x, y);
-				System.out.println("Set npc "+Integer.toHexString(id)+" pos and dest to ("+x+","+y+")");
+				debug("Set npc "+Integer.toHexString(id)+" pos and dest to ("+x+","+y+")");
 			}else throw new RuntimeException("Invalid npc varname: "+varname);
 		}else if(varname.startsWith("sprite ")){
 			if(index) throw new RuntimeException("Syntax");
@@ -142,18 +143,18 @@ public class Set extends ScriptStep{
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
 				int x = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				sprite.x = x;
-				System.out.println("Set sprite "+Integer.toHexString(id)+" x to "+x);
+				debug("Set sprite "+Integer.toHexString(id)+" x to "+x);
 			}else if(varname.equals("y")){
 				if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : set npc x do not evaluate into a single value.");
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				sprite.y = y;
-				System.out.println("Set sprite "+Integer.toHexString(id)+" y to "+y);
+				debug("Set sprite "+Integer.toHexString(id)+" y to "+y);
 			}else if(varname.equals("pos")){
 				if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set ncp pos do not evaluate into 2 values.");
 				int x = (Tile.SIZE/16) * Script.parseInt(newargs.get(0));
 				int y = (Tile.SIZE/16) * Script.parseInt(newargs.get(1));
 				sprite.setPos(x, y);
-				System.out.println("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
+				debug("Set npc "+Integer.toHexString(id)+" pos to ("+x+","+y+")");
 			}else throw new RuntimeException("Invalid sprite varname: "+varname);
 		}else if(index){
 			if(newargs.size() != 2) throw new RuntimeException("Arguments passed to script step : set [] do not evaluate into an index and a value");

@@ -44,7 +44,7 @@ public class Tilemap{
 				}
 			}
 			if(image == null){
-				System.out.println("Loading default image for tile id "+count+" in tilemap id "+id);
+				debug("Loading default image for tile id "+count+" in tilemap id "+id);
 				image = Images.retrieve("tilemaps\\"+id+"\\"+count+"\\layer0.png");
 			}
 			tiles.add(new Tile(image,box));

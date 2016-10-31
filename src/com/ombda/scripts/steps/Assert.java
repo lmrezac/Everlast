@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.scripts.Scope;
-
+import static com.ombda.Debug.debug;
 public class Assert extends ScriptStep{
 	private List<String> args;
 	public Assert(List<String> args){
@@ -20,7 +20,7 @@ public class Assert extends ScriptStep{
 			if(newargs.size() > 1){
 				newargs.set(0,"Assertation failure ");
 				new Msg(newargs).execute(scope);
-			}else System.out.println("Assertation failure ");
+			}else debug("Assertation failure ");
 			throw new Error();
 		}
 	}

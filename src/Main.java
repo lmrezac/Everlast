@@ -4,14 +4,13 @@ import java.io.PrintStream;
 import com.ombda.Debug;
 import com.ombda.FatalError;
 import com.ombda.Frame;
-
+import static com.ombda.Debug.debug;
 public class Main{
 	private static Frame theFrame;
 	public static final PrintStream stream = new com.ombda.Debug();
 	public static void main(String[] args){
-		
 		try{
-		System.out.println("Starting!");
+		debug("Starting!");
 		EventQueue.invokeLater(new Runnable(){
 			@Override
 			public void run(){

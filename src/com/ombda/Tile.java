@@ -15,7 +15,7 @@ import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
 import com.ombda.scripts.Struct;
 import com.ombda.tileentities.TileEntity;
-
+import static com.ombda.Debug.debug;
 public class Tile extends Struct implements Collideable, Interactable{
 	public static final int SIZE = 32;
 	public static Tile[] tiles = new Tile[0xFF];
@@ -38,7 +38,7 @@ public class Tile extends Struct implements Collideable, Interactable{
 				String result;
 				if(!(image instanceof AnimatedImage)) result = "0";
 				result = Script.toString(((AnimatedImage)image).animationIndex());
-				System.out.println("Getanimationframe = "+result);
+				debug("Getanimationframe = "+result);
 				return result;
 			}
 		}.getIdStr(), this);

@@ -38,6 +38,23 @@ public class ListScope extends Scope{
 				return value;
 			}
 		}.getIdStr());
+		this.vars.put("equals", this.vars.put("operator =", new Function(null,null,false){
+			public int args_length(){ return 1; }
+			public String call(Scope scopeIn, List<String> values){
+				String val = values.get(0);
+				if(!val.startsWith(Script.REF))return "0";
+				Scope scope = Scope.getId(val);
+				if(!(scope instanceof ListScope)) return "0";
+				ListScope list = (ListScope)scope;
+				if(variadicsize != list.variadicsize) return "0";
+				if(size != list.size) return "0";
+				for(int i = 0; i < size; i++){
+					String index = String.valueOf(i);
+					if(!getVar(index,this).equals(list.getVar(index,list))) return "0";
+				}
+				return "1";
+			}
+		}.getIdStr()));
 	}
 	public boolean variadic(){ return variadicsize; }
 	public void setVar(String varname, String value,boolean isfinal,Scope scopeIn){
@@ -108,7 +125,7 @@ public class ListScope extends Scope{
 	}
 	public String getVar(String varname,Scope scopeIn){
 		if(varname.equals("size")) return Integer.toString(this.size);
-		if(varname.equals("add") || varname.equals("addAt") || varname.equals("removeAt"))
+		if(varname.equals("add") || varname.equals("addAt") || varname.equals("removeAt") || varname.equals("equals") || varname.equals("operator ="))
 			return super.getVar(varname,scopeIn);
 		if(!varname.startsWith("class ") && !require_class && varname.contains(".")) varname = "class "+varname;
 		if(varname.startsWith("class ")){
@@ -172,5 +189,13 @@ public class ListScope extends Scope{
 				result += ' ';
 		}
 		return result+"}";
+	}
+	public boolean equals(ListScope list){
+		if(size != list.size) return false;
+		for(int i = 0; i < size; i++){
+			String index = String.valueOf(i);
+			if(!getVar(index,this).equals(list.getVar(index,list))) return false;
+		}
+		return true;
 	}
 }

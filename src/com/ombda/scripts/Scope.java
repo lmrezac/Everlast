@@ -95,11 +95,11 @@ public class Scope{
 				}else if(varname.equals("x")){
 					double d = parseDouble(value);
 					Panel.getInstance().getPlayer().x = d;
-					System.out.println("Set player x to " + value);
+					debug("Set player x to " + value);
 				}else if(varname.equals("y")){
 					double d = parseDouble(value);
 					Panel.getInstance().getPlayer().y = d;
-					System.out.println("Set player y to " + value);
+					debug("Set player y to " + value);
 				}else if(varname.equals("map")){
 					if(!value.startsWith(Script.REF)){
 						Map map = Map.get(value);
@@ -407,7 +407,7 @@ public class Scope{
 			throw new RuntimeException("Expected subscope name after class");
 		if(!varname.startsWith("class ") && !require_class && varname.indexOf(".") > 0)
 			varname = "class " + varname;
-		// System.out.println("Get var "+varname);
+		// debug("Get var "+varname);
 		if(varname.startsWith("class ")){
 			varname = varname.substring(6);
 			int i = varname.indexOf('.');
@@ -564,7 +564,6 @@ public class Scope{
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
-			// TODO
 			if(!arg.contains("${") && !require_brackets && !require_class && arg.indexOf(".") > 0 && ((i > 0 && !args.get(i - 1).equals("class") && !args.get(i - 1).equals("npc")) || i == 0)){
 				args.add(i, "class");
 			}
@@ -638,6 +637,7 @@ public class Scope{
 		List<String> lastPass = new ArrayList<String>();
 		while(!args.equals(lastPass)){
 			lastPass = new ArrayList<String>(args);
+			// function calls, new objects, array literals
 			for(index = args.size() - 1; index >= 0; index--){
 				String arg = evalVars(args.get(index));
 				if(arg.startsWith(Script.REF)){
@@ -726,8 +726,8 @@ public class Scope{
 			
 				}else
 					args.set(index, arg);
-			} // functions
-			
+			}
+			// power operator '^'
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("^")){
@@ -748,7 +748,8 @@ public class Scope{
 						args.add(index + 2, arg2);
 					}
 				}
-			} // ^
+			}
+			// multiplication, division operators '*' '/'
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("*") || arg.equals("/")){
@@ -769,7 +770,8 @@ public class Scope{
 						args.add(index + 2, arg2);
 					}
 				}
-			} // * /
+			}
+			// addition, subtraction, concatenation operators '+' '-' '##'
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("+") || arg.equals("-")){
@@ -796,7 +798,8 @@ public class Scope{
 					String arg2 = args.remove(index + 1);
 					args.set(index, evalVars(arg1) + evalVars(arg2));
 				}
-			} // + -
+			}
+			// equality, comparison operators '=' 'not=' '>' '>=' '<' '<='
 			for(index = 1; index < args.size() - 1; index++){
 				
 				String arg = args.get(index);
@@ -806,7 +809,9 @@ public class Scope{
 					String arg1 = args.get(index);
 					args.remove(index + 1);
 					String arg2 = args.remove(index + 1);
-					boolean string = isString(arg1) || isString(arg2);
+					//debug("arg1 = "+evalVars(arg1)+" isstring = "+isString(evalVars(arg1))+" arg2 = "+evalVars(arg2)+" isstring = "+isString(evalVars(arg2)));
+					boolean string = isString(evalVars(arg1)) || isString(evalVars(arg2));
+					
 					if(!string)
 						try{
 							String arg1_ = evalVars(arg1);
@@ -820,22 +825,34 @@ public class Scope{
 							args.set(index, (arg.equals("not=")? !(x == y) : (x == y))? "1" : "0");
 						}catch(NumberFormatException e){
 							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
+							
 							if(string){
 								string = testOpOverride(args, index, arg1, arg2, "operator =");
 								if(string){
+									debug("testing op override equals for "+arg1+" and "+arg2);
 									string = testOpOverride(args, index, arg1, arg2, "equals");
+									debug("result = "+string);
 								}
 								if(!string && arg.equals("not="))
 									args.set(index, args.get(index).equals("0")? "1" : "0");
 							}
 						}
 					if(string){
-						if(arg1.startsWith(Script.REF)|| arg2.startsWith(Script.REF) ){
+						debug("comparing "+arg1+" with "+arg2);
+						/*if(arg1.startsWith(Script.REF)|| arg2.startsWith(Script.REF) ){
 							Scope sarg1 = Scope.getId(arg1);
 							
 							if(!(sarg1 instanceof Function)){
 								if(arg2.startsWith(Script.REF)){
-									error
+									Scope sarg2 = Scope.getId(arg2);
+									if(!(sarg2 instanceof Function)){
+										string = testOpOverride(args, index, arg1, arg2, "operator =");
+										if(string) string = testOpOverride(args, index, arg1, arg2, "equals");
+										if(!string && arg.equals("not="))
+											args.set(index,args.get(index).equals("0")? "1" : "0");
+									}
+								}else{
+									
 								}
 							}else if(arg2.startsWith(Script.REF)){
 								
@@ -845,8 +862,10 @@ public class Scope{
 								index+=2;
 							}
 							
-						}else
+						}/**/
+						if(string)
 							args.set(index, (arg.equals("not=")? !arg1.equals(arg2) : arg1.equals(arg2))? "1" : "0");
+						
 					}
 				}else if(arg.equals("<") || arg.equals("<=") || arg.equals(">") || arg.equals(">=")){
 					index--;
@@ -867,7 +886,8 @@ public class Scope{
 						index = index+2;
 					}
 				}
-			} // = < > <= >= not=
+			}
+			// not operator
 			for(index = 0; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("not")){
@@ -884,7 +904,8 @@ public class Scope{
 						args.set(index, arg1.equals("0")? "1" : "0");
 					}
 				}
-			} // not
+			}
+			// and operator
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("and")){
@@ -907,7 +928,8 @@ public class Scope{
 						args.set(index, arg1.equals("0")? "0" : arg2.equals("0")? "0" : arg2);
 					}
 				}
-			} // and
+			}
+			// or operator
 			for(index = 1; index < args.size() - 1; index++){
 				String arg = args.get(index);
 				if(arg.equals("or")){
@@ -930,7 +952,7 @@ public class Scope{
 						args.set(index, arg1.equals("0")? (arg2.equals("0")? "0" : arg2) : arg1);
 					}
 				}
-			} // or
+			}
 		}
 	}
 
@@ -941,10 +963,18 @@ public class Scope{
 			Function func;
 			String var = null;
 			try{
-				if(scope instanceof Struct && (var = scope.getVar(op, this)).startsWith(Script.REF) && Scope.getId(var) instanceof Function && (func = (Function) Scope.getId(var)).args_length() == 1)
-					args.set(index, var = func.call(this, Arrays.asList(arg2)));
+				if((scope instanceof Struct) && (var = scope.getVar(op, this)).startsWith(Script.REF) && Scope.getId(var) instanceof Function && (func = (Function) Scope.getId(var)).args_length() == 1)
+					args.set(index, func.call(this, Arrays.asList(arg2)));
+				else if(scope instanceof ListScope && (op.equals("equals") || op.equals("operator ="))){
+					ListScope list1 = (ListScope)scope;
+					if(!arg2.startsWith(Script.REF)) return true;
+					Scope scope2 = Scope.getId(arg2);
+					if(!(scope2 instanceof ListScope)) return true;
+					ListScope list2 = (ListScope)scope2;
+					args.set(index,list1.equals(list2)? "1" : "0");
+				}
 				else
-					return true;// System.out.println("result op = "+args.get(index)+
+					return true;// debug("result op = "+args.get(index)+
 								// " var = "+var);
 			}catch(VarNotExists ex){
 				return true;

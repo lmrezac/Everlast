@@ -27,11 +27,8 @@ public class Function extends Script{
 		if(values.size() != args_length())
 			throw new RuntimeException("Invalid number of arguments passed");
 		for(int i = 0; i < args_length(); i++){
-		//	System.out.println("i = "+i+" args = "+this.args+" id = "+this.getId());
 			String varname = this.args.get(i);
-		//	System.out.println("varname = "+varname);
 			String value = values.get(i);
-		//	System.out.println("value = "+value);
 			this.setVar(varname,value,this);
 		}
 		setFinalVar("outer",this.caller.getIdStr(),this);

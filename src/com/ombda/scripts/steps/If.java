@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.scripts.Scope;
-
+import static com.ombda.Debug.debug;
 public class If extends ScriptStep{
 	private List<String> args;
 	private List<ScriptStep> trueSteps, falseSteps;
@@ -15,10 +15,10 @@ public class If extends ScriptStep{
 		this.falseSteps = elsesteps;
 	}
 	public void execute(Scope scope){
-		//System.out.println("If scope = "+scope.toString());
+		//debug("If scope = "+scope.toString());
 		List<String> newargs = new ArrayList<>(args);
 		scope.evalArgs(newargs);
-		System.out.println("If: args = "+args+" result = "+newargs);
+		debug("If: args = "+args+" result = "+newargs);
 		if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step : if do not evaluate into one argument : "+newargs);
 		if(newargs.get(0).equals("0"))
 			for(int i = 0; i < falseSteps.size(); i++){

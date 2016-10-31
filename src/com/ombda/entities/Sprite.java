@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
 import com.ombda.Map;
 import com.ombda.Point;
 import com.ombda.Tile;
-
+import static com.ombda.Debug.debug;
 public class Sprite extends Entity{
 	
 	protected ImageIcon image;
@@ -32,7 +32,7 @@ public class Sprite extends Entity{
 	
 	public Sprite(int x, int y, ImageIcon bimg,int hash){
 		this(hash,bimg,x,y);
-		System.out.println("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
 	}
 	public Sprite(ImageIcon bimg,int hash){
 		this(0,0,bimg,hash);

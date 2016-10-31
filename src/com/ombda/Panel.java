@@ -37,6 +37,7 @@ import com.ombda.gui.HUD;
 import com.ombda.gui.Input;
 import com.ombda.gui.MapMaker;
 import com.ombda.gui.MessageBox;
+import com.ombda.gui.Picture;
 import com.ombda.scripts.Script;
 
 //import javax.swing.Timer;
@@ -55,6 +56,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public Console console;
 	public MapMaker mapcreator;
 	public MessageBox msgbox;
+	public Picture img;
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	boolean running = true;
@@ -91,6 +93,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		input = new Input();
 		console = new Console();
 		mapcreator = new MapMaker();
+		img = new Picture();
 		gui = hud;
 		previous = hud;
 		
@@ -172,11 +175,11 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				throw new FatalError();
 			}
 			Files.write(f.getAbsolutePath(), Arrays.asList("player","test"));
-			System.out.println(Files.read(f));
+			debug(Files.read(f));
 		}
 		List<String> lines = Files.read(f);
 		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
-		System.out.println(lines);
+		debug(lines);
 		player_name = lines.get(0);
 		setMap(Map.get(lines.get(1)));
 		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
@@ -396,7 +399,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			try{
 				Thread.sleep(sleep);
 			}catch(InterruptedException e){
-				System.out.println("Interrupted: " + e.getMessage());
+				debug("Interrupted: " + e.getMessage());
 			
 			}
 

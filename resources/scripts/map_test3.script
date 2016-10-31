@@ -22,4 +22,5 @@ set npc 0x05.onInteracted script interact_hoodlum_left
 npc 0x06 48 96 0 every:south:car2
 set npc 0x06.map test3
 set npc 0x06.facing Facing.south
+set npc 0x06.speed 2
 set npc 0x06.onUpdate script car_script_1

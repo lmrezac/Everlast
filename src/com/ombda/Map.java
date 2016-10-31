@@ -233,7 +233,7 @@ public class Map extends Struct{
 			width-=Byte.MAX_VALUE;
 		}
 		tempByteList.add((byte)width);
-		//System.out.println(tempByteList);
+		//debug(tempByteList);
 		byte[] bytes = new byte[tempByteList.size()+1+width*height*2];
 		int index = 0;
 		for(; index < tempByteList.size(); index++){

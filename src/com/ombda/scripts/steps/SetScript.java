@@ -7,7 +7,7 @@ import java.util.Scanner;
 import com.ombda.scripts.Function;
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
-
+import static com.ombda.Debug.debug;
 public class SetScript extends ScriptStep{
 	protected List<ScriptStep> steps;
 	protected boolean function;
@@ -41,6 +41,6 @@ public class SetScript extends ScriptStep{
 		else thing = new Script(steps);
 		if(finalvar) script.setFinalVar(varname,thing.getIdStr(),script);
 		else script.setVar(varname,thing.getIdStr(),script);
-		System.out.println("function created: "+varname+" "+thing.getId()+" in scope "+script.getId());
+		debug("function created: "+varname+" "+thing.getId()+" in scope "+script.getId());
 	}
 }

@@ -7,12 +7,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
-
+import static com.ombda.Debug.debug;
 public class Frame extends JFrame implements KeyListener{
 	private static final long serialVersionUID = -3581077622302427213L;
 	private Panel panel;
 	public static boolean[] keys = new boolean[0xFFFF];
 	public static final int WIDTH = 600, HEIGHT = 600;
+	//resolution
 	public static final int PRF_WIDTH = 2*256, PRF_HEIGHT = 2*256;
 	
 	public Frame(){
@@ -42,7 +43,7 @@ public class Frame extends JFrame implements KeyListener{
 			}
 		});
 		
-		System.out.println("New Frame created!");
+		debug("New Frame created!");
 	}
 	
 	
@@ -56,13 +57,13 @@ public class Frame extends JFrame implements KeyListener{
 	@Override
 	public void keyPressed(KeyEvent arg0){
 		keys[arg0.getKeyCode()] = true;
-		//System.out.println("key pressed : "+arg0.getKeyCode());
+		//debug("key pressed : "+arg0.getKeyCode());
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0){
 		keys[arg0.getKeyCode()] = false;
-		//System.out.println("key released : "+arg0.getKeyCode());
+		//debug("key released : "+arg0.getKeyCode());
 	}
 
 	@Override

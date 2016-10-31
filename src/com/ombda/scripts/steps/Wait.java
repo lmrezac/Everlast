@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.VarNotExists;
-
+import static com.ombda.Debug.debug;
 public class Wait extends ScriptStep{
 	private List<String> args;
 	private double waiting = 0, time = -1;
@@ -30,7 +30,7 @@ public class Wait extends ScriptStep{
 		
 			if(newargs.size() != 1) throw new RuntimeException("Arguments passed to script step: wait do not evaluate into a single value");
 			if(args.size() == 1)
-			System.out.println("args = "+args+" newargs  = "+newargs);
+			debug("args = "+args+" newargs  = "+newargs);
 			if(!newargs.get(0).equals("0")){
 				done = true;
 			}
