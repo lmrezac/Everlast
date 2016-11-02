@@ -138,7 +138,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	
 	@Override
 	public void draw(Graphics2D g, int offsetX, int offsetY){
-		if(image == null) return;
+		if(hidden || image == null) return;
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y-yminus+offsetY,null);
 	}
 	@Override

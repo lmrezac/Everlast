@@ -22,12 +22,13 @@ public class CreateNPC extends ScriptStep{
 	}
 	private static ImageIcon[] evalImages(List<String> args){
 		//if(args.size() != 20) throw new RuntimeException("Expected 20 arguments passed to script step: npc");
-		if(args.size() < 5) throw new RuntimeException("Expected 5 - 20 arguments passed to script step: npc");
+		if(args.size() < 4) throw new RuntimeException("Expected 5 - 20 arguments passed to script step: npc");
 		ImageIcon[] images = new ImageIcon[16];
 		/*for(int i = 4; i < 20; i++){
 			String loc = Script.evalString(args.get(i));
 			images[i-4] = Images.retrieve(loc);
 		}*/
+		if(args.size() > 4){
 		args = args.subList(4, args.size());
 		int i = 0;
 		boolean prefix = false;
@@ -55,6 +56,12 @@ public class CreateNPC extends ScriptStep{
 				if(prefix) throw new RuntimeException("In script step: npc: When you start using the prefix notation, ever argument after that must be in prefix notation.");
 				images[i] = Images.retrieve(arg);
 				i++;
+			}
+		}
+		}
+		for(int i = 0; i < images.length; i++){
+			if(images[i] == null){
+				images[i] = Images.getError();
 			}
 		}
 		return images;

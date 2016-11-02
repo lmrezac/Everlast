@@ -1,18 +1,21 @@
 package com.ombda.scripts;
 
+import static com.ombda.Debug.debug;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.swing.ImageIcon;
+
+import com.ombda.AnimatedImage;
 import com.ombda.Facing;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Tile;
 import com.ombda.entities.NPC;
-
-import static com.ombda.Debug.debug;
 
 ;
 public class Scope{
@@ -397,7 +400,11 @@ public class Scope{
 				return Script.toString(npc.destX);
 			}else if(varname.equals("dest.y")){
 				return Script.toString(npc.destY);
-			//}else if(varname.equals("))
+			}else if(varname.equals("animationFrame")){
+				ImageIcon img = npc.image;
+				if(img instanceof AnimatedImage)
+					return String.valueOf(((AnimatedImage)img).index);
+				return "0";
 			}else
 				throw new RuntimeException("Cannot set variable " + varname + " in npc");
 		}

@@ -17,6 +17,7 @@ public class CreateSprite extends ScriptStep{
 	private String spriteX, spriteY;
 	private ImageIcon spriteImage;
 	private String mapName;
+	//sprite <int literal:id> <int:x> <int:y> <string:image> [string:map name]
 	public CreateSprite(List<String> args){
 		if(args.size() != 4 && args.size() != 5) throw new RuntimeException("Expected 5 arguments passed to script step: sprite (got:"+args+")");
 		this.spriteId = Script.parseInt(args.get(0));

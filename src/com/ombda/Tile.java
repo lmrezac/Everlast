@@ -25,24 +25,24 @@ public class Tile extends Struct implements Collideable, Interactable{
 	private Shape boundingBox;
 	public final short id;
 	public Tile(short id, ImageIcon img, Shape boundingBox){
-		super(Scope.tile_type, Arrays.asList("id","isAnimated","getAnimationFrame"));
-		this.setFinalVar("isAnimated", new Function(null,null,false){
+		super(Scope.tile_type, Arrays.asList("id","isAnimated","animationFrame"));
+		/*this.setFinalVar("isAnimated", new Function(null,null,false){
 			public int args_length(){ return 0; }
 			public String call(Scope scopeIn, List<String> args){
 				return image instanceof AnimatedImage? "1" : "0";
 			}
 		}.getIdStr(), this);
-		this.setFinalVar("getAnimationFrame", new Function(null,null,false){
+		this.setFinalVar("animationFrame", new Function(null,null,false){
 			public int args_length(){ return 0; }
 			public String call(Scope scopeIn, List<String> args){
 				String result;
 				if(!(image instanceof AnimatedImage)) result = "0";
-				result = Script.toString(((AnimatedImage)image).animationIndex());
+				result = Script.toString(((AnimatedImage)image).index);
 				debug("Getanimationframe = "+result);
 				return result;
 			}
 		}.getIdStr(), this);
-		
+		*/
 		this.image = img;
 		this.boundingBox = boundingBox;
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
@@ -62,11 +62,29 @@ public class Tile extends Struct implements Collideable, Interactable{
 	public Tile(int i, ImageIcon retrieve, Shape boundingBox){
 		this((short)i,retrieve,boundingBox);
 	}
+	@Override
 	public void setVar(String varname, String value, boolean isfinal, Scope scope){
 		if(varname.equals("id")){
 			throw new RuntimeException("Cannot set variable id, it is final");
-		}
-		super.setVar(varname,value,isfinal,scope);
+		}else if(varname.equals("animationFrame")){
+			if(!(this.image instanceof AnimatedImage)) throw new RuntimeException("Cannot set animationFrame on non-animated tile");
+			((AnimatedImage)this.image).index = Script.parseInt(value);
+		}else
+			super.setVar(varname,value,isfinal,scope);
+	}
+	@Override
+	public String getVar(String varname, Scope scope){
+		if(varname.equals("id"))
+			return String.valueOf(this.id);
+		else if(varname.equals("animationFrame")){
+			String result;
+			if(!(image instanceof AnimatedImage)) result = "0";
+			result = Script.toString(((AnimatedImage)image).index);
+			debug("Getanimationframe = "+result);
+			return result;
+		}else if(varname.equals("isAnimated")){
+			return image instanceof AnimatedImage? "1" : "0";
+		}else return super.getVar(varname,scope);
 	}
 	public void incrementFrame(){
 		frame = image.getImage();

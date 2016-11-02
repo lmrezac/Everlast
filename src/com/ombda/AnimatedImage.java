@@ -8,10 +8,11 @@ import javax.swing.ImageIcon;
 public class AnimatedImage extends ImageIcon{
 	private static final long serialVersionUID = 7744250593953834113L;
 	private BufferedImage[] images;
-	private int index;
+	public int index;
 	private int frametime = 0;
 	private int indexTime = 0;
 	private int height, width;
+	private boolean animate = true;
 	public AnimatedImage(BufferedImage[] i,int frametime){
 		images = i;
 		index = 0;
@@ -25,12 +26,14 @@ public class AnimatedImage extends ImageIcon{
 		return images[incrementIndex()];
 	}
 	private int incrementIndex(){
-		indexTime--;
-		if(indexTime <= 0){
-			indexTime = frametime;
-			index++;
-			if(index >= images.length)
-				index = 0;
+		if(animate){
+			indexTime--;
+			if(indexTime <= 0){
+				indexTime = frametime;
+				index++;
+				if(index >= images.length)
+					index = 0;
+			}
 		}
 		return index;
 	}
@@ -42,7 +45,8 @@ public class AnimatedImage extends ImageIcon{
 	public int getIconWidth(){
 		return width;
 	}
-	public int animationIndex() {
-		return index;
+	public void animate(boolean b){
+		animate = b;
 	}
+	
 }

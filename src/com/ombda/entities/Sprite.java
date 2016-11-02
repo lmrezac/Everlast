@@ -11,8 +11,8 @@ import com.ombda.Tile;
 import static com.ombda.Debug.debug;
 public class Sprite extends Entity{
 	
-	protected ImageIcon image;
-	
+	public ImageIcon image;
+	public boolean hidden = false;
 	private int hash;
 	protected Sprite(int hash, ImageIcon bimg, int x, int y){
 		super(x,y);
@@ -29,7 +29,6 @@ public class Sprite extends Entity{
 		this.map = map;
 		this.map.addSprite(this);
 	}
-	
 	public Sprite(int x, int y, ImageIcon bimg,int hash){
 		this(hash,bimg,x,y);
 		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
@@ -63,6 +62,7 @@ public class Sprite extends Entity{
 		return image.getIconHeight();
 	}
 	public void draw(Graphics2D g, int offsetX, int offsetY){
+		if(hidden) return;
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y+offsetY,null);
 	}
 	public void drawBoundingBox(Graphics2D g, int offsetX, int offsetY){

@@ -127,7 +127,7 @@ public class MessageBox extends GUI{
 		drawBox(g2d,0,400,32,7);
 		Color tint = null;
 		drawX = INIT_DRAW_X; drawY = INIT_DRAW_Y;
-		
+		boolean bold = false, underline = false;
 		for(int i = startIndexAt; i < index; i++){
 			char c = string[i];
 			if(c == '\n'){
@@ -205,6 +205,7 @@ public class MessageBox extends GUI{
 						g2d.drawImage(letters[SECTION], drawX, drawY, null);
 						drawX += letters[SECTION].getWidth(null);
 					}
+					
 				}
 			}else{
 				Color underlineColor = Color.WHITE;

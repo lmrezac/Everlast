@@ -202,7 +202,7 @@ public class Map extends Struct{
 				throw new RuntimeException("tile entity box requires 4 values : tile x, tile y, width, height");
 			tileEntities[tiley][tilex] = new com.ombda.tileentities.BoundingBox(tilex,tiley,disableCollisions,Integer.parseInt(args.get(0)),Integer.parseInt(args.get(1)));
 		}else throw new RuntimeException("Invalid tile entity : "+cmd);
-		debug("new tile entity created at ["+tilex+","+tiley+"] : "+tileEntities[tiley][tilex].save());
+	//	debug("new tile entity created at ["+tilex+","+tiley+"] : "+tileEntities[tiley][tilex].save());
 	}
 	private static String toHexString(int i){
 		String str = Integer.toHexString(i);

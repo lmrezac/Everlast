@@ -144,7 +144,6 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 	}
 	protected static final Color PURPLE = new Color(178,0,255);
 	protected static final char SECTION = '§';
-	protected boolean bold = false, underline = false;
 	public static int stringWidth(String str){
 		str = str.replaceAll("§([0rgboypuB]|(c[\\dA-Za-z]{6}))", "");
 		int length = 0;

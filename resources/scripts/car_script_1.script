@@ -1,5 +1,5 @@
 set script function testAnimationFrame ()
-	set x map.getTile 81 13 1 .getAnimationFrame
+	set x map.getTile 81 13 1 .animationFrame
 	return x >= 4 and x <= 6
 end script function testAnimationFrame
 while 1 do
