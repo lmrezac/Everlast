@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ombda.Debug;
@@ -33,14 +34,152 @@ public class Console extends Input{
 		setMessage("§o> §0");
 		panel = Panel.getInstance();
 	}
+	private List<String> currentOptions = null;
+	private int currentOptionIndex = 0;
+	@Override
+	public void keyTyped(KeyEvent e){
+		char c = e.getKeyChar();
+		if(c == '\t'){
+			debug("tab pressed!");
+			if(currentOptions != null){
+				currentOptionIndex++;
+				if(currentOptionIndex >= currentOptions.size())
+					currentOptionIndex = 0;
+				setMessage(evaluateOptions());
+			}else{
+				calculateOptions();
+				debug("options calculated = "+currentOptions);
+				setMessage(evaluateOptions());
+			}
+		}else{
+			currentOptions = null;
+			currentOptionIndex = 0;
+			super.keyTyped(e);
+		}
+	}
 	@Override
 	public void keyPressed(KeyEvent e){
 		if(e.getKeyCode() == KeyEvent.VK_ENTER){
 			executeCommand(str);
+		}else if(e.getKeyCode() == KeyEvent.VK_SPACE){
+			currentOptions = null;
+			currentOptionIndex = 0;
+			super.keyPressed(e);
 		}else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
 			if(str.length() > 6)
 			setMessage(str.substring(0,str.length()-1));
-		}else super.keyPressed(e);
+			if(currentOptions != null){
+				currentOptions = null;
+				currentOptionIndex = 0;
+			}
+		}else if(e.getKeyCode() == KeyEvent.VK_TAB){
+			if(currentOptions != null){
+				currentOptionIndex++;
+				if(currentOptionIndex >= currentOptions.size())
+					currentOptionIndex = 0;
+				setMessage(evaluateOptions());
+			}else{
+				calculateOptions();
+				setMessage(evaluateOptions());
+			}
+		}else{
+			currentOptions = null;
+			currentOptionIndex = 0;
+			super.keyPressed(e);
+		}
+	}
+	private static List<String> command_list = Arrays.asList("gui","noclip","close","quit","set","save","fill","debug","goto","help","testfor","script","newmap","tileEntity","delete","load","drawBoxes"),
+			cmd_gui = Arrays.asList("msgbox","input","hud","mapcreator","img"),
+			truefalse = Arrays.asList("true","false","1","0","on","off"),
+			load = Arrays.asList("game"),
+			save = Arrays.asList("game","all","x","map"),
+			set = Arrays.asList("tile","map","player.map","player.x","player.y","player.pos","map.size","sprite","npc"),
+				set_tile = Arrays.asList("from"),
+					set_tile_from = Arrays.asList("to"),
+					set_tile_from_layer = Arrays.asList("fore","foreground","1","back","background","0"),
+				set_map_size = Arrays.asList("vert","horiz"),
+				set_sprite = Arrays.asList("x","y","map"),
+				set_npc = Arrays.asList("x","y","map","dest");
+			
+	
+	private String evaluateOptions(){
+		if(currentOptions == null || currentOptions.size() == 0){
+			currentOptions = null;	currentOptionIndex = 0;
+			return str;
+		}
+		debug("str = "+str);
+		List<String> args = parseArgs(str.substring(6));
+
+		args.set(args.size()-1,currentOptions.get(currentOptionIndex));
+		String str = "";
+		for(int i = 0; i < args.size(); i++){
+			str += args.get(i);
+			if(i != args.size()-1) str += " ";
+		}
+		return "§o> §0"+str;
+	}
+	private void calculateOptions(){
+		List<String> args = parseArgs(str.substring(6));
+		debug("args = "+args);
+		if(args.size() <= 1){
+			List<String> completions = getCompletionList(args.get(0),command_list);
+			
+			currentOptions = completions;
+			currentOptionIndex = 0;
+		}else{
+			String cmd = args.get(0);
+			if(cmd.equals("gui") && args.size() == 2){
+				currentOptions = getCompletionList(args.get(1),cmd_gui);
+				currentOptionIndex = 0;
+			}else if(args.size() == 2 && (cmd.equals("noclip") || cmd.equals("debug") || cmd.equals("drawBoxes"))){
+				currentOptions = getCompletionList(args.get(1),truefalse);
+				currentOptionIndex = 0;
+			}else if(cmd.equals("load") && args.size() == 2){
+				currentOptions = getCompletionList(args.get(1),load);
+				currentOptionIndex = 0;
+			}else if(cmd.equals("save") && args.size() == 2){
+				currentOptions = getCompletionList(args.get(1),save);
+				currentOptionIndex = 0;
+			}else if(cmd.equals("set")){
+				if(args.size() == 2){
+					currentOptions = getCompletionList(args.get(1),set);
+					currentOptionIndex = 0;
+				}else{
+					String arg = args.get(1);
+					if(arg.equals("tile")){
+						if(args.size() == 3){
+							currentOptions = getCompletionList(args.get(2),set_tile);
+							currentOptionIndex = 0;
+						}else if(args.size() == 6 && args.get(2).equals("from")){
+							currentOptions = getCompletionList(args.get(5),set_tile_from);
+							currentOptionIndex = 0;
+						}else if(args.size() > 5 && args.get(2).equals("from")){
+							if(args.get(5).equals("to") && args.size() == 9 || !args.get(5).equals("to") && args.size() == 8){
+								currentOptions = getCompletionList(args.get(8),set_tile_from_layer);
+								currentOptionIndex = 0;
+							}
+						}
+					}else if(arg.equals("map.size") && args.size() == 5){
+						currentOptions = getCompletionList(args.get(4),set_map_size);
+						currentOptionIndex = 0;
+					}else if(arg.equals("sprite") && args.size() == 4){
+						currentOptions = getCompletionList(args.get(3),set_sprite);
+						currentOptionIndex = 0;
+					}else if(arg.equals("npc") && args.size() == 4){
+						currentOptions = getCompletionList(args.get(3),set_npc);
+						currentOptionIndex = 0;
+					}
+				}
+			}
+		}
+	}
+	private static List<String> getCompletionList(String message, List<String> list){
+		List<String> result = new ArrayList<>();
+		for(String str : list){
+			if(str.startsWith(message)) result.add(str);
+		}
+		debug("message = "+message+" list = "+list+" result = "+result);
+		return result;
 	}
 	
 	public void executeCommand(String str){
@@ -164,9 +303,9 @@ public class Console extends Input{
 			p.noclip = !p.noclip;
 		}
 		if(p.noclip){
-			panel.msgbox.setMessage("Noclip ON        ");
+			panel.msgbox.setMessage("Noclip ON                    ");
 		}else{
-			panel.msgbox.setMessage("Noclip OFF        ");
+			panel.msgbox.setMessage("Noclip OFF                   ");
 		}
 
 		panel.msgbox.instant();
@@ -800,15 +939,16 @@ public class Console extends Input{
 			throw new CmdException("cannot load "+args.get(1));
 		Panel.getInstance().loadSaveFile();
 	}
+	
 	private void cmdBoxes(List<String> args){
 		args.remove(0);
 		if(args.isEmpty()){
 			Panel.getInstance().drawBoundingBoxes = !Panel.getInstance().drawBoundingBoxes;
 		}else{
 			String val = args.get(0);
-			if(val.equals("0") || val.equals("false"))
+			if(val.equals("0") || val.equals("false") || val.equals("off"))
 				Panel.getInstance().drawBoundingBoxes = false;
-			else if(val.equals("1") || val.equals("true"))
+			else if(val.equals("1") || val.equals("true") || val.equals("on"))
 				Panel.getInstance().drawBoundingBoxes = true;
 			else throw new CmdException("Invalid argument");
 		}
@@ -818,7 +958,7 @@ public class Console extends Input{
 	public void reset(){
 		super.reset();
 		setMessage("§o> §0");
-		Panel panel = Panel.getInstance();
+	//	Panel panel = Panel.getInstance();
 	}
 	
 	public static List<String> parseArgs(String str){

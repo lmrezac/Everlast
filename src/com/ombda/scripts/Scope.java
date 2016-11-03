@@ -16,6 +16,7 @@ import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.Tile;
 import com.ombda.entities.NPC;
+import com.ombda.entities.Sprite;
 
 ;
 public class Scope{
@@ -400,6 +401,9 @@ public class Scope{
 				return Script.toString(npc.destX);
 			}else if(varname.equals("dest.y")){
 				return Script.toString(npc.destY);
+			}else if(varname.equals("isAnimated")){
+				ImageIcon img = npc.image;
+				return img instanceof AnimatedImage? "1" : "0";
 			}else if(varname.equals("animationFrame")){
 				ImageIcon img = npc.image;
 				if(img instanceof AnimatedImage)
@@ -407,6 +411,51 @@ public class Scope{
 				return "0";
 			}else
 				throw new RuntimeException("Cannot set variable " + varname + " in npc");
+		}else if(varname.startsWith("sprite ") && varname.indexOf(".") > 0){
+			varname = varname.substring(7);
+			int i = varname.indexOf('.');
+			if(i == -1) throw new RuntimeException("Expected . in sprite setter");
+			int q = varname.indexOf('.',i+1);
+			int p;
+			if(q != -1) p = varname.indexOf('.',q+1);
+			else p = -1;
+			Sprite sprite;
+			int id;
+			if(q == -1){
+				id = Script.parseInt(varname.substring(0,i));
+				sprite = Panel.getInstance().getPlayer().getMap().getSprite(id);
+				varname = varname.substring(i+1);
+			}else{
+				String mapname = varname.substring(0,i);
+				if(mapname.matches("((0x|#)[\\dA-Za-z]+)|(\\d+)")){
+					id = Script.parseInt(mapname);
+					sprite = Panel.getInstance().getPlayer().getMap().getSprite(id);
+					varname = varname.substring(i+1);
+				}else{
+					id = Script.parseInt(varname.substring(i+1,q));
+					sprite = Map.get(mapname).getSprite(id);
+					varname = varname.substring(q+1);
+				}
+			}
+			if(varname.equals("xy") || varname.equals("pos")){
+				ListScope xy = new ListScope(2);
+				xy.setVar("0", Script.toString(sprite.x / (Tile.SIZE / 16)), scopeIn);
+				xy.setVar("1", Script.toString(sprite.y / (Tile.SIZE / 16)), scopeIn);
+				return xy.getIdStr();
+			}else if(varname.equals("x") || varname.equals("pos.x")){
+				return Script.toString(sprite.x / (Tile.SIZE / 16));
+			}else if(varname.equals("y") || varname.equals("pos.y")){
+				return Script.toString(sprite.y / (Tile.SIZE / 16));
+			}else if(varname.equals("isAnimated")){
+				ImageIcon img = sprite.image;
+				return img instanceof AnimatedImage? "1" : "0";
+			}else if(varname.equals("animationFrame")){
+				ImageIcon img = sprite.image;
+				if(img instanceof AnimatedImage)
+					return String.valueOf(((AnimatedImage)img).index);
+				return "0";
+			}else
+				throw new RuntimeException("Cannot set variable " + varname + " in sprite");
 		}
 		if(varname.contains("operator"))
 			varname = varname.replaceAll("operator(?! )", "operator ");
@@ -547,9 +596,9 @@ public class Scope{
 		Scope currentScope = this.getCurrentScope();
 		String str = line;
 		if(!isString(str) && !require_brackets && !number.matcher(str).find()){
-			if(currentScope.vars.containsKey(str) || ((!str.startsWith("npc ") && (str.startsWith("class ") || (!require_class && str.indexOf(".") > 0)) && !str.contains("${")))){
+			if(currentScope.vars.containsKey(str) || ((!str.startsWith("npc ") && !str.startsWith("sprite ") && (str.startsWith("class ") || (!require_class && str.indexOf(".") > 0)) && !str.contains("${")))){
 
-				if(str.indexOf(".") > 0 && !str.startsWith("class ") && !str.startsWith(".") && !require_class && !str.startsWith("npc "))
+				if(str.indexOf(".") > 0 && !str.startsWith("class ") && !str.startsWith(".") && !require_class && !str.startsWith("npc ") && !str.startsWith("sprite "))
 					str = "class " + str;
 				return currentScope.getVar(str, currentScope);
 			}
@@ -571,7 +620,7 @@ public class Scope{
 		Scope currentScope = getCurrentScope();
 		for(int i = 0; i < args.size(); i++){
 			String arg = args.get(i);
-			if(!arg.contains("${") && !require_brackets && !require_class && arg.indexOf(".") > 0 && ((i > 0 && !args.get(i - 1).equals("class") && !args.get(i - 1).equals("npc")) || i == 0)){
+			if(!arg.contains("${") && !require_brackets && !require_class && arg.indexOf(".") > 0 && ((i > 0 && !args.get(i - 1).equals("class") && !args.get(i - 1).equals("npc") && !args.get(i - 1).equals("sprite")) || i == 0)){
 				args.add(i, "class");
 			}
 		}
@@ -593,10 +642,9 @@ public class Scope{
 				}catch(VarNotExists ex){
 					args.set(i,arg);
 				}
-			}else if(!require_brackets && arg.equals("npc")){
+			}else if(!require_brackets && (arg.equals("npc") || arg.equals("sprite"))){
 				args.set(i, currentScope.getVar(arg + " " + args.remove(i + 1), currentScope));
-			}else args.set(i,currentScope.evalVars(arg));
-			
+			}
 			
 		}
 		evalMath(args);

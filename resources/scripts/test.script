@@ -1,1 +1,1 @@
-print npc 0x01.pos = { 1344 80 }
+print sprite 0x02.x
