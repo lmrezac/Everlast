@@ -15,13 +15,15 @@ import com.ombda.Collideable;
 import com.ombda.Facing;
 import com.ombda.Interactable;
 import com.ombda.Panel;
+import com.ombda.ScriptThread;
 import com.ombda.Updateable;
 import com.ombda.scripts.Script;
 
 
 public class NPC extends Sprite implements Updateable, Collideable, Interactable{
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
-	public Script onInteractedScript = null, updateScript = null;
+	private String onInteractedScript = null;
+	private ScriptThread onUpdateThread = null;
 	public int destX, destY;
 	protected double lastX, lastY;
 	protected Rectangle2D boundingBox;
@@ -45,6 +47,17 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		this.images = animations;
 		this.yminus = yminus;
 	}
+	public void setUpdateScript(String str){
+		onUpdateThread = new ScriptThread(str);
+		onUpdateThread.start();
+		synchronized(onUpdateThread){
+			try{
+				onUpdateThread.wait();
+			}catch(InterruptedException e){
+			
+			}
+		}
+	}
 	public static NPC getNPC(int hash){
 		NPC npc = npcs.get(hash);
 		if(npc == null){
@@ -61,6 +74,9 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return direction;
 	}
 	public void update(){
+		synchronized(onUpdateThread){
+			onUpdateThread.notify();
+		}
 		double newx = x, newy = y;
 		if(x != destX){
 			
@@ -97,10 +113,10 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		
 		this.image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
 		
-		if(updateScript != null){
-			updateScript.execute(updateScript);
-			if(updateScript.done()){
-				updateScript.reset();
+		synchronized(onUpdateThread){
+			try{
+				onUpdateThread.wait();
+			}catch(InterruptedException e){
 			}
 		}
 	}
@@ -170,12 +186,12 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	}
 	@Override
 	public void onInteracted(Player p, int x, int y){
+		debug("onInteracted npc ");
 		if(onInteractedScript != null){
 			//debug("int y = "+y+" x = "+x+" my y = "+this.y+" "+this.yminus+" "+boundingBox.getHeight()+" "+(int)((this.y-yminus)+boundingBox.getHeight()-1)+" my x = "+this.x+" "+(this.x+this.boundingBox.getWidth()));
 			if(y >= (int)(this.y-yminus+boundingBox.getHeight()-1) && y <= (int)(this.y-yminus+boundingBox.getHeight()+1) && this.x < x && x < this.x+this.boundingBox.getWidth()){
 				debug("running script");
-				onInteractedScript.reset();
-				Panel.getInstance().runScript(onInteractedScript);
+				new ScriptThread(onInteractedScript).start();
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import java.util.Scanner;
 import com.ombda.Panel;
 import com.ombda.scripts.steps.*;
 import static com.ombda.Debug.debug;
+@Deprecated
 public class Script extends Scope{
 	private static HashMap<String,Script> scripts = new HashMap<>();
 	public static final String REF = "ǂ";
@@ -143,7 +144,6 @@ public class Script extends Scope{
 	private static int createStep(int i, String cmd, List<String> args, final List<String> lines, List<ScriptStep> steps){
 		if(args.size() - 3 >= 0 && args.get(args.size()-3).equals("new") && args.get(args.size()-2).equals("function")){
 			List<ScriptStep> substeps = new ArrayList<>();
-		//	int oldi = i;
 			String end = "end function";
 			for(i = i+1; i < lines.size(); i++){
 				if(lines.get(i).equals(end)) break;
@@ -166,6 +166,8 @@ public class Script extends Scope{
 		}
 		if(cmd.equals("msg"))
 			steps.add(new Msg(args));
+		else if(cmd.equals("cmd"))
+			steps.add(new Cmd(args));
 		else if(cmd.equals("print"))
 			steps.add(new PrintToConsole(args));
 		else if(cmd.equals("npc"))

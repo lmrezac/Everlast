@@ -17,7 +17,7 @@ public class MapOld{
 	private boolean[] layerIsBackground;
 	private int width, height;
 	public MapOld(String name){
-		List<String> lines = Files.read("maps\\"+name+"\\.map");
+		List<String> lines = Files.readLines("maps\\"+name+"\\.map");
 		String header = lines.get(0);
 		debug("lines: "+lines);
 		int tilemapid = 0;
@@ -26,7 +26,7 @@ public class MapOld{
 			tilemapid = Integer.parseInt(header.substring(9));
 		}
 		
-		loadObjects(Files.read("maps\\"+name+"\\.objects"));
+		loadObjects(Files.readLines("maps\\"+name+"\\.objects"));
 		
 		this.tilemap = new Tilemap(tilemapid);
 		load(lines);

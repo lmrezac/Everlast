@@ -53,12 +53,12 @@ public class Map extends Struct{
 		foreground = load(Files.readBytes("maps\\"+name+"\\fore.map"));
 		background = load(Files.readBytes("maps\\"+name+"\\back.map"));
 		maps.put(name, this);
-		if(Script.exists("map_"+name))
-			Panel.getInstance().runScript(Script.getScript("map_"+name));
+		if(Panel.getInstance().scripts.containsKey("map_"+name))
+			Panel.getInstance().runScript("map_"+name);
 		f = new File(Files.localize("maps\\"+name+"\\background.color"));
 		if(!f.exists())
 			throw new RuntimeException("Background color info file for map "+name+" doesn't exist!");
-		List<String> lines = Files.read(f);
+		List<String> lines = Files.readLines(f);
 		if(lines.size() != 1) throw new RuntimeException("Background color info file for map "+name+" is invalid, too many lines.");
 		String colorstr = lines.get(0);
 		if(colorstr.length() != 6)
@@ -70,7 +70,7 @@ public class Map extends Struct{
 		f = new File(Files.localize("maps\\"+name+"\\tileEntities.info"));
 		if(!f.exists())
 			throw new RuntimeException("Entity info file for map "+name+" doesn't exist!");
-		loadEntities(Files.read(f));
+		loadEntities(Files.readLines(f));
 	}
 	private final Function toString = new Function(null,null,false){
 		@Override

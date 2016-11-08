@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.swing.JPanel;
 
 import com.ombda.entities.Player;
@@ -38,14 +41,12 @@ import com.ombda.gui.Input;
 import com.ombda.gui.MapMaker;
 import com.ombda.gui.MessageBox;
 import com.ombda.gui.Picture;
-import com.ombda.scripts.Script;
 
 //import javax.swing.Timer;
 
 public class Panel extends JPanel implements Runnable, MouseListener, MouseMotionListener, KeyListener{
 	private static final long serialVersionUID = -1418699633283587432L;
 	private static Panel instance;
-	
 	private Player player;
 	private String player_name;
 	private Map map;
@@ -57,6 +58,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public MapMaker mapcreator;
 	public MessageBox msgbox;
 	public Picture img;
+	
+	public ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	boolean running = true;
@@ -104,13 +107,14 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 
 		debug("New Panel created!");
 	}
+	public HashMap<String,String> scripts = new HashMap<>();
 	private void loadScripts(){
 		File f = new File(Files.localize("scripts"));
 		assert f.exists() : "Scripts directory not found!";
 		assert f.isDirectory() : "\\resources\\scripts was not a directory!";
 		File[] files = f.listFiles(new FilenameFilter(){
 			public boolean accept(File arg0, String arg1){
-				return arg1.endsWith(".script");
+				return arg1.endsWith(".js");
 			}
 		});
 		for(File file : files){
@@ -118,24 +122,15 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			int i = name.indexOf('.');
 			if(i != -1)
 				name = name.substring(0, i);
-			Script.compile(name,Files.read(file));
+			debug("adding script "+name);
+			scripts.put(name,evaluateScriptFile(Files.read(file)));
+			//Script.compile(name,Files.read(file));
 		}
-		/*new Script("map_test3",Arrays.<ScriptStep>asList(
-			new ScriptStep(){
-
-				@Override
-				public void execute(Panel game, Script script){
-					
-				}
-
-				@Override
-				public boolean done(){
-					return false;
-				}
-				
-			}
-		));*/
 		
+	}
+	private static String evaluateScriptFile(String str){
+		//str = "load("
+		return str;
 	}
 	public void setMap(Map map){
 		this.map = map;
@@ -155,12 +150,20 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			guiID = "mapcreator";*/
 		debug(gui.toString());
 	}
-	private List<Script> scripts = new ArrayList<>();
-	public void runScript(Script s){
-		if(!scripts.contains(s)){
+	//private List<Script> scripts = new ArrayList<>();
+	public void runScript(String str){
+		/*if(!scripts.contains(s)){
 			scripts.add(s);
+		}*/
+		
+		String script = scripts.get(str);
+		if(script != null){
+			debug("running new script "+str);
+			new ScriptThread(script).start();
+		}else{
+			debug("Error: script "+str+" doesn't exist!");
+			throw new FatalError();
 		}
-		//debug("running new script");
 	}
 	public void loadSaveFile(){
 	
@@ -175,9 +178,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				throw new FatalError();
 			}
 			Files.write(f.getAbsolutePath(), Arrays.asList("player","test"));
-			debug(Files.read(f));
+			debug(Files.readLines(f));
 		}
-		List<String> lines = Files.read(f);
+		List<String> lines = Files.readLines(f);
 		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
 		debug(lines);
 		player_name = lines.get(0);
@@ -185,7 +188,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
 		offsetX = Integer.parseInt(lines.get(4));
 		offsetY = Integer.parseInt(lines.get(5));
-		Script.loadVars(lines.get(6));
+		//Script.loadVars(lines.get(6));
 	}
 	public void saveGame(){
 		File f = new File(Files.localize("saves/save0.dat"));
@@ -206,7 +209,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		lines.add(Double.toString(player.y));
 		lines.add(Integer.toString(offsetX));
 		lines.add(Integer.toString(offsetY));
-		lines.add(Script.saveVars());
+		//lines.add(Script.saveVars());
 		Files.write("saves/save0.dat", lines);
 		debug("Game saved!");
 	}
@@ -340,7 +343,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		}
 	}*/
 	public void update(){
-		if(!scripts.isEmpty()){
+		/*if(!scripts.isEmpty()){
 			for(int i = scripts.size()-1; i>=0; i--){
 				Script script = scripts.get(i);
 				if(script.done()){
@@ -354,11 +357,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 					}
 				}
 			}
-			/*currentScript.execute(currentScript);
-			if(currentScript != null && currentScript.done()){
-				resetScript();
-			}*/
-		}
+		}*/
 		if(!gui.pauseGame()){
 			if(!gui.blockInput()){
 				
@@ -379,7 +378,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 	
 	@Override
-	public void run(){
+	public synchronized void run(){
 	try{
 		long beforeTime, timeDiff, sleep;
 
@@ -414,7 +413,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	}
 	
 	public void stop(){
+		
 		running = false;
+		ScriptThread.stopAll();
 	}
 
 	@Override

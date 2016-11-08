@@ -49,6 +49,7 @@ public class Frame extends JFrame implements KeyListener{
 	
 	protected void processWindowEvent(WindowEvent event){
 		if(event.getID() == WindowEvent.WINDOW_CLOSING){
+			debug("stopping!");
 			this.panel.stop();
 			this.dispose();
 		}

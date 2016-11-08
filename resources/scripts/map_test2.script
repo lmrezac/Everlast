@@ -2,3 +2,4 @@ sprite 0x01 13t 9t sprites/newspaper test2
 set sprite 0x01.hidden 1
 npc 0x02 16 16 0
 set npc 0x02.hidden 1
+set npc 0x02.onInteracted script newspaper

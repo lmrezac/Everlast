@@ -27,7 +27,7 @@ public class TilemapOld{
 		linePattern = "\\d+,\\d+,\\[("+shapePattern+")?(,"+shapePattern+")*\\]";
 	}
 	private void loadBoundingBoxes(String file){
-		List<String> lines = Files.read(file);
+		List<String> lines = Files.readLines(file);
 		boundingBoxes = new Shape[tiles.length];
 		Shape basic = new MultiShape(new ArrayList<Shape>());
 		for(int i = 0; i < boundingBoxes.length; i++)

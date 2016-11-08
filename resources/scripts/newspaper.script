@@ -1,0 +1,5 @@
+print "NPC 0x02 interacted"
+set sprite 0x01.hidden 0
+wait until sprite 0x01.animationFrame = 15
+set sprite 0x01.animateImage 0
+cmd gui img gui/overlays/newspaper

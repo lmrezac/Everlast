@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import com.ombda.Debug;
 import com.ombda.FatalError;
 import com.ombda.Frame;
+import com.ombda.Panel;
+
 import static com.ombda.Debug.debug;
 public class Main{
 	private static Frame theFrame;
@@ -19,7 +21,10 @@ public class Main{
 			}
 		});
 		}catch(FatalError ex){
-			throw ex;
+			Panel.getInstance().stop();
+			theFrame.dispose();
+			ex.printStackTrace();
+			System.exit(0);
 		}catch(Exception e){
 			Debug.debug(e.getMessage());
 			if(Debug.printStackTrace)

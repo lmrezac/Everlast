@@ -28,7 +28,7 @@ public class Tilemap{
 			Shape box = BoundingBox.FULL;
 			ImageIcon image = null;
 			if((f = new File(Files.localize("tilemaps\\"+id+"\\"+count+"\\tile.info"))).exists()){
-				List<String> lines = Files.read(f);
+				List<String> lines = Files.readLines(f);
 				for(String str : lines){
 					if(!str.startsWith("#")){
 						int i = str.indexOf(' ');

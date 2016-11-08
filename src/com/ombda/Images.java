@@ -125,7 +125,7 @@ public class Images{
 	}
 	private static ImageIcon evaluateAnimFile(String folderIn,File f, BufferedImage image){
 		debug("Loading animated image "+f.getAbsolutePath());
-		List<String> lines = Files.read(f);
+		List<String> lines = Files.readLines(f);
 		List<BufferedImage> frames = new ArrayList<>();
 		int width = -1, height = -1, frametime = 0;
 		boolean nodefine = false;

@@ -40,10 +40,10 @@ public class Files{
 		return file;
 	}
 	public static final boolean isWindowsOS = System.getProperty("os.name").toLowerCase().contains("windows");
-	public static List<String> read(String path){
-		return read(new File(localize(path)));
+	public static List<String> readLines(String path){
+		return readLines(new File(localize(path)));
 	}
-	public static List<String> read(File file){
+	public static List<String> readLines(File file){
 		try{
 			Scanner scan = new Scanner(file);
 			List<String> lines = new ArrayList<>();
@@ -58,7 +58,24 @@ public class Files{
 			throw new FatalError();
 		}
 	}
-	
+	public static String read(String path){
+		return read(new File(localize(path)));
+	}
+	public static String read(File file){
+		try{
+			Scanner scan = new Scanner(file);
+			String str = "";
+			while(scan.hasNext())
+					str += scan.nextLine();
+			scan.close();
+			return str;
+		}catch(IOException e){
+			debug("Error reading "+file.getAbsolutePath());
+			if(printStackTrace)
+				e.printStackTrace();
+			throw new FatalError();
+		}
+	}
 	public static byte[] readBytes(String str){
 		str = localize(str);
 		try{
