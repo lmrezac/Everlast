@@ -4,7 +4,6 @@ import static com.ombda.Debug.debug;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,20 +12,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
+
 import com.ombda.entities.Entity;
+import com.ombda.entities.NPC;
 import com.ombda.entities.Sprite;
-import com.ombda.scripts.Function;
-import com.ombda.scripts.Scope;
-import com.ombda.scripts.Script;
-import com.ombda.scripts.Struct;
-import com.ombda.scripts.VarNotExists;
 import com.ombda.tileentities.Doorway;
 import com.ombda.tileentities.TileEntity;
 import com.ombda.tileentities.Triangle;
 import com.ombda.tileentities.Wall;
 
-public class Map extends Struct{
+public class Map extends AbstractJSObject{
 	private short[][] foreground, background;
+	private MatrixWrapperShort foregroundWrapper, backgroundWrapper;
+	private MatrixWrapperTileEntity tileEntityWrapper;
+	private SpritesWrapper spritesWrapper;
+	private EntitiesWrapper entitiesWrapper;
 	private int width = 0, height = 0;
 	private String name;
 	public int playerSpawnX = 0, playerSpawnY = 0;
@@ -35,7 +37,6 @@ public class Map extends Struct{
 	private TileEntity[][] tileEntities;
 	private Color clr;
 	public Map(String name, int width, int height, Color clr){
-		super(Scope.map_type,Arrays.asList("width","height","toString"));
 		this.name = name;
 		this.width = width;
 		this.height = height;
@@ -43,10 +44,10 @@ public class Map extends Struct{
 		foreground = new short[height][width];
 		background = new short[height][width];
 		tileEntities = new TileEntity[height][width];
+		createWrappers();
 		maps.put(name, this);
 	}
 	public Map(String name){
-		super(Scope.map_type,Arrays.asList("width","height","toString"));
 		this.name = name;
 		File f = new File(Files.localize("maps\\"+name));
 		if(!f.exists()) throw new RuntimeException("Directory maps\\"+name+" doesn't exist!");
@@ -71,43 +72,7 @@ public class Map extends Struct{
 		if(!f.exists())
 			throw new RuntimeException("Entity info file for map "+name+" doesn't exist!");
 		loadEntities(Files.readLines(f));
-	}
-	private final Function toString = new Function(null,null,false){
-		@Override
-		public int args_length(){ return 0; }
-		@Override
-		public String call(Scope script,List<String> values){
-			return Map.this.name;
-		}
-	};
-	private final Function getTile = new Function(null,null,false){
-		public int args_length(){ return 3; }
-		public String call(Scope script, List<String> values){
-			int x = Script.parseInt(values.get(0));
-			int y = Script.parseInt(values.get(1));
-			int layer = Script.parseInt(values.get(2));
-			if(layer == 0)
-				return Tile.getTile(background[y][x]).getIdStr();
-			else return Tile.getTile(foreground[y][x]).getIdStr();
-		}
-	};
-	@Override
-	public String getVar(String varname, Scope scopeIn){
-		if(varname.equals("width"))
-			return Integer.toString(Map.this.width);
-		else if(varname.equals("height"))
-			return Integer.toString(Map.this.height);
-		else if(varname.equals("tostring"))
-			return toString.getIdStr();
-		else if(varname.equals("getTile"))
-			return getTile.getIdStr();
-		else if(varname.equals("name"))
-			return name;
-		else throw new VarNotExists("Variable "+varname+" does not exist in map "+Map.this.name);
-	}
-	@Override
-	public void setVar(String varname, String value, boolean isfinal, Scope scopeIn){
-		throw new RuntimeException("Cannot set variable "+varname+" in map "+Map.this.name);
+		createWrappers();
 	}
 	public Color getBackground(){
 		return clr;
@@ -136,9 +101,6 @@ public class Map extends Struct{
 			}
 		}
 		return tiles;
-		
-	
-		
 	}
 	private void loadEntities(List<String> lines){
 		this.tileEntities = new TileEntity[height][width];
@@ -432,5 +394,275 @@ public class Map extends Struct{
 		if(!sprites.containsKey(hashcode))
 			throw new RuntimeException("A sprite with id "+hashcode+" in map "+toString()+" does not exist!");
 		return sprites.get(hashcode);
+	}
+	
+	@Override
+	public String getClassName(){return "Map";}
+	@Override
+	public boolean hasMember(String name){
+		return name.equals("foreground") || name.equals("background") || name.equals("name") || name.equals("width") || name.equals("height") || name.equals("setSize") || name.equals("sprites") || name.equals("entities") || name.equals("tileEntities");
+	}
+	@Override
+	public Object getMember(String name){
+		if(name.equals("foreground")){
+			return foregroundWrapper;
+		}else if(name.equals("background")){
+			return backgroundWrapper;
+		}else if(name.equals("tileEntities")){
+			return tileEntityWrapper;
+		}else if(name.equals("name")){
+			return this.name;
+		}else if(name.equals("width")){
+			return this.width;
+		}else if(name.equals("height")){
+			return this.height;
+		}else if(name.equals("setSize")){
+			return setSizeWrapper;
+		}else if(name.equals("sprites")){
+			return spritesWrapper;
+		}
+	}
+	private void createWrappers(){
+		foregroundWrapper = new MatrixWrapperShort(foreground);
+		backgroundWrapper = new MatrixWrapperShort(background);
+		tileEntityWrapper = new MatrixWrapperTileEntity(tileEntities);
+		spritesWrapper = new SpritesWrapper();
+		entitiesWrapper = new EntitiesWrapper();
+	}
+	private class EntitiesWrapper extends AbstractJSObject{
+		private JSObject removeEntity = new AbstractJSObject(){
+			public boolean isFunction(){return true;}
+			public Object call(Object thiz,Object... args){
+				if(args.length != 1) throw new RuntimeException("Invalid number of params passed to entities.remove: expected 1");
+				if(!(args[0] instanceof Entity)) throw new RuntimeException("Invalid type passed to entities.remove: "+args[0].getClass().getName());
+				if(!(thiz instanceof EntitiesWrapper)) throw new RuntimeException("Cannot call entities.remove on "+thiz);
+				((EntitiesWrapper)thiz).map.removeEntity((Entity)args[0]);
+				return thiz;
+			}
+		};
+		private JSObject addEntity = new AbstractJSObject(){
+			public boolean isFunction(){return true;}
+			public Object call(Object thiz,Object... args){
+				if(args.length != 1) throw new RuntimeException("Invalid number of params passed to entities.remove: expected 1");
+				if(!(args[0] instanceof Entity)) throw new RuntimeException("Invalid type passed to entities.remove: "+args[0].getClass().getName());
+				if(!(thiz instanceof EntitiesWrapper)) throw new RuntimeException("Cannot call entities.remove on "+thiz);
+				((Entity)args[0]).setMap(((EntitiesWrapper)thiz).map);
+				return thiz;
+			}
+		};
+		private Map map = Map.this;
+		public boolean hasMember(String name){
+			return name.equals("remove") || name.equals("add");
+		}
+		public Object getMember(String name){
+			if(name.equals("remove")) return removeEntity;
+			else if(name.equals("add")) return addEntity;
+			else return super.getMember(name);
+		}
+		public boolean hasSlot(int i){
+			for(Entity ent : Map.this.entities){
+				if(ent instanceof NPC){
+					if(((NPC)ent).hashCode() == i) return true;
+				}
+			}
+			return false;
+		}
+		public Object getSlot(int i){
+			for(Entity ent : Map.this.entities){
+				if(ent instanceof NPC){
+					if(((NPC)ent).hashCode() == i) return ent;
+				}
+			}
+			return null;
+		}
+		public void setSlot(int i, Object value){
+			if(value == null || value.getClass() == jdk.nashorn.internal.runtime.Undefined.class){
+				if(hasSlot(i))
+					Map.this.removeEntity((Entity)getSlot(i));
+			}else{
+				throw new RuntimeException("Cannot use entities[] in this way");
+			}
+		}
+		public String getClassName(){ return "Entity[]";}
+		public String toString(){
+			return "Entity[]";
+		}
+		
+	}
+	private class SpritesWrapper extends AbstractJSObject{
+		public boolean hasSlot(int i){
+			return Map.this.sprites.containsKey(i);
+		}
+		public Object getSlot(int i){
+			return Map.this.getSprite(i);
+		}
+		public void setSlot(int i, Object value){
+			if(value == null || value.getClass() == jdk.nashorn.internal.runtime.Undefined.class){
+				if(hasSlot(i))
+					Map.this.removeSprite(Map.this.getSprite(i));
+			}else{
+				if(!(value instanceof Sprite)) throw new RuntimeException("Cannot set index "+i+" in Sprite[] to "+value.getClass().getName());
+				((Sprite)value).setMap(Map.this);
+			}
+		}
+		public String getClassName(){ return "Sprite[]";}
+		public String toString(){
+			return "Sprite[]";
+		}
+	}
+	private static class SetSizeWrapper extends AbstractJSObject{
+		@Override
+		public boolean isFunction(){return true;}
+		@Override
+		public Object call(Object thiz, Object... args){
+			if(args.length < 2) throw new RuntimeException("Invalid number of params in function setSize: expected 2");
+			if(!(args[0] instanceof Number) || !(args[1] instanceof Number)) throw new RuntimeException("Invalid type passed to setSize for arguments 1 or 2: expected int");
+			if(!(thiz instanceof Map)) throw new RuntimeException("Cannot call setSize on object of type "+thiz.getClass().getName());
+			int newwidth = ((Number)args[0]).intValue(), newheight = ((Number)args[1]).intValue();
+			boolean bottom, left;
+			if(args.length >= 3){
+				if(!(args[2] instanceof Boolean)) throw new RuntimeException("Invalid type passed to setSize for argument 3: expected boolean");
+				bottom = (Boolean)args[2];
+				if(args.length >= 4){
+					if(!(args[3] instanceof Boolean)) throw new RuntimeException("Invalid type passed to setSize for argument 4: expected boolean");
+					left = (Boolean)args[3];
+				}else left = false;
+			}else{
+				left = false;
+				bottom = false;
+			}
+			Map map = (Map)thiz;
+			map.setSize(newwidth, newheight, bottom, left);
+			return map;
+		}
+		public String toString(){
+			return "function setSize(width,height,addTop,addLeft){[native code]}";
+		}
+	}
+	private static final SetSizeWrapper setSizeWrapper = new SetSizeWrapper();
+	private class MatrixWrapperTileEntity extends AbstractJSObject{
+		private TileEntity[][] matrix;
+		private ArrayWrapperTileEntity[] listeners;
+		public MatrixWrapperTileEntity(TileEntity[][] m){
+			matrix = m;
+			listeners = new ArrayWrapperTileEntity[m.length];
+			for(int i = 0; i < m.length; i++){
+				listeners[i] = new ArrayWrapperTileEntity(m[i]);
+			}
+		}
+		public boolean hasSlot(int i){
+			return i >= 0 && i < listeners.length;
+		}
+		public Object getSlot(int i){
+			return listeners[i];
+		}
+		public boolean hasMember(String name){
+			return name.equals("length");
+		}
+		public Object getMember(String name){
+			if(name.equals("length"))
+				return listeners.length;
+			else return super.getMember(name);
+		}
+		public String toString(){
+			String result = "[";
+			for(int i = 0; i < matrix.length; i++){
+				result += Arrays.toString(matrix[i]);
+				if(i != matrix.length-1) result += ", ";
+			}
+			return result + "]";
+		}
+	}
+	private class ArrayWrapperTileEntity extends AbstractJSObject{
+		private TileEntity[] list;
+		public ArrayWrapperTileEntity(TileEntity[] l){
+			list = l;
+		}
+		public boolean hasSlot(int i){
+			return i >= 0 && i < list.length;
+		}
+		public Object getSlot(int i){
+			return list[i];
+		}
+		public boolean isArray(){return true;}
+		
+		public boolean hasMember(String name){
+			return name.equals("length");
+		}
+		public Object getMember(String name){
+			if(name.equals("length")){
+				return list.length;
+			}else return super.getMember(name);
+		}
+		public void setSlot(int index, Object value){
+			if(!(value instanceof TileEntity)) throw new RuntimeException("Cannot set slot "+index+" in short[] to value of type "+value.getClass().getName());
+			list[index] = (TileEntity)value;
+		}
+		public String toString(){
+			return Arrays.toString(list);
+		}
+	}
+	private class MatrixWrapperShort extends AbstractJSObject{
+		private short[][] matrix;
+		private ArrayWrapperShort[] listeners;
+		public MatrixWrapperShort(short[][] m){
+			matrix = m;
+			listeners = new ArrayWrapperShort[m.length];
+			for(int i = 0; i < m.length; i++){
+				listeners[i] = new ArrayWrapperShort(m[i]);
+			}
+		}
+		public boolean hasSlot(int i){
+			return i >= 0 && i < listeners.length;
+		}
+		public Object getSlot(int i){
+			return listeners[i];
+		}
+		public boolean hasMember(String name){
+			return name.equals("length");
+		}
+		public Object getMember(String name){
+			if(name.equals("length"))
+				return listeners.length;
+			else return super.getMember(name);
+		}
+		public String toString(){
+			String result = "[";
+			for(int i = 0; i < matrix.length; i++){
+				result += Arrays.toString(matrix[i]);
+				if(i != matrix.length-1) result += ", ";
+			}
+			return result + "]";
+		}
+	}
+	private class ArrayWrapperShort extends AbstractJSObject{
+		private short[] list;
+		public ArrayWrapperShort(short[] l){
+			list = l;
+		}
+		public boolean hasSlot(int i){
+			return i >= 0 && i < list.length;
+		}
+		public Object getSlot(int i){
+			return list[i];
+		}
+		public boolean isArray(){return true;}
+		
+		public boolean hasMember(String name){
+			return name.equals("length");
+		}
+		public Object getMember(String name){
+			if(name.equals("length")){
+				return list.length;
+			}else return super.getMember(name);
+		}
+		public void setSlot(int index, Object value){
+			if(!(value instanceof Number)) throw new RuntimeException("Cannot set slot "+index+" in short[] to value of type "+value.getClass().getName());
+			short val = ((Number)value).shortValue();
+			list[index] = val;
+		}
+		public String toString(){
+			return Arrays.toString(list);
+		}
 	}
 }

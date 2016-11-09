@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.ombda.scripts.Scope;
 import com.ombda.scripts.Script;
-
+@Deprecated
 public abstract class ScriptStep {
 	protected boolean executed = true;
 	public abstract void execute(Scope script);

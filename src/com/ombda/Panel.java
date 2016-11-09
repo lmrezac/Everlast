@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.JPanel;
@@ -59,7 +61,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public MessageBox msgbox;
 	public Picture img;
 	
-	public ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
+	public ScriptEngine scriptEngine;
+	
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	boolean running = true;
@@ -101,6 +104,12 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		previous = hud;
 		
 		Tiles.loadTiles();
+		
+		scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
+		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+		
+		
+		
 		loadScripts();
 		
 		loadSaveFile();
@@ -137,6 +146,13 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		player.setMap(map);
 		player.x = map.playerSpawnX;
 		player.y = map.playerSpawnY;
+		
+		//script map variable
+		setScriptMap(map);
+	}
+	private void setScriptMap(Map map){
+		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+		
 	}
 	public void setGUI(GUI gui){
 		previous = this.gui;

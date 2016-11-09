@@ -827,8 +827,8 @@ public class Console extends Input{
 				str += ' ';
 		}
 		try{
-			Script s = Script.getScript(str);
-			Panel.getInstance().runScript(s);
+			
+			Panel.getInstance().runScript(str);
 		}catch(RuntimeException e){
 			if(Debug.printStackTrace)
 			e.printStackTrace();
