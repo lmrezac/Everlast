@@ -28,22 +28,22 @@ public class Player extends NPC{
 	public Player(int x, int y,Facing dir){
 		super(x,y,0,-1,
 			new ImageIcon[]{
-				Images.retrieve("base_still_N"),
-				Images.retrieve("base_still_NE"),
-				Images.retrieve("base_still_E"),
-				Images.retrieve("base_still_SE"),
-				Images.retrieve("base_still_S"),
-				Images.retrieve("base_still_SW"),
-				Images.retrieve("base_still_W"),
-				Images.retrieve("base_still_NW"),
-				Images.retrieve("base_walk_N"),
-				Images.retrieve("base_walk_NE"),
-				Images.retrieve("base_walk_E"),
-				Images.retrieve("base_walk_SE"),
-				Images.retrieve("base_walk_S"),
-				Images.retrieve("base_walk_SW"),
-				Images.retrieve("base_walk_W"),
-				Images.retrieve("base_walk_NW")
+				Images.retrieve("base_still_N",false),
+				Images.retrieve("base_still_NE",false),
+				Images.retrieve("base_still_E",false),
+				Images.retrieve("base_still_SE",false),
+				Images.retrieve("base_still_S",false),
+				Images.retrieve("base_still_SW",false),
+				Images.retrieve("base_still_W",false),
+				Images.retrieve("base_still_NW",false),
+				Images.retrieve("base_walk_N",false),
+				Images.retrieve("base_walk_NE",false),
+				Images.retrieve("base_walk_E",false),
+				Images.retrieve("base_walk_SE",false),
+				Images.retrieve("base_walk_S",false),
+				Images.retrieve("base_walk_SW",false),
+				Images.retrieve("base_walk_W",false),
+				Images.retrieve("base_walk_NW",false)
 			},
 			new Rectangle2D.Double(0,0,28,16));
 		this.direction = dir;
@@ -346,6 +346,6 @@ public class Player extends NPC{
 	}
 
 	public String toString(){
-		return "player";
+		return "[object Player]";
 	}
 }

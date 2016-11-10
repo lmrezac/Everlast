@@ -1,22 +1,20 @@
 package com.ombda;
 
+import static com.ombda.Debug.debug;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Shape;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
+
 import com.ombda.entities.Player;
-import com.ombda.scripts.Function;
-import com.ombda.scripts.Scope;
-import com.ombda.scripts.Script;
-import com.ombda.scripts.Struct;
 import com.ombda.tileentities.TileEntity;
-import static com.ombda.Debug.debug;
-public class Tile extends Struct implements Collideable, Interactable{
+public class Tile extends AbstractJSObject implements Collideable, Interactable{
 	public static final int SIZE = 32;
 	public static Tile[] tiles = new Tile[0xFF];
 	private static short id_count = 0;
@@ -25,7 +23,7 @@ public class Tile extends Struct implements Collideable, Interactable{
 	private Shape boundingBox;
 	public final short id;
 	public Tile(short id, ImageIcon img, Shape boundingBox){
-		super(Scope.tile_type, Arrays.asList("id","isAnimated","animationFrame"));
+		//super(Script.tile_type, Arrays.asList("id","isAnimated","animationFrame"));
 		/*this.setFinalVar("isAnimated", new Function(null,null,false){
 			public int args_length(){ return 0; }
 			public String call(Scope scopeIn, List<String> args){
@@ -48,7 +46,7 @@ public class Tile extends Struct implements Collideable, Interactable{
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
 		tiles[id] = this;
 		this.id = id;
-		super.setVar("id",Short.toString(this.id),false,this);
+		//super.setVar("id",Short.toString(this.id),false,this);
 	}
 	public Tile(short id, ImageIcon image){
 		this(id,image,Tiles.EMPTY);
@@ -63,28 +61,33 @@ public class Tile extends Struct implements Collideable, Interactable{
 		this((short)i,retrieve,boundingBox);
 	}
 	@Override
-	public void setVar(String varname, String value, boolean isfinal, Scope scope){
+	public void setMember(String varname, Object value){
 		if(varname.equals("id")){
 			throw new RuntimeException("Cannot set variable id, it is final");
 		}else if(varname.equals("animationFrame")){
 			if(!(this.image instanceof AnimatedImage)) throw new RuntimeException("Cannot set animationFrame on non-animated tile");
-			((AnimatedImage)this.image).index = Script.parseInt(value);
+			if(!(value instanceof Integer)) throw new RuntimeException("Cannot set tile variable animationFrame to value of type "+value.getClass().getName());
+			((AnimatedImage)this.image).index = (Integer)value;
 		}else
-			super.setVar(varname,value,isfinal,scope);
+			super.setMember(varname,value);
 	}
 	@Override
-	public String getVar(String varname, Scope scope){
+	public boolean hasMember(String name){
+		return name.equals("id") || name.equals("animationFrame") || name.equals("isAnimated");
+	}
+	@Override
+	public Object getMember(String varname){
 		if(varname.equals("id"))
-			return String.valueOf(this.id);
+			return this.id;
 		else if(varname.equals("animationFrame")){
-			String result;
-			if(!(image instanceof AnimatedImage)) result = "0";
-			result = Script.toString(((AnimatedImage)image).index);
+			int result;
+			if(!(image instanceof AnimatedImage)) result = 0;
+			result = ((AnimatedImage)image).index;
 			debug("Getanimationframe = "+result);
 			return result;
 		}else if(varname.equals("isAnimated")){
-			return image instanceof AnimatedImage? "1" : "0";
-		}else return super.getVar(varname,scope);
+			return image instanceof AnimatedImage;
+		}else return super.getMember(varname);
 	}
 	public void incrementFrame(){
 		frame = image.getImage();
@@ -138,12 +141,36 @@ public class Tile extends Struct implements Collideable, Interactable{
 		return Panel.getInstance().getPlayer().getMap().getTileEntityAt(x, y) != null;
 	}
 	public void manageCollision(Collideable c){}
-	
+	@Override
+	public Object getDefaultValue(Class<?> hint){
+		if(hint == String.class){
+			return this.toString();
+		}else return super.getDefaultValue(hint);
+	}
 	public static Tile getTile(int id){
 		if(id < 0 || id >= 0xFF) throw new RuntimeException("Invalid id: "+id);
 		if(tiles[id] == null) throw new RuntimeException("No tile with id "+Integer.toHexString(id));
 		return tiles[id];
 	}
+	public static final JSObject TILES_JS = new AbstractJSObject(){
+		@Override
+		public boolean hasSlot(int id){
+			return id >= 0 && id < 0xFF && tiles[id] != null;
+		}
+		@Override
+		public Object getSlot(int id){
+			debug("Getslot "+id);
+			return getTile(id);
+		}
+		@Override
+		public String getClassName(){
+			return "Tile[]";
+		}
+		@Override
+		public String toString(){
+			return "Tile[]";
+		}
+	};
 	public Shape getBoundingBox(){
 		return boundingBox;
 	}

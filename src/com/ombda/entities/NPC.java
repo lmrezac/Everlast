@@ -149,7 +149,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	}
 
 	public String toString(){
-		return "ncp 0x"+Integer.toHexString(this.id);
+		return "npc 0x"+Integer.toHexString(this.id);
 	}
 	
 	@Override

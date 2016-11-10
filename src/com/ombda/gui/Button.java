@@ -19,8 +19,8 @@ public abstract class Button implements MouseListener{
 	private String label;
 	public Button(String str,int x, int y){
 		this.label = str;
-		normal = Images.retrieve("gui/button");
-		pressed = Images.retrieve("gui/button_pressed");
+		normal = Images.retrieve("gui/button",false);
+		pressed = Images.retrieve("gui/button_pressed",false);
 		
 		this.x = x;
 		this.y = y;

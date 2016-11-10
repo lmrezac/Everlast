@@ -420,7 +420,9 @@ public class Map extends AbstractJSObject{
 			return setSizeWrapper;
 		}else if(name.equals("sprites")){
 			return spritesWrapper;
-		}
+		}else if(name.equals("entities")){
+			return entitiesWrapper;
+		}else throw new RuntimeException("Map doesn't contain member "+name);
 	}
 	private void createWrappers(){
 		foregroundWrapper = new MatrixWrapperShort(foreground);

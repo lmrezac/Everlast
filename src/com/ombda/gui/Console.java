@@ -282,7 +282,7 @@ public class Console extends Input{
 			throw new CmdException("Cannot set gui to "+args.get(1));
 		}else if(args.get(1).equals("img")){
 			if(args.size() != 3) throw new CmdException("Need another argument");
-			panel.img.setImage(Images.retrieve(args.get(2)));
+			panel.img.setImage(Images.retrieve(args.get(2),false));
 			panel.setGUI(panel.img);
 			reset();
 		}else throw new CmdException("No such gui id: "+args.get(1));

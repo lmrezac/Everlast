@@ -21,7 +21,7 @@ public class MapMaker extends GUI implements InputListener{
 	private short tileId = 0;
 	private ImageIcon bar;
 	public MapMaker(){
-		bar = Images.retrieve("gui/bar");
+		bar = Images.retrieve("gui/bar",false);
 		buttons.add(new Button("Save",0,0){
 			@Override
 			public void buttonPressed(){

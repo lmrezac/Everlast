@@ -29,7 +29,12 @@ public class Sprite extends Entity{
 		this.map = map;
 		this.map.addSprite(this);
 	}
-	public Sprite(int x, int y, ImageIcon bimg,int hash){
+	public Sprite(int x, int y, ImageIcon bimg,int hash,Map map){
+		this(hash,bimg,x,y);
+		setMap(map);
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
+	}
+	public Sprite(int x, int y, ImageIcon bimg, int hash){
 		this(hash,bimg,x,y);
 		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
 	}

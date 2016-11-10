@@ -27,11 +27,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.JPanel;
 
 import com.ombda.entities.Player;
@@ -43,6 +46,7 @@ import com.ombda.gui.Input;
 import com.ombda.gui.MapMaker;
 import com.ombda.gui.MessageBox;
 import com.ombda.gui.Picture;
+import com.ombda.scripts.Script;
 
 //import javax.swing.Timer;
 
@@ -107,8 +111,16 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 		scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
-		
-		
+		bindings.put("TILES",Tile.TILES_JS);
+		try{
+			scriptEngine.eval("var Player = Java.type('com.ombda.entities.Player')");
+			scriptEngine.eval("var Map = Java.type('com.ombda.Map')");
+			scriptEngine.eval("var game = Java.type('com.ombda.Panel').getInstance()");
+			scriptEngine.eval("var player = game.player");
+			scriptEngine.eval("var image = Java.type('com.ombda.Images').retrieve");
+		}catch(ScriptException e){
+			throw new RuntimeException(e);
+		}
 		
 		loadScripts();
 		
@@ -123,7 +135,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		assert f.isDirectory() : "\\resources\\scripts was not a directory!";
 		File[] files = f.listFiles(new FilenameFilter(){
 			public boolean accept(File arg0, String arg1){
-				return arg1.endsWith(".js");
+				return arg1.endsWith(".ejs");
 			}
 		});
 		for(File file : files){
@@ -138,7 +150,15 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 	}
 	private static String evaluateScriptFile(String str){
-		//str = "load("
+		Matcher m = Pattern.compile("(-?((\\d+\\.\\d*)|(\\d*\\.\\d+)))t").matcher(str);
+		while(m.find()){
+			String group = m.group();
+			String replacement;
+			if(group.contains(".")){
+				replacement = Script.toString(Script.parseDouble(group));
+			}else replacement = String.valueOf(Script.parseInt(group));
+			m.replaceFirst(replacement);
+		}
 		return str;
 	}
 	public void setMap(Map map){
@@ -152,7 +172,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	}
 	private void setScriptMap(Map map){
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
-		
+		bindings.put("map", this.map);
 	}
 	public void setGUI(GUI gui){
 		previous = this.gui;
