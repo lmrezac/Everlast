@@ -1,84 +1,15 @@
 package com.ombda.scripts;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
-import com.ombda.Panel;
-import com.ombda.scripts.steps.*;
-import static com.ombda.Debug.debug;
-@Deprecated
-public class Script extends Scope{
-	private static HashMap<String,Script> scripts = new HashMap<>();
-	public static final String REF = "ǂ";
-	protected Scope currentScope;
-	List<Scope> pastScopes = new ArrayList<>();
-	protected List<ScriptStep> steps;
-	public int index = 0;
-	private String description;
-	public Script(List<ScriptStep> steps){
-		this(steps,true);
-	}
-	public Script(String desc, List<ScriptStep> steps){
-		this(desc,steps,true);
-	}
-	public Script(List<ScriptStep> steps, boolean functions){
-		this(null,steps,functions);
-	}
-	public Script(String desc,List<ScriptStep> steps,boolean functions){
-		super(functions);
-		this.steps = steps;	
-		this.currentScope = this;
-		this.description = desc;
-		if(desc != null)
-			scripts.put(desc, this);
-	}
-	public void reset(){
-		index = 0;
-		this.currentScope = this;
-	}
-	public void execute(Scope script){
-		if(index == steps.size()){
-				throw new RuntimeException("Script was not reset!");
-		}
-		//debug("executing script");
-		ScriptStep step = steps.get(index);
-		if(step instanceof Msg && step.done()){
-			index++;
-			if(index != steps.size())
-				execute(script);
-			return;
-		}
-		Panel.getInstance().step = step.getClass().getSimpleName();
-		if(index+1 < steps.size()){
-			if(steps.get(index+1) instanceof Msg){
-				Panel.getInstance().msgbox.closeWhenDone = false;
-			}
-		}else Panel.getInstance().msgbox.closeWhenDone = true;
-		step.execute(script);
-		if(step.done()){
-			index++;
-		}
-	}
-	public boolean done(){
-		return index == steps.size();
-	}
-	public void run(){
-		debug("called!");
-		new Exception().printStackTrace();
-		while(!done()){
-			execute(this.currentScope);
-		}
-	}
-	public void setScope(Scope scope){
-		pastScopes.add(this.currentScope);
-		this.currentScope = scope;
-	}
-	public void exitScope(){
-		if(pastScopes.size() != 0)
-			this.currentScope = pastScopes.remove(pastScopes.size()-1);
-	}
+import com.ombda.Tile;
+
+
+public class Script{
+	
+	//private static Pattern number = Pattern.compile("-?((\\d+\\.\\d*)|(\\d*\\.\\d+))");
+
 	public static List<String> scanLine(String line){
 		
 		List<String> result = new ArrayList<>();
@@ -99,328 +30,498 @@ public class Script extends Scope{
 				if(depth > 0) throw new RuntimeException("Unclosed variable in string "+line);
 				result.add(line.substring(i,j).trim());
 				i = j;
+				
 			}
 		}
 		return result;
 	}
-	public static Script compile(String name,final List<String> lines){
-		for(int index = 0; index < lines.size(); index++){
-			String line = lines.get(index).trim();
-			if(line.startsWith("#") || line.isEmpty()){
-				lines.remove(index);
-				index--;
-			}else{
-				boolean instring = false;
-				for(int i = 0; i < line.length(); i++){
-					if(line.charAt(i) == '"') instring = !instring;
-					if(!instring && line.substring(i).startsWith("--")){
-						line = line.substring(0,i);
-						break;
-					}
+	/*public String evalVars(String line){
+		Scope currentScope = this.getCurrentScope();
+		String str = line;
+		if(!isString(str) && !require_brackets && !number.matcher(str).find()){
+			if(currentScope.vars.containsKey(str) || ((!str.startsWith("npc ") && !str.startsWith("sprite ") && (str.startsWith("class ") || (!require_class && str.indexOf(".") > 0)) && !str.contains("${")))){
+
+				if(str.indexOf(".") > 0 && !str.startsWith("class ") && !str.startsWith(".") && !require_class && !str.startsWith("npc ") && !str.startsWith("sprite "))
+					str = "class " + str;
+				return currentScope.getVar(str, currentScope);
+			}
+		}
+		str = evalString(str);
+		int i;
+		while((i = str.indexOf("${")) != -1){
+			int j = str.indexOf('}', i + 2);
+			if(j == -1)
+				throw new RuntimeException("Unclosed variable at index " + i + " in string " + line);
+			String varname = str.substring(i + 2, j);
+			str = str.substring(0, i) + currentScope.getVar(varname, currentScope) + (j + 1 < str.length()? str.substring(j + 1) : "");
+		}
+		return str;
+	}*/
+
+	/*public void evalArgs(List<String> args){
+		//debug("before: "+args);
+		Scope currentScope = getCurrentScope();
+		for(int i = 0; i < args.size(); i++){
+			String arg = args.get(i);
+			if(!arg.contains("${") && !require_brackets && !require_class && arg.indexOf(".") > 0 && ((i > 0 && !args.get(i - 1).equals("class") && !args.get(i - 1).equals("npc") && !args.get(i - 1).equals("sprite")) || i == 0)){
+				args.add(i, "class");
+			}
+		}
+	//	debug("args after = "+args);
+		for(int i = 0; i < args.size(); i++){
+			String arg = args.get(i);
+			if(!require_brackets && (arg.endsWith("class") || arg.endsWith("operator"))){
+				if(i + 1 >= args.size())
+					throw new RuntimeException("Keyword class expects a variable name!");
+				arg += " " + evalString(args.remove(i + 1));
+				while(arg.endsWith("class") || arg.endsWith("operator")){
+					if(i + 1 >= args.size())
+						throw new RuntimeException("Keyword class/operator expects a variable/operator name!");
+					arg += " " + evalString(args.remove(i + 1));
 				}
-				if(line.isEmpty()){
-					lines.remove(index);
-					index--;
+				try{
+					arg = currentScope.getVar(arg, currentScope);
+					args.set(i, arg);
+				}catch(VarNotExists ex){
+					args.set(i,arg);
+				}
+			}else if(!require_brackets && (arg.equals("npc") || arg.equals("sprite"))){
+				args.set(i, currentScope.getVar(arg + " " + args.remove(i + 1), currentScope));
+			}
+			
+		}
+		evalMath(args);
+		for(int i = 0; i < args.size() - 1; i++){
+			String arg = evalVars(args.get(i));
+			if(arg.startsWith(Script.REF)){
+				Scope scope = Scope.getId(arg);
+				if(scope instanceof Struct)
+					arg = scope.toString();
+				else if(scope instanceof StructTemplate)
+					arg = ((StructTemplate) scope).getName();
+			}
+			args.set(i, arg);
+		}
+	}*/
+
+	public static String toString(double d){
+		String str = Double.toString(d);
+		if(str.endsWith(".0"))
+			return str.substring(0, str.length() - 2);
+		return str;
+	}
+
+	/*public void evalMath(List<String> args){
+		int index;
+		while((index = args.indexOf("(")) != -1){
+			int depth = 1;
+			List<String> subargs = new ArrayList<>();
+			while(!args.isEmpty()){
+				if(args.get(index + 1).equals("(")){
+					depth++;
+				}else if(args.get(index + 1).equals(")")){
+					depth--;
+				}
+				if(depth == 0)
+					break;
+				subargs.add(args.remove(index + 1));
+			}
+			args.remove(index + 1);
+			args.remove(index);
+			evalMath(subargs);
+
+			args.addAll(index, subargs);
+		}
+		List<String> lastPass = new ArrayList<String>();
+		while(!args.equals(lastPass)){
+			lastPass = new ArrayList<String>(args);
+			// function calls, new objects, array literals
+			for(index = args.size() - 1; index >= 0; index--){
+				String arg = evalVars(args.get(index));
+				if(arg.startsWith(Script.REF)){
+					if((index != 0 && !args.get(index - 1).equals("function")) || index == 0){
+						Scope scope = getId(arg);
+						if(scope instanceof Function){
+							Function func = (Function) scope;
+							int size = func.args_length();
+							List<String> values = new ArrayList<>();
+							for(int j = 0; j < size; j++){
+								if(index + 1 >= args.size())
+									throw new RuntimeException("Function of id " + id + " expects " + size + " arguments, found " + values.size());
+								values.add(evalVars(args.remove(index + 1)));
+							}
+							args.set(index, func.call(getCurrentScope(), values));
+						}
+					}else{
+						assert args.get(index - 1).equals("function");
+						index--;
+						String name = evalString(args.remove(index + 1));
+						String value = getCurrentScope().evalVars(name);
+						if(!value.startsWith(Script.REF))
+							throw new RuntimeException("Value after function declaration MUST be a scoped value! Got: " + value);
+						Scope scope = Scope.getId(value);
+						if(!(scope instanceof Function))
+							throw new RuntimeException("Value after function declaration MUST be a function value.");
+						args.set(index, scope.getIdStr());
+					}
+					if(index+1 < args.size() && args.get(index+1).startsWith(".") && args.get(index+1).length()>1 && args.get(index).startsWith(Script.REF)){
+					
+						Scope scope = Scope.getId(args.get(index));
+						String val = args.remove(index+1);
+				//		index--;
+						args.set(index,arg = scope.getVar(val.substring(1),getCurrentScope()));
+		
+					}
+				}else if(arg.equals("new")){
+					if(index >= args.size() - 1)
+						throw new RuntimeException("Expected type name after new declaration");
+					String name = evalString(args.remove(index + 1));
+					if(name.equals("scope")){
+						Scope s = new Scope();
+						args.set(index, s.getIdStr());
+						continue;
+					}else if(name.equals("array")){
+						if(index + 1 >= args.size())
+							throw new RuntimeException("Expected size after new array declaration.");
+						String value = args.remove(index + 1);
+						int size = parseInt(value);
+						ListScope list = new ListScope(size);
+						args.set(index, list.getIdStr());
+					}else if(name.equals("List")){
+						ListScope list = new ListScope();
+						args.set(index, list.getIdStr());
+					}else if(getVar(name, this).startsWith(Script.REF)){
+						Scope scope = Scope.getId(getVar(name, this));
+						if(!(scope instanceof StructTemplate))
+							throw new RuntimeException("Cannot create new object from non-struct template");
+						StructTemplate template = (StructTemplate) scope;
+						List<String> values = new ArrayList<String>();
+						if(template.args_length() > 0){
+							for(int j = 0; j < template.args_length(); j++){
+								if(index + 1 >= args.size())
+									break;
+								values.add(evalVars(args.remove(index + 1)));
+							}
+						}
+						Struct struct = template.createNewStruct(values);
+						args.set(index, struct.getIdStr());
+					}else
+						throw new RuntimeException("Invalid type name: " + name);
+				}else if(arg.equals("{")){
+					//if(index >= args.size() - 2)
+					//	throw new RuntimeException("Expected parenthesis after collect");
+					args.remove(index);
+					List<String> values = new ArrayList<>();
+
+					while(!args.get(index).equals("}"))
+						values.add(evalVars(args.remove(index)));
+
+					ListScope list = new ListScope(values.size());
+					for(int j = 0; j < values.size(); j++)
+						list.setVar(toString(j), values.get(j), getCurrentScope());
+
+					args.set(index, list.getIdStr());
+			
 				}else
-					lines.set(index,line);
+					args.set(index, arg);
 			}
-		}
-		List<ScriptStep> steps = new ArrayList<>();
-		for(int i = 0; i < lines.size(); i++){
-			String line = lines.get(i).trim();
-			if(line.contains(Script.REF))
-				throw new RuntimeException("Illegal character "+Script.REF+" encountered at index "+line.indexOf(Script.REF)+" on line "+i);
-			lines.set(i,line);
-		}
-		for(int i = 0; i < lines.size(); i++){
-			String line = lines.get(i);
-			List<String> args = scanLine(line);
-			String cmd = args.remove(0);
-			
-			i = createStep(i,cmd,args,lines,steps);
-		}
-		return new Script(name,steps);
-	}
-	private static int createStep(int i, String cmd, List<String> args, final List<String> lines, List<ScriptStep> steps){
-		if(args.size() - 3 >= 0 && args.get(args.size()-3).equals("new") && args.get(args.size()-2).equals("function")){
-			List<ScriptStep> substeps = new ArrayList<>();
-			String end = "end function";
-			for(i = i+1; i < lines.size(); i++){
-				if(lines.get(i).equals(end)) break;
-				List<String> subargs = scanLine(lines.get(i));
-				String subcmd2 = subargs.remove(0);
-				i = createStep(i,subcmd2,subargs,lines,substeps);
-			}
-			if(i == lines.size() && !lines.get(i).equals(end)) throw new RuntimeException("No corresponding end statement found for inline function creation");
-			assert lines.get(i).equals(end);
-			String arglist = args.remove(args.size()-1);
-			if(!arglist.startsWith("(") && !arglist.endsWith(")")) throw new RuntimeException("In script step : set script function : variable list MUST be enclosed by parenthesis ()!");
-			arglist = arglist.substring(1,arglist.length()-1);
-			Scanner scan = new Scanner(arglist);
-			scan.useDelimiter(",");
-			List<String> argnames = new ArrayList<>();
-			while(scan.hasNext()) argnames.add(scan.next());
-			scan.close();
-			args.remove(args.size()-1);
-			args.set(args.size()-1,new Function(argnames,substeps).getIdStr());
-		}
-		if(cmd.equals("msg"))
-			steps.add(new Msg(args));
-		else if(cmd.equals("cmd"))
-			steps.add(new Cmd(args));
-		else if(cmd.equals("print"))
-			steps.add(new PrintToConsole(args));
-		else if(cmd.equals("npc"))
-			steps.add(new CreateNPC(args));
-		else if(cmd.equals("sprite"))
-			steps.add(new CreateSprite(args));
-		else if(cmd.equals("collideable"))
-			steps.add(new CreateCollideable(args));
-		else if(cmd.equals("wait"))
-			steps.add(new Wait(args));
-		else if(cmd.equals("set")){
-			if(args.isEmpty()) throw new RuntimeException("script step : set needs a minimum of two arguments.");
-			String subcmd = args.get(0);
-			boolean finalvar = false;
-			if(subcmd.equals("final")){
-				finalvar = true;
-				args.remove(0);
-				subcmd = args.get(0);
-			}
-			if(subcmd.equals("script")){
-				args.remove(0);
-				int k = 0;
-				if(args.isEmpty()) throw new RuntimeException("script step : set script needs a minimum of one argument, followed by lines of code, followed by a corresponding end statement.");
-				String name = "script";
-				if(args.size() > 1 && args.get(0).equals("function")){
-					name += " function";
-					if(args.size() < 2)
-						throw new RuntimeException("script step : set script function needs exactly 2 arguments: a name and variable list enclosed in parenthesis, followed by lines of code, followed by a corresponding end statement.");
-					name += " "+args.get(1);
-					if(name.endsWith("class")){
-						if(args.size() == 2) throw new RuntimeException("Expected object name following class.");
-						k = 2;
-						name += args.get(2);
-						while(k < args.size() && name.endsWith("class")){
-							name += " "+args.get(i);
-							k++;
+			// power operator '^'
+			for(index = 1; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("^")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					boolean string = isString(arg1) || isString(arg2);
+					if(!string)
+						try{
+							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
+							args.set(index, toString(Math.pow(x, y)));
+						}catch(NumberFormatException e){
+							string = testOpOverride(args, index, arg1, arg2, "operator ^");
 						}
-					}else name = Script.evalString(name);
-				}else name += " "+args.get(k);
-				String end = "end "+name;
-				List<ScriptStep> substeps = new ArrayList<>();
-				for(i = i+1; i < lines.size(); i++){
-					if(lines.get(i).equals(end)) break;
-					List<String> subargs = scanLine(lines.get(i));
-					String subcmd2 = subargs.remove(0);
-					i = createStep(i,subcmd2,subargs,lines,substeps);
-				}
-				if(i == lines.size() && !lines.get(i).equals(end)) throw new RuntimeException("No corresponding end statement found for scope creation : "+name);
-				assert lines.get(i).equals(end);
-				
-				steps.add(new SetScript(finalvar,args,substeps));
-			}else
-				steps.add(new Set(finalvar,args));
-		}
-		else if(cmd.equals("scope"))
-			steps.add(new SetScope(args));
-		else if(cmd.equals("script"))
-			steps.add(new RunScript(args));
-		else if(cmd.equals("function"))
-			steps.add(new RunFunction(args));
-		else if(cmd.equals("delete"))
-			steps.add(new DeleteVar(args));
-		else if(cmd.equals("return"))
-			steps.add(new Return(args));
-		else if(cmd.equals("define")){
-			if(args.isEmpty()) throw new RuntimeException("script step : set needs a minimum of two arguments.");
-			String subcmd = args.get(0);
-			boolean finalvar = false, isStatic = false, isPublic = true;
-			if(subcmd.equals("public")){
-				isPublic = true;
-				args.remove(0);
-				subcmd = args.get(0);
-			}else if(subcmd.equals("private")){
-				isPublic = false;
-				args.remove(0);
-				subcmd = args.get(0);
-			}
-			if(subcmd.equals("static")){
-				isStatic = true;
-				args.remove(0);
-				subcmd = args.get(0);
-			}
-			if(subcmd.equals("final")){
-				finalvar = true;
-				args.remove(0);
-				subcmd = args.get(0);
-			}
-			if(subcmd.equals("script")){
-				args.remove(0);
-				int k = 0;
-				if(args.isEmpty()) throw new RuntimeException("script step : set script needs a minimum of one argument, followed by lines of code, followed by a corresponding end statement.");
-				String name = "script";
-				if(args.size() > 1 && args.get(0).equals("function")){
-					name += " function";
-					if(args.size() < 2)
-						throw new RuntimeException("script step : set script function needs exactly 2 arguments: a name and variable list enclosed in parenthesis, followed by lines of code, followed by a corresponding end statement.");
-					name += " "+args.get(1);
-					if(name.endsWith("class") || name.endsWith("operator")){
-						if(args.size() == 2) throw new RuntimeException("Expected object name following class.");
-						k = 2;
-						name += " "+args.get(2);
-						while(k < args.size() && (name.endsWith("class") || name.endsWith("operator"))){
-							name += " "+args.get(k);
-							k++;
-						}
-					}else name = Script.evalString(name);
-				}else name += " "+args.get(k);
-				String end = "end "+name;
-				List<ScriptStep> substeps = new ArrayList<>();
-				for(i = i+1; i < lines.size(); i++){
-					if(lines.get(i).equals(end)) break;
-					List<String> subargs = scanLine(lines.get(i));
-					String subcmd2 = subargs.remove(0);
-					i = createStep(i,subcmd2,subargs,lines,substeps);
-				}
-				if(i == lines.size() && !lines.get(i).equals(end)) throw new RuntimeException("No corresponding end statement found for scope creation : "+name);
-				assert lines.get(i).equals(end);
-				
-				steps.add(new DefineScript(finalvar,isStatic,isPublic,args,substeps));
-			}else
-				steps.add(new Define(finalvar,isStatic,isPublic,args));
-		}
-		else if(cmd.equals("struct")){
-			String name = "struct ";
-			
-			name += args.get(i);
-			
-			for(int j = i+1; name.endsWith("class") && j < args.size(); j++){
-				name += ' '+args.get(j);
-			}
-			String end = "end "+name;
-			List<ScriptStep> substeps = new ArrayList<>();
-			for(i = i+1; i < lines.size(); i++){
-			//	debug("lines = '"+lines.get(i)+"' end = '"+end+"' == "+lines.get(i).equals(end));
-				if(lines.get(i).equals(end)) break;
-				List<String> subargs = scanLine(lines.get(i));
-				String subcmd2 = subargs.remove(0);
-				i = createStep(i,subcmd2,subargs,lines,substeps);
-			}
-			if(i == lines.size() && !lines.get(i).equals(end)) throw new RuntimeException("No corresponding end statement found for scope creation : "+name);
-			assert lines.get(i).equals(end);
-			steps.add(new CreateStruct(args,substeps));
-		}
-		else if(cmd.equals("assert"))
-			steps.add(new Assert(args));
-		else if(cmd.equals("if")){
-			int depth = 0;
-			List<ScriptStep> trueSteps = new ArrayList<>(), falseSteps = new ArrayList<>();
-			boolean elseEncountered = false;
-			if(i+1 < lines.size() && args.get(args.size()-1).equals("then")){
-				
-				args.remove(args.size()-1);
-				for(i = i+1; i < lines.size(); i++){
-					if(lines.get(i).equals("end if") && depth == 0) break;
-					else if(lines.get(i).equals("end if")) depth--;
-					else if(lines.get(i).startsWith("if ") && lines.get(i).endsWith(" then")) depth++;
-					else if(lines.get(i).equals("else do") && depth == 0){
-						elseEncountered = true;
-						i++;
-					}else if(lines.get(i).equals("else")){
-						i++;
-						List<String> subargs = scanLine(lines.get(i));
-						String subcmd2 = subargs.remove(0);
-						i = createStep(i,subcmd2,subargs,lines, falseSteps);
-						break;
+					if(string){
+						args.add(index + 1, arg);
+						args.add(index + 2, arg2);
 					}
-					List<String> subargs = scanLine(lines.get(i));
-					String subcmd2 = subargs.remove(0);
-					i = createStep(i,subcmd2,subargs,lines, elseEncountered? falseSteps : trueSteps);
 				}
-			}else{
-				if(i+1 >= lines.size())
-					throw new RuntimeException("Statement expected after if.");
-				i++;
-				List<String> subargs = scanLine(lines.get(i));
-				String subcmd2 = subargs.remove(0);
-				i = createStep(i,subcmd2,subargs,lines,trueSteps);
 			}
-			steps.add(new If(args,trueSteps,falseSteps));
-		}else if(cmd.equals("while")){
-			List<ScriptStep> substeps = new ArrayList<>();
-			if(i+1 < lines.size() && args.get(args.size()-1).equals("do")){
-				args.remove(args.size()-1);
-				int depth = 0;
-				for(i = i+1; i < lines.size(); i++){
-					if(lines.get(i).equals("end while") && depth == 0) break;
-					else if(lines.get(i).equals("end while")) depth--;
-					else if(lines.get(i).startsWith("while ") && lines.get(i).endsWith(" do")) depth++;
-					List<String> subargs = scanLine(lines.get(i));
-					String subcmd2 = subargs.remove(0);
-					i = createStep(i,subcmd2,subargs,lines, substeps);
+			// multiplication, division operators '*' '/'
+			for(index = 1; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("*") || arg.equals("/")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					boolean string = isString(arg1) || isString(arg2);
+					if(!string)
+						try{
+							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
+							args.set(index, toString(arg.equals("*")? (x * y) : (x / y)));
+						}catch(NumberFormatException e){
+							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
+						}
+					if(string){
+						args.add(index + 1, arg);
+						args.add(index + 2, arg2);
+					}
 				}
-			}else{
-				if(i+1 >= lines.size())
-					throw new RuntimeException("Statement expected after if.");
-				i++;
-				List<String> subargs = scanLine(lines.get(i));
-				String subcmd2 = subargs.remove(0);
-				i = createStep(i,subcmd2,subargs,lines,substeps);
 			}
-			steps.add(new While(args,substeps));
+			// addition, subtraction, concatenation operators '+' '-' '##'
+			for(index = 1; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("+") || arg.equals("-")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					boolean string = isString(arg1) || isString(arg2);
+					if(!string){
+						try{
+							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
+							args.set(index, Script.toString(arg.equals("+")? (x + y) : (x - y)));
+						}catch(NumberFormatException e){
+							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
+						}
+					}
+					if(string){
+						args.set(index, evalVars(arg1) + evalVars(arg2));
+					}
+				}else if(arg.equals("##")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					args.set(index, evalVars(arg1) + evalVars(arg2));
+				}
+			}
+			// equality, comparison operators '=' 'not=' '>' '>=' '<' '<='
+			for(index = 1; index < args.size() - 1; index++){
+				
+				String arg = args.get(index);
+				if(arg.equals("=") || arg.equals("not=")){
+
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					//debug("arg1 = "+evalVars(arg1)+" isstring = "+isString(evalVars(arg1))+" arg2 = "+evalVars(arg2)+" isstring = "+isString(evalVars(arg2)));
+					boolean string = isString(evalVars(arg1)) || isString(evalVars(arg2));
+					
+					if(!string)
+						try{
+							String arg1_ = evalVars(arg1);
+							String arg2_ = evalVars(arg2);
+							double x = parseDouble(arg1_), y = parseDouble(arg2_);
+							
+							if(arg1_.endsWith("t"))
+								x /= Tile.SIZE / 16;
+							if(arg2_.endsWith("t"))
+								y /= Tile.SIZE / 16;
+							args.set(index, (arg.equals("not=")? !(x == y) : (x == y))? "1" : "0");
+						}catch(NumberFormatException e){
+							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
+							
+							if(string){
+								string = testOpOverride(args, index, arg1, arg2, "operator =");
+								if(string){
+									debug("testing op override equals for "+arg1+" and "+arg2);
+									string = testOpOverride(args, index, arg1, arg2, "equals");
+									debug("result = "+string);
+								}
+								if(!string && arg.equals("not="))
+									args.set(index, args.get(index).equals("0")? "1" : "0");
+							}
+						}
+					if(string){
+						debug("comparing "+arg1+" with "+arg2);
+						/*if(arg1.startsWith(Script.REF)|| arg2.startsWith(Script.REF) ){
+							Scope sarg1 = Scope.getId(arg1);
+							
+							if(!(sarg1 instanceof Function)){
+								if(arg2.startsWith(Script.REF)){
+									Scope sarg2 = Scope.getId(arg2);
+									if(!(sarg2 instanceof Function)){
+										string = testOpOverride(args, index, arg1, arg2, "operator =");
+										if(string) string = testOpOverride(args, index, arg1, arg2, "equals");
+										if(!string && arg.equals("not="))
+											args.set(index,args.get(index).equals("0")? "1" : "0");
+									}
+								}else{
+									
+								}
+							}else if(arg2.startsWith(Script.REF)){
+								
+							}else{
+								args.add(index+1,arg);
+								args.add(index+2,arg2);
+								index+=2;
+							}
+							
+						}
+						if(string)
+							args.set(index, (arg.equals("not=")? !arg1.equals(arg2) : arg1.equals(arg2))? "1" : "0");
+						
+					}
+				}else if(arg.equals("<") || arg.equals("<=") || arg.equals(">") || arg.equals(">=")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					boolean string = isString(arg1) || isString(arg2);
+					if(!string)
+						try{
+							double x = parseDouble(evalVars(arg1)), y = parseDouble(evalVars(arg2));
+							args.set(index, (arg.equals("<")? (x < y) : arg.equals("<=")? (x <= y) : arg.equals(">")? (x > y) : (x >= y))? "1" : "0");
+						}catch(NumberFormatException e){
+							string = testOpOverride(args, index, arg1, arg2, "operator " + arg);
+						}
+					if(string){
+						args.add(index + 1, arg);
+						args.add(index + 2, arg2);
+						index = index+2;
+					}
+				}
+			}
+			// not operator
+			for(index = 0; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("not")){
+					String arg1 = args.remove(index + 1);
+					if(!isString(arg1))
+						arg1 = evalVars(arg1);
+					boolean override = false;
+					if(arg1.startsWith(Script.REF)){
+						override = testOpBool(args, index, arg1);
+					}
+					if(!override){
+						if(arg1.endsWith(".0"))
+							arg1 = arg1.substring(0, arg1.length() - 2);
+						args.set(index, arg1.equals("0")? "1" : "0");
+					}
+				}
+			}
+			// and operator
+			for(index = 1; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("and")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					if(!isString(arg1))
+						arg1 = evalVars(arg1);
+					if(!isString(arg2))
+						arg2 = evalVars(arg2);
+					boolean no_override = true;
+					if(arg1.startsWith(Script.REF) || arg2.startsWith(Script.REF))
+						no_override = testOpOverride(args, index, arg1, arg2, "operator and");
+					if(no_override){
+						if(arg1.endsWith(".0"))
+							arg1 = arg1.substring(0, arg1.length() - 2);
+						if(arg2.endsWith(".0"))
+							arg2 = arg2.substring(0, arg2.length() - 2);
+						args.set(index, arg1.equals("0")? "0" : arg2.equals("0")? "0" : arg2);
+					}
+				}
+			}
+			// or operator
+			for(index = 1; index < args.size() - 1; index++){
+				String arg = args.get(index);
+				if(arg.equals("or")){
+					index--;
+					String arg1 = args.get(index);
+					args.remove(index + 1);
+					String arg2 = args.remove(index + 1);
+					if(!isString(arg1))
+						arg1 = evalVars(arg1);
+					if(!isString(arg2))
+						arg2 = evalVars(arg2);
+					boolean no_override = true;
+					if(arg1.startsWith(Script.REF) || arg2.startsWith(Script.REF))
+						no_override = testOpOverride(args, index, arg1, arg2, "operator and");
+					if(no_override){
+						if(arg1.endsWith(".0"))
+							arg1 = arg1.substring(0, arg1.length() - 2);
+						if(arg2.endsWith(".0"))
+							arg2 = arg2.substring(0, arg2.length() - 2);
+						args.set(index, arg1.equals("0")? (arg2.equals("0")? "0" : arg2) : arg1);
+					}
+				}
+			}
 		}
-		else if(cmd.equals("end"))
-			throw new RuntimeException("Invalid end statement : "+lines.get(i)+" : check your names!");
-		else{
-			if(!isReservedWord(cmd)){
-				args.add(0,cmd);
-				steps.add(new RunFunction(args));
-			}else throw new RuntimeException("There is no script step of name "+cmd+"; line = "+lines.get(i));
+	}*/
+
+	/*private boolean testOpOverride(List<String> args, int index, String arg1_, String arg2_, String op){
+		String arg1 = evalVars(arg1_), arg2 = evalVars(arg2_);
+		if(arg1.startsWith(Script.REF)){
+			Scope scope = Scope.getId(arg1);
+			Function func;
+			String var = null;
+			try{
+				if((scope instanceof Struct) && (var = scope.getVar(op, this)).startsWith(Script.REF) && Scope.getId(var) instanceof Function && (func = (Function) Scope.getId(var)).args_length() == 1)
+					args.set(index, func.call(this, Arrays.asList(arg2)));
+				else if(scope instanceof ListScope && (op.equals("equals") || op.equals("operator ="))){
+					ListScope list1 = (ListScope)scope;
+					if(!arg2.startsWith(Script.REF)) return true;
+					Scope scope2 = Scope.getId(arg2);
+					if(!(scope2 instanceof ListScope)) return true;
+					ListScope list2 = (ListScope)scope2;
+					args.set(index,list1.equals(list2)? "1" : "0");
+				}
+				else
+					return true;// debug("result op = "+args.get(index)+
+								// " var = "+var);
+			}catch(VarNotExists ex){
+				return true;
+			}
+			return false;
+		}else if(arg2.startsWith(Script.REF)){
+			if(op.equals("equals") || op.equals("operator =") || op.equals("operator not="))
+				return testOpOverride(args, index, arg2, arg1, op);
 		}
-		return i;
+		return true;
 	}
-	public static Script getScript(String name){
-		return scripts.get(name);
-	}
-	public static boolean exists(String name){
-		return scripts.containsKey(name);
-	}
+
+	private boolean testOpBool(List<String> args, int index, String arg1){
+		arg1 = evalVars(arg1);
+		if(arg1.startsWith(Script.REF)){
+			Scope scope = Scope.getId(arg1);
+			Function func;
+			String var;
+			try{
+				if(scope instanceof Struct && (var = scope.getVar("operator bool", this)).startsWith(Script.REF) && Scope.getId(var) instanceof Function && (func = (Function) Scope.getId(var)).args_length() == 0)
+					args.set(index, func.call(this, new ArrayList<String>()));
+			}catch(VarNotExists ex){
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}*/
+
 	
-	public static void loadVars(String line){
-		if(line.charAt(0) != '_') throw new RuntimeException("Invalid line "+line);
-		if(globalScope == null) throw new RuntimeException("Global scope not initialized yet!");
-		line = line.substring(1);
-		while(!line.isEmpty()){
-			if(line.charAt(0) != '"') throw new RuntimeException("Invalid line "+line);
-			int i = line.indexOf('"',1);
-			if(i == -1) throw new RuntimeException("Invalid line "+line);
-			String name = line.substring(1,i);
-			if(line.charAt(i+1) != '=') throw new RuntimeException("Invalid line "+line);
-			line = line.substring(i+2);
-			if(line.charAt(0) != '"') throw new RuntimeException("Invalid line "+line);
-			i = line.indexOf('"',1);
-			if(i == -1) throw new RuntimeException("Invalid line "+line);
-			if(i+1 < line.length() && line.charAt(i+1) != ' ') throw new RuntimeException("Invalid line "+line);
-			String value = line.substring(1,i);
-			globalScope.setVar(name, value, globalScope);
-			if(i+2 >= line.length()) break;
-			line = line.substring(i+2);
-		}
+	public static boolean isString(String str){
+		return str.startsWith("\"") && str.endsWith("\"") && str.length() > 1;
 	}
-	public static String saveVars(){
-		String result = "_";
-		for(String name : globalScope.vars.keySet()){
-			if(!globalScope.finalvars.get(name) && !globalScope.vars.get(name).startsWith(Script.REF))
-				result += '"'+name+"\"=\""+globalScope.vars.get(name)+"\" ";
-		}
-		if(result.length() > 1) result = result.substring(0,result.length()-1);
-		debug(result);
-		return result;
+
+	public static String evalString(String str){
+		if(isString(str))
+			return str.substring(1, str.length() - 1);
+		return str;
 	}
-	public String toString(){
-		return description;
+
+	public static int parseInt(String str){
+		if(str.endsWith("t"))
+			return 16 * Integer.decode(str.substring(0, str.length() - 1));
+		return Integer.decode(str);
+	}
+
+	public static double parseDouble(String str){
+		if(str.endsWith("t"))
+			return Tile.SIZE * Double.valueOf(str.substring(0, str.length() - 1));
+		return Double.valueOf(str);
 	}
 }
-
-
