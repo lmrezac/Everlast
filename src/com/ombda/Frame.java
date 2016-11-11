@@ -52,6 +52,7 @@ public class Frame extends JFrame implements KeyListener{
 			debug("stopping!");
 			this.panel.stop();
 			this.dispose();
+			System.exit(0);
 		}
 	}
 	

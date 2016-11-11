@@ -19,6 +19,18 @@ public class Sprite extends Entity{
 		image = bimg;
 		this.hash = hash;
 	}
+	public Sprite(int x, int y, ImageIcon bimg,int hash,Map map){
+		this(hash,bimg,(Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
+		setMap(map);
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+this.x+","+this.y+")");
+	}
+	public Sprite(int x, int y, ImageIcon bimg, int hash){
+		this(hash,bimg,(Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
+	}
+	public Sprite(ImageIcon bimg,int hash){
+		this(0,0,bimg,hash);
+	}
 	public int hashCode(){
 		return hash;
 	}
@@ -29,18 +41,7 @@ public class Sprite extends Entity{
 		this.map = map;
 		this.map.addSprite(this);
 	}
-	public Sprite(int x, int y, ImageIcon bimg,int hash,Map map){
-		this(hash,bimg,x,y);
-		setMap(map);
-		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
-	}
-	public Sprite(int x, int y, ImageIcon bimg, int hash){
-		this(hash,bimg,x,y);
-		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
-	}
-	public Sprite(ImageIcon bimg,int hash){
-		this(0,0,bimg,hash);
-	}
+	
 	public void setPos(int newx, int newy){
 		x = newx;
 		y = newy;
