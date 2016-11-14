@@ -37,6 +37,9 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.JPanel;
 
+import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
+
 import com.ombda.entities.Player;
 import com.ombda.entities.Sprite;
 import com.ombda.gui.Console;
@@ -112,16 +115,21 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
 		bindings.put("TILES",Tile.TILES_JS);
+		bindings.put("MAPS", Map.MAPS_JS);
+		
 		try{
-			//scriptEngine.eval("var Player = Java.type('com.ombda.entities.Player')");
-			scriptEngine.eval("var Map = Java.type('com.ombda.Map')");
-			scriptEngine.eval("var Sprite = Java.type('com.ombda.entities.Sprite')");
-			scriptEngine.eval("var CollideableSprite = Java.type('com.ombda.entities.CollideableSprite')");
-			scriptEngine.eval("var NPC = Java.type('com.ombda.entities.NPC')");
-			scriptEngine.eval("var game = Java.type('com.ombda.Panel').getInstance()");
-			scriptEngine.eval("var player = game.player");
-			scriptEngine.eval("var image = Java.type('com.ombda.Images').retrieve");
-			
+			scriptEngine.eval(
+			"var Map = Java.type('com.ombda.Map');"+
+			"var Sprite = Java.type('com.ombda.entities.Sprite');"+
+			"var CollideableSprite = Java.type('com.ombda.entities.CollideableSprite');"+
+			"var NPC = Java.type('com.ombda.entities.NPC');"+
+			"var game = Java.type('com.ombda.Panel').getInstance();"+
+			"var player = game.player;"+
+			"var image = Java.type('com.ombda.Images').retrieve;"+
+			"var Image = Java.type('javax.swing.ImageIcon');"+
+			"var AnimatedImage = Java.type('com.ombda.AnimatedImage');"+
+			"var Tile = Java.type('com.ombda.Tile');"
+			);
 		}catch(ScriptException e){
 			throw new RuntimeException(e);
 		}
@@ -221,7 +229,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			debug(Files.readLines(f));
 		}
 		List<String> lines = Files.readLines(f);
-		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
+		//if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
 		debug(lines);
 		player_name = lines.get(0);
 		setMap(Map.get(lines.get(1)));

@@ -74,6 +74,7 @@ public class Map extends AbstractJSObject{
 		loadEntities(Files.readLines(f));
 		createWrappers();
 	}
+	
 	public Color getBackground(){
 		return clr;
 	}
@@ -358,6 +359,24 @@ public class Map extends AbstractJSObject{
 	public String toString(){ return name;}
 	
 	private static HashMap<String,Map> maps = new HashMap<>();
+	public static final JSObject MAPS_JS = new AbstractJSObject(){
+		@Override
+		public boolean hasMember(String name){
+			return maps.containsKey(name);
+		}
+		@Override
+		public Object getMember(String name){
+			return maps.get(name);
+		}
+		@Override
+		public String getClassName(){
+			return "Tile[]";
+		}
+		@Override
+		public String toString(){
+			return "Tile[]";
+		}
+	};
 	public static Map get(String name){
 		if(maps.containsKey(name)) return maps.get(name);
 		else{

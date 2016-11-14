@@ -18,6 +18,7 @@ public class Sprite extends Entity{
 		super(x,y);
 		image = bimg;
 		this.hash = hash;
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+x+","+y+")");
 	}
 	public Sprite(int x, int y, ImageIcon bimg,int hash,Map map){
 		this(hash,bimg,(Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
@@ -30,6 +31,7 @@ public class Sprite extends Entity{
 	}
 	public Sprite(ImageIcon bimg,int hash){
 		this(0,0,bimg,hash);
+		debug("New Sprite created of id "+Integer.toHexString(hash)+" at ("+0+","+0+")");
 	}
 	public int hashCode(){
 		return hash;

@@ -23,30 +23,11 @@ public class Tile extends AbstractJSObject implements Collideable, Interactable{
 	private Shape boundingBox;
 	public final short id;
 	public Tile(short id, ImageIcon img, Shape boundingBox){
-		//super(Script.tile_type, Arrays.asList("id","isAnimated","animationFrame"));
-		/*this.setFinalVar("isAnimated", new Function(null,null,false){
-			public int args_length(){ return 0; }
-			public String call(Scope scopeIn, List<String> args){
-				return image instanceof AnimatedImage? "1" : "0";
-			}
-		}.getIdStr(), this);
-		this.setFinalVar("animationFrame", new Function(null,null,false){
-			public int args_length(){ return 0; }
-			public String call(Scope scopeIn, List<String> args){
-				String result;
-				if(!(image instanceof AnimatedImage)) result = "0";
-				result = Script.toString(((AnimatedImage)image).index);
-				debug("Getanimationframe = "+result);
-				return result;
-			}
-		}.getIdStr(), this);
-		*/
 		this.image = img;
 		this.boundingBox = boundingBox;
 		if(tiles[id] != null) throw new RuntimeException("Duplicate tile id: 0x"+Integer.toHexString(id));
 		tiles[id] = this;
 		this.id = id;
-		//super.setVar("id",Short.toString(this.id),false,this);
 	}
 	public Tile(short id, ImageIcon image){
 		this(id,image,Tiles.EMPTY);
@@ -73,12 +54,14 @@ public class Tile extends AbstractJSObject implements Collideable, Interactable{
 	}
 	@Override
 	public boolean hasMember(String name){
-		return name.equals("id") || name.equals("animationFrame") || name.equals("isAnimated");
+		return name.equals("id") || name.equals("image") || name.equals("animationFrame") || name.equals("isAnimated");
 	}
 	@Override
 	public Object getMember(String varname){
 		if(varname.equals("id"))
 			return this.id;
+		else if(varname.equals("image"))
+			return this.image;
 		else if(varname.equals("animationFrame")){
 			int result;
 			if(!(image instanceof AnimatedImage)) result = 0;
