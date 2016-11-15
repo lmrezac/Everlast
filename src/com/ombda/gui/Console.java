@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.script.ScriptException;
+
 import com.ombda.Debug;
+import com.ombda.FatalError;
 import com.ombda.Images;
 import com.ombda.Map;
 import com.ombda.Panel;
@@ -226,6 +229,8 @@ public class Console extends Input{
 			cmdLoad(args);
 		}else if(args.get(0).equals("drawBoxes")){
 			cmdBoxes(args);
+		}else if(args.get(0).equals("eval")){
+			cmdEval(args);
 		}else{
 			debug("unknown command");
 			panel.msgbox.setMessage("Error: unknown command"+WAIT);
@@ -835,7 +840,25 @@ public class Console extends Input{
 			throw new CmdException(e.getMessage());
 		}
 	}
+	private void cmdEval(List<String> args){
+		args.remove(0);
+		String result = "?";
 	
+		for(String str : args){
+			char start = str.charAt(0);
+			char last = result.charAt(result.length()-1);
+			if(Character.isLetterOrDigit(last) && Character.isLetterOrDigit(start)) result += " ";
+			result += str;
+		}
+		try{
+			Object value = Panel.getInstance().scriptEngine.eval(result.substring(1));
+			Panel.getInstance().msgbox.setMessage(value.toString()+MessageBox.WAIT);
+			Panel.getInstance().msgbox.instant();
+			Panel.getInstance().setGUI(Panel.getInstance().msgbox);
+		}catch(ScriptException e){
+			throw new CmdException(e.getMessage());
+		}
+	}
 	private void cmdNewMap(List<String> args){
 		args.remove(0);
 		if(args.size() != 4){

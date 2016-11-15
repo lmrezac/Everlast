@@ -116,6 +116,14 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
 		bindings.put("TILES",Tile.TILES_JS);
 		bindings.put("MAPS", Map.MAPS_JS);
+		bindings.put("north", Facing.N);
+		bindings.put("northeast",Facing.NE);
+		bindings.put("east",Facing.E);
+		bindings.put("southeast",Facing.SE);
+		bindings.put("south", Facing.S);
+		bindings.put("southwest",Facing.SW);
+		bindings.put("west",Facing.W);
+		bindings.put("northwest",Facing.NW);
 		try{
 			scriptEngine.eval("var Map = Java.type('com.ombda.Map')");
 			scriptEngine.eval("var Sprite = Java.type('com.ombda.entities.Sprite')");
@@ -127,6 +135,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			scriptEngine.eval("var Image = Java.type('javax.swing.ImageIcon')");
 			scriptEngine.eval("var AnimatedImage = Java.type('com.ombda.AnimatedImage')");
 			scriptEngine.eval("var Tile = Java.type('com.ombda.Tile')");
+			
 		}catch(ScriptException e){
 			throw new RuntimeException(e);
 		}
@@ -159,7 +168,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 	}
 	private static String evaluateScriptFile(String str){
-	/*	Matcher m = Pattern.compile("(-?((\\d+(\\.\\d*)?)|(\\d*\\.\\d+)))t").matcher(str);
+		/*Matcher m = Pattern.compile("(-?((\\d+(\\.\\d*)?)|(\\d*\\.\\d+)))t").matcher(str);
 		while(m.find()){
 			String group = m.group();
 			String replacement;
@@ -168,8 +177,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			}else replacement = String.valueOf(Script.parseInt(group));
 			str = m.replaceFirst(replacement);
 		}*/
-		str = str.replaceAll("//[^\n]*\n","").replaceAll("//\\*.*\\*//","").trim();
-		System.out.println("Loaded script "+str);
+		str = str.replaceAll("//[^\n]*\n","").trim();
+		//System.out.println("Loaded script "+str);
 		return str;
 	}
 	public void setMap(Map map){
@@ -372,39 +381,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	
 	public static final double dist = Math.sqrt(.5);
 	
-	/*public void resetScript(){
-		debug("reset script");
-		for(int i = currentScripts.size()-1; i>=0; i--){
-			currentScripts.get(i).reset();
-		}
-		currentScripts.clear();
-		if(!scripts.isEmpty()){
-			
-			currentScripts.add(scripts.remove(scripts.size()-1));
-			while(!scripts.isEmpty() && currentScript().done()){
-				currentScripts.set(currentScripts().size()-1,scripts.remove(scripts.size()-1);
-				
-			}
-			if(scripts.isEmpty() && currentScript.done()) 
-				currentScript = null;
-		}
-	}*/
 	public void update(){
-		/*if(!scripts.isEmpty()){
-			for(int i = scripts.size()-1; i>=0; i--){
-				Script script = scripts.get(i);
-				if(script.done()){
-					script.reset();
-					scripts.remove(i);
-				}else{
-					script.execute(script);
-					if(script.done()){
-						script.reset();
-						scripts.remove(i);
-					}
-				}
-			}
-		}*/
+	
 		if(!gui.pauseGame()){
 			if(!gui.blockInput()){
 				

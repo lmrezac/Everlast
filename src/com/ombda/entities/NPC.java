@@ -12,20 +12,21 @@ import java.util.HashMap;
 import javax.swing.ImageIcon;
 
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.runtime.ScriptFunction;
 
 import com.ombda.Collideable;
 import com.ombda.Facing;
+import com.ombda.Images;
 import com.ombda.Interactable;
 import com.ombda.Map;
 import com.ombda.Panel;
 import com.ombda.ScriptThread;
+import com.ombda.Tile;
 import com.ombda.Updateable;
 
 
 public class NPC extends Sprite implements Updateable, Collideable, Interactable{
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
-	private String onInteractedScript = null;
+	//private String onInteractedScript = null;
 	private Thread onUpdateThread = null;
 	public int destX, destY;
 	protected double lastX, lastY;
@@ -51,24 +52,31 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 				images[i] = (ImageIcon)obj.getSlot(i);
 			}
 		}else{
-			String[] names = new String[8];
+			/*String[] names = new String[8];
 			for(int i = 0; i < 8; i++){
 				names[i] = Facing.values()[i].toString();
-			}
+			}*/
+			
 			if(obj.hasMember("still")){
 				JSObject still = (JSObject)obj.getMember("still");
-				for(String name : names){
-					if(still.hasMember(name))
+				for(String name : still.keySet()){
+					try{
+						System.out.println("setting "+name+" in NPC to "+still.getMember(name));
 						images[Facing.valueOf(name).ordinal()] = (ImageIcon)still.getMember(name);
+					}catch(RuntimeException e){}
 				}
 			}
 			if(obj.hasMember("walk")){
 				JSObject walk = (JSObject)obj.getMember("walk");
-				for(String name : names){
-					if(walk.hasMember(name))
+				for(String name : walk.keySet()){
+					try{
 						images[Facing.valueOf(name).ordinal()+8] = (ImageIcon)walk.getMember(name);
+					}catch(RuntimeException e){}
 				}
 			}
+		}
+		for(int i = 0; i < 16; i++){
+			if(images[i] == null) images[i] = Images.getError();
 		}
 		return images;
 	}
@@ -77,15 +85,16 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		super(hash,animations[Facing.N.ordinal()],x,y,map);
 		assert animations.length == 16 : "Not right number of images passed to NPC()";
 		boundingBox = box;
-		lastX = x;
-		lastY = y;
+		lastX = (Tile.SIZE/16)*x;
+		lastY = (Tile.SIZE/16)*y;
 		direction = Facing.N;
 		this.id = hash;
 		if(this.getClass() != Player.class)
 			npcs.put(hash,this);
-		setDestination(x,y);
+		setDestination((Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
 		this.images = animations;
 		this.yminus = yminus;
+		System.out.println("New npc created");
 	}
 	public void setUpdateScript(String str){
 		onUpdateThread = new ScriptThread(str);
@@ -116,13 +125,23 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	public void update(){
 		if(!onUpdateSet && onUpdate != null){
 			onUpdateSet = true;
-			onUpdateThread = 
+			onUpdateThread = new Thread(){
+				public void run(){
+					onUpdate.call(NPC.this);
+				}
+			};
+			onUpdateThread.start();
+			synchronized(onUpdateThread){
+				try{
+					onUpdateThread.wait();
+				}catch(InterruptedException e){}
+			}
 		}
-		if(onUpdateThread != null){
+		if(onUpdateThread != null)
 		synchronized(onUpdateThread){
 			onUpdateThread.notify();
 		}
-		}
+
 		double newx = x, newy = y;
 		if(x != destX){
 			
@@ -159,6 +178,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		
 		this.image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
 		
+		if(onUpdateThread != null)
 		synchronized(onUpdateThread){
 			try{
 				onUpdateThread.wait();
@@ -200,7 +220,10 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	
 	@Override
 	public void draw(Graphics2D g, int offsetX, int offsetY){
-		if(hidden || image == null) return;
+		if(hidden || image == null){
+			//debug("Not drawing npc "+id+" because it is hidden or image = null");
+			return;
+		}
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y-yminus+offsetY,null);
 	}
 	@Override
@@ -240,7 +263,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 				//new ScriptThread(onInteractedScript).start();
 				new Thread(){
 					public void run(){
-						onInteracted.call(this, p,x,y);
+						onInteracted.call(NPC.this, p,x,y);
 					}
 				}.start();
 			}

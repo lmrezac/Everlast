@@ -66,7 +66,7 @@ public class Files{
 			Scanner scan = new Scanner(file);
 			String str = "";
 			while(scan.hasNext())
-					str += scan.nextLine();
+					str += scan.nextLine()+"\n";
 			scan.close();
 			return str;
 		}catch(IOException e){
