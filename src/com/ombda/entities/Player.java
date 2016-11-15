@@ -45,7 +45,7 @@ public class Player extends NPC{
 				Images.retrieve("base_walk_W",false),
 				Images.retrieve("base_walk_NW",false)
 			},
-			new Rectangle2D.Double(0,0,28,16));
+			new Rectangle2D.Double(0,0,28,16),null);
 		this.direction = dir;
 		image = images[direction.ordinal()];
 		yminus = (int)(images[0].getIconHeight() - boundingBox.getHeight());

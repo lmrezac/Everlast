@@ -10,17 +10,14 @@ import com.ombda.Map;
 
 public class CollideableSprite extends Sprite implements Collideable{
 	private Shape boundingBox;
-	public CollideableSprite(int x, int y, ImageIcon bimg, int hash,Shape boundingBox){
-		super(x, y, bimg, hash);
+	/*public CollideableSprite(int x, int y, ImageIcon bimg, int hash,Shape boundingBox){
+		super(hash,bimg,x,y);
 		this.boundingBox = boundingBox;
 		
-	}
+	}*/
 	public CollideableSprite(int x, int y, ImageIcon bimg, int hash,Shape boundingBox,Map map){
-		this(x,y,bimg,hash,boundingBox);
-		this.setMap(map);
-	}
-	public CollideableSprite(int x, int y, ImageIcon bimg, int hash, int width, int height){
-		this(x,y,bimg,hash,new Rectangle2D.Double(x,y,width,height));
+		super(hash,bimg,x,y,map);
+		this.boundingBox = boundingBox;
 	}
 	public CollideableSprite(int x, int y, ImageIcon bimg, int hash, int width, int height,Map map){
 		this(x,y,bimg,hash,new Rectangle2D.Double(x,y,width,height),map);

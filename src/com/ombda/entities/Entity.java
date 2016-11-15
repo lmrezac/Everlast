@@ -16,7 +16,9 @@ public abstract class Entity{
 		if(this.map != null){
 			this.map.removeEntity(this);
 		}
+		
 		this.map = map;
-		this.map.addEntity(this);
+		if(map != null)
+			this.map.addEntity(this);
 	}
 }

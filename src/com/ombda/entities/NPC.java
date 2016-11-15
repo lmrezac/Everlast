@@ -15,10 +15,11 @@ import javax.swing.ImageIcon;
 
 import jdk.nashorn.api.scripting.JSObject;
 
-import com.ombda.AnimatedImage;
 import com.ombda.Collideable;
 import com.ombda.Facing;
 import com.ombda.Interactable;
+import com.ombda.Map;
+import com.ombda.Panel;
 import com.ombda.ScriptThread;
 import com.ombda.Updateable;
 
@@ -35,13 +36,12 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	protected Facing direction;
 	public double speed = 1;
 	protected int yminus;
-	public NPC(int x, int y, int hash, int yminus, JSObject obj){
+	/*public NPC(int x, int y, int hash, int yminus, JSObject obj){
 		super(hash,evalImages(obj)[Facing.N.ordinal()],x,y);
 		this.boundingBox = new Rectangle2D.Double(0,0,images[0].getIconWidth(),images[0].getIconHeight());
-	}
+	}*/
 	public NPC(int x, int y,int hash, int yminus,JSObject obj,int width, int height){
-		super(hash,evalImages(obj)[Facing.N.ordinal()],x,y);
-		this.boundingBox = new Rectangle2D.Double(0,0,width,height);
+		this(x,y,hash,yminus,evalImages(obj),new Rectangle2D.Double(0,0,width,height),Panel.getInstance().getPlayer().getMap());
 	}
 	private static ImageIcon[] evalImages(JSObject obj){
 		ImageIcon[] images = new ImageIcon[16];
@@ -71,9 +71,9 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		}
 		return images;
 	}
-	public NPC(int x, int y,int hash, int yminus,ImageIcon[] animations,Rectangle2D box){
+	public NPC(int x, int y,int hash, int yminus,ImageIcon[] animations,Rectangle2D box,Map map){
 		//animations == [N still, NE still, E still, SE still, S still, SW still, W still, NW still, N walk, NE walk, E walk, SE walk, S walk, SW walk, W walk, NW walk]
-		super(hash,animations[Facing.N.ordinal()],x,y);
+		super(hash,animations[Facing.N.ordinal()],x,y,map);
 		assert animations.length == 16 : "Not right number of images passed to NPC()";
 		boundingBox = box;
 		lastX = x;
