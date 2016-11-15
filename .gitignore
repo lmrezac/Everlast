@@ -50,5 +50,5 @@ Temporary Items
 .settings/*
 .classpath
 .project
-*.class
-bin/com/ombda/gui/MessageBox.class
+.class
+bin/*

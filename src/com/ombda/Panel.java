@@ -116,20 +116,17 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
 		bindings.put("TILES",Tile.TILES_JS);
 		bindings.put("MAPS", Map.MAPS_JS);
-		
 		try{
-			scriptEngine.eval(
-			"var Map = Java.type('com.ombda.Map');"+
-			"var Sprite = Java.type('com.ombda.entities.Sprite');"+
-			"var CollideableSprite = Java.type('com.ombda.entities.CollideableSprite');"+
-			"var NPC = Java.type('com.ombda.entities.NPC');"+
-			"var game = Java.type('com.ombda.Panel').getInstance();"+
-			"var player = game.player;"+
-			"var image = Java.type('com.ombda.Images').retrieve;"+
-			"var Image = Java.type('javax.swing.ImageIcon');"+
-			"var AnimatedImage = Java.type('com.ombda.AnimatedImage');"+
-			"var Tile = Java.type('com.ombda.Tile');"
-			);
+			scriptEngine.eval("var Map = Java.type('com.ombda.Map')");
+			scriptEngine.eval("var Sprite = Java.type('com.ombda.entities.Sprite')");
+			scriptEngine.eval("var CollideableSprite = Java.type('com.ombda.entities.CollideableSprite')");
+			scriptEngine.eval("var NPC = Java.type('com.ombda.entities.NPC')");
+			scriptEngine.eval("var game = Java.type('com.ombda.Panel').getInstance()");
+			scriptEngine.eval("var player = game.player");
+			scriptEngine.eval("var image = Java.type('com.ombda.Images').retrieve");
+			scriptEngine.eval("var Image = Java.type('javax.swing.ImageIcon')");
+			scriptEngine.eval("var AnimatedImage = Java.type('com.ombda.AnimatedImage')");
+			scriptEngine.eval("var Tile = Java.type('com.ombda.Tile')");
 		}catch(ScriptException e){
 			throw new RuntimeException(e);
 		}

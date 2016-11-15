@@ -15,7 +15,7 @@ public class Sprite extends Entity{
 	public boolean hidden = false;
 	private int hash;
 	public Sprite(int hash, ImageIcon bimg, int x, int y, Map map){
-		super(x,y);
+		super((Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
 		image = bimg;
 		this.hash = hash;
 		this.setMap(map);
