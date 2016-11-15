@@ -159,15 +159,17 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		
 	}
 	private static String evaluateScriptFile(String str){
-		Matcher m = Pattern.compile("(-?((\\d+\\.\\d*)|(\\d*\\.\\d+)))t").matcher(str);
+	/*	Matcher m = Pattern.compile("(-?((\\d+(\\.\\d*)?)|(\\d*\\.\\d+)))t").matcher(str);
 		while(m.find()){
 			String group = m.group();
 			String replacement;
 			if(group.contains(".")){
 				replacement = Script.toString(Script.parseDouble(group));
 			}else replacement = String.valueOf(Script.parseInt(group));
-			m.replaceFirst(replacement);
-		}
+			str = m.replaceFirst(replacement);
+		}*/
+		str = str.replaceAll("//[^\n]*\n","").replaceAll("//\\*.*\\*//","").trim();
+		System.out.println("Loaded script "+str);
 		return str;
 	}
 	public void setMap(Map map){

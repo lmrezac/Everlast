@@ -7,13 +7,12 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 
 import javax.swing.ImageIcon;
 
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.internal.runtime.ScriptFunction;
 
 import com.ombda.Collideable;
 import com.ombda.Facing;
@@ -24,10 +23,10 @@ import com.ombda.ScriptThread;
 import com.ombda.Updateable;
 
 
-public class NPC extends Sprite implements Updateable, Collideable, Interactable, JSObject{
+public class NPC extends Sprite implements Updateable, Collideable, Interactable{
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
 	private String onInteractedScript = null;
-	private ScriptThread onUpdateThread = null;
+	private Thread onUpdateThread = null;
 	public int destX, destY;
 	protected double lastX, lastY;
 	protected Rectangle2D boundingBox;
@@ -36,6 +35,8 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	protected Facing direction;
 	public double speed = 1;
 	protected int yminus;
+	private boolean onUpdateSet = false;
+	public JSObject onInteracted = null, onUpdate = null;
 	/*public NPC(int x, int y, int hash, int yminus, JSObject obj){
 		super(hash,evalImages(obj)[Facing.N.ordinal()],x,y);
 		this.boundingBox = new Rectangle2D.Double(0,0,images[0].getIconWidth(),images[0].getIconHeight());
@@ -113,8 +114,14 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return direction;
 	}
 	public void update(){
+		if(!onUpdateSet && onUpdate != null){
+			onUpdateSet = true;
+			onUpdateThread = 
+		}
+		if(onUpdateThread != null){
 		synchronized(onUpdateThread){
 			onUpdateThread.notify();
+		}
 		}
 		double newx = x, newy = y;
 		if(x != destX){
@@ -224,116 +231,19 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		g.drawImage(image,(int)x+offsetX,(int)y+offsetY,null);
 	}
 	@Override
-	public void onInteracted(Player p, int x, int y){
+	public void onInteracted(final Player p, final int x, final int y){
 		debug("onInteracted npc ");
-		if(onInteractedScript != null){
+		if(onInteracted != null){
 			//debug("int y = "+y+" x = "+x+" my y = "+this.y+" "+this.yminus+" "+boundingBox.getHeight()+" "+(int)((this.y-yminus)+boundingBox.getHeight()-1)+" my x = "+this.x+" "+(this.x+this.boundingBox.getWidth()));
 			if(y >= (int)(this.y-yminus+boundingBox.getHeight()-1) && y <= (int)(this.y-yminus+boundingBox.getHeight()+1) && this.x < x && x < this.x+this.boundingBox.getWidth()){
 				debug("running script");
-				new ScriptThread(onInteractedScript).start();
+				//new ScriptThread(onInteractedScript).start();
+				new Thread(){
+					public void run(){
+						onInteracted.call(this, p,x,y);
+					}
+				}.start();
 			}
 		}
-	}
-	@Override
-	public Object call(Object arg0, Object... arg1){
-		throw new RuntimeException("Type NPC is not a function.");
-	}
-	@Override
-	public Object eval(String arg0){
-		return null;
-	}
-	@Override
-	public String getClassName(){
-		return "NPC";
-	}
-	@Override
-	public Object getMember(String name){
-		if(name.equals("image"))
-			return image;
-		else if(name.equals("id"))
-			return id;
-		else if(name.equals("x"))
-			return this.x;
-		else if(name.equals("y"))
-			return this.y;
-		else if(name.equals("destX"))
-			return this.destX;
-		else if(name.equals("destY"))
-			return this.destY;
-		else return null;
-	}
-	@Override
-	public Object getSlot(int arg0){
-		return null;
-	}
-	@Override
-	public boolean hasMember(String arg0){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean hasSlot(int arg0){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isArray(){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isFunction(){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isInstance(Object arg0){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isInstanceOf(Object arg0){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean isStrictFunction(){
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public Set<String> keySet(){
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Object newObject(Object... arg0){
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void removeMember(String arg0){
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void setMember(String arg0, Object arg1){
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void setSlot(int arg0, Object arg1){
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public double toNumber(){
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public Collection<Object> values(){
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

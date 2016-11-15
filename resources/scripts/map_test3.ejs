@@ -1,2 +1,7 @@
-
-new Sprite(0x02,image('tiles/intro/city/pole'),1331,224,MAPS.test3);
+new Sprite(0x02,image('tiles/intro/city/pole'),1331,224,map);
+new Sprite(0x03,image('tiles/intro/city/pole'),1171,24*16,map);
+new Sprite(0x04,image('tiles/intro/city/awning'),90*16,13*16,map);
+new CollideableSprite(0x06,image('tiles/intro/city/garbage_can_spilled'),98*16,12*16,22,20,map);
+var hoodlum_images = {still:{east:image('npcs/hoodlum_reversed'),west:image('npcs/hoodlum')}};
+var guy_left = new NPC(84*16,5*16,0x01,0,hoodlum_images,14,32);
+guy_left.setMap(map);

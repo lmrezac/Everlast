@@ -15,12 +15,12 @@ public class CollideableSprite extends Sprite implements Collideable{
 		this.boundingBox = boundingBox;
 		
 	}*/
-	public CollideableSprite(int x, int y, ImageIcon bimg, int hash,Shape boundingBox,Map map){
+	public CollideableSprite(int hash,ImageIcon bimg, int x, int y,Shape boundingBox,Map map){
 		super(hash,bimg,x,y,map);
 		this.boundingBox = boundingBox;
 	}
-	public CollideableSprite(int x, int y, ImageIcon bimg, int hash, int width, int height,Map map){
-		this(x,y,bimg,hash,new Rectangle2D.Double(x,y,width,height),map);
+	public CollideableSprite(int hash, ImageIcon bimg, int x, int y, int width, int height,Map map){
+		this(hash,bimg,x,y,new Rectangle2D.Double(x,y,width,height),map);
 	}
 
 	@Override
