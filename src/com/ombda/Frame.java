@@ -59,6 +59,8 @@ public class Frame extends JFrame implements KeyListener{
 	@Override
 	public void keyPressed(KeyEvent arg0){
 		keys[arg0.getKeyCode()] = true;
+		if(keys[KeyEvent.VK_CONTROL] && keys[KeyEvent.VK_SHIFT] && keys[KeyEvent.VK_T])
+			new Exception().printStackTrace();
 		//debug("key pressed : "+arg0.getKeyCode());
 	}
 

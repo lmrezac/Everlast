@@ -851,11 +851,14 @@ public class Console extends Input{
 			result += str;
 		}
 		try{
-			Object value = Panel.getInstance().scriptEngine.eval(result.substring(1));
-			Panel.getInstance().msgbox.setMessage(value.toString()+MessageBox.WAIT);
+			Object value = Panel.getInstance().scriptEngine.eval(Panel.evaluateScriptFile(result.substring(1)));
+			
+			Panel.getInstance().msgbox.setMessage(value+""+MessageBox.WAIT);
 			Panel.getInstance().msgbox.instant();
 			Panel.getInstance().setGUI(Panel.getInstance().msgbox);
-		}catch(ScriptException e){
+		}catch(Exception e){
+			if(printStackTrace)
+				e.printStackTrace();
 			throw new CmdException(e.getMessage());
 		}
 	}

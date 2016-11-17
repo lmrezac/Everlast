@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.script.ScriptException;
+
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 
@@ -29,6 +31,7 @@ public class Map extends AbstractJSObject{
 	private MatrixWrapperTileEntity tileEntityWrapper;
 	private SpritesWrapper spritesWrapper;
 	private EntitiesWrapper entitiesWrapper;
+	private JSObject getTile;
 	private int width = 0, height = 0;
 	private String name;
 	public int playerSpawnX = 0, playerSpawnY = 0;
@@ -46,6 +49,7 @@ public class Map extends AbstractJSObject{
 		tileEntities = new TileEntity[height][width];
 		createWrappers();
 		maps.put(name, this);
+
 	}
 	public Map(String name){
 		this.name = name;
@@ -385,8 +389,8 @@ public class Map extends AbstractJSObject{
 			return map;
 		}
 	}
-	public Collection<Sprite> getSprites(){
-		return sprites.values();
+	public List<Sprite> getSprites(){
+		return new ArrayList<>(sprites.values());
 	}
 	public void addSprite(Sprite s){
 		sprites.put(s.hashCode(),s);
@@ -419,7 +423,7 @@ public class Map extends AbstractJSObject{
 	public String getClassName(){return "Map";}
 	@Override
 	public boolean hasMember(String name){
-		return name.equals("foreground") || name.equals("background") || name.equals("name") || name.equals("width") || name.equals("height") || name.equals("setSize") || name.equals("sprites") || name.equals("entities") || name.equals("tileEntities");
+		return name.equals("getTile") || name.equals("foreground") || name.equals("background") || name.equals("name") || name.equals("width") || name.equals("height") || name.equals("setSize") || name.equals("sprites") || name.equals("entities") || name.equals("tileEntities");
 	}
 	@Override
 	public Object getMember(String name){
@@ -441,6 +445,8 @@ public class Map extends AbstractJSObject{
 			return spritesWrapper;
 		}else if(name.equals("entities")){
 			return entitiesWrapper;
+		}else if(name.equals("getTile")){
+			return getTile;
 		}else throw new RuntimeException("Map doesn't contain member "+name);
 	}
 	private void createWrappers(){
@@ -449,6 +455,11 @@ public class Map extends AbstractJSObject{
 		tileEntityWrapper = new MatrixWrapperTileEntity(tileEntities);
 		spritesWrapper = new SpritesWrapper();
 		entitiesWrapper = new EntitiesWrapper();
+		try{
+			getTile = (JSObject)Panel.getInstance().scriptEngine.eval("function(x,y,l){if(l==0)return TILES[this.background[y][x]];else return TILES[this.foreground[y][x]];}");
+		}catch(ScriptException e){
+			throw new RuntimeException(e);
+		}
 	}
 	private class EntitiesWrapper extends AbstractJSObject{
 		private JSObject removeEntity = new AbstractJSObject(){

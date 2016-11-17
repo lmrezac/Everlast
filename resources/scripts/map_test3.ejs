@@ -1,8 +1,67 @@
 new Sprite(0x02,image('tiles/intro/city/pole'),1331,224,map);
 new Sprite(0x03,image('tiles/intro/city/pole'),1171,24*16,map);
-new Sprite(0x04,image('tiles/intro/city/awning'),90*16,13*16,map);
-new CollideableSprite(0x06,image('tiles/intro/city/garbage_can_spilled'),98*16,12*16,22,20,map);
+new Sprite(0x04,image('tiles/intro/city/awning'),90t,13t,map);
+new CollideableSprite(0x06,image('tiles/intro/city/garbage_can_spilled'),98t,12t,22,20,map);
 var hoodlum_images = {still:{east:image('npcs/hoodlum_reversed'),west:image('npcs/hoodlum')}};
-var guy_left = new NPC(84*16,5*16,0x01,0,hoodlum_images,14,32);
-guy_left.setMap(map);
-guy_left.setDirection(west);
+global.lastGuyInteracted = -1;
+var guyTalkCount = 0;
+//npc on right side of road
+var guy1 = new NPC(0x01,84t,5t,0,hoodlum_images,14,32);
+guy1.setMap(map);
+guy1.setDirection(west);
+var guyInteracted = function(){
+	msg("Hey, buddy. This street is my turf.\nI'd turn around if I were you.",*wait);
+	if(guyTalkCount == 1)
+		msg("(Wasn't this guy just across the street\nonly a moment ago?)",*wait);
+	else if(guyTalkCount == 2)
+		msg("(How did he get across the street so fast...?!)",*wait);
+	else if(guyTalkCount == 3)
+		msg("(What is this sorcery?!)",*wait);
+	else if(guyTalkCount > 3) msg("(...How?!)",*wait);
+	guyTalkCount++;
+};
+guy1.onInteracted = function(){
+	if(global.lastGuyInteracted == 1){
+		msg("Din'cha hear me, bub? Scram!",*wait);
+	}else{
+		guyInteracted();
+	}
+	global.lastGuyInteracted = 1;
+}
+//npc 1 is done
+//npc on left side of road
+var guy2 = new NPC(0x05,72t,5t,0,hoodlum_images,14,32);
+guy2.setMap(map);
+guy2.setDirection(east);
+guy2.onInteracted = function(){
+	if(global.lastGuyInteracted == 2){
+		msg("Din'cha hear me, bub? Scram!",*wait);
+	}else{
+		guyInteracted();
+	}
+	global.lastGuyInteracted = 2;
+}
+//npc 2 is done
+var car1 = new NPC(0x06,0,0,0,{walk:{south:image('car2')},still:{south:image('car2')}},48,96);
+car1.setMap(map);
+car1.setDirection(south);
+car1.speed = 2;
+car1.setPos(74t,-5t);
+car1.setDestination(74t,-5t);
+/*car1.onUpdate = function(){
+	while(true){
+		print('car1 update');
+		this.setPos(74t,-5t);
+		this.setDestination(1192,10t);
+		while(!this.isAtDestination()){print('waiting for destination')}
+		print('at destination');
+		var x = map.getTile(81,13,1).animationFrame;
+		while(!(tile.animationFrame >= 4 && tile.animationFrame <= 6)){}
+		this.setDestination(1192,36t);
+		while(!this.isAtDestination()){}
+	}
+
+}*/
+Save.addHook(function(){
+	delete global.lastGuyInteracted;
+});

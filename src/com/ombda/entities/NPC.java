@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -42,8 +43,8 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		super(hash,evalImages(obj)[Facing.N.ordinal()],x,y);
 		this.boundingBox = new Rectangle2D.Double(0,0,images[0].getIconWidth(),images[0].getIconHeight());
 	}*/
-	public NPC(int x, int y,int hash, int yminus,JSObject obj,int width, int height){
-		this(x,y,hash,yminus,evalImages(obj),new Rectangle2D.Double(0,0,width,height),Panel.getInstance().getPlayer().getMap());
+	public NPC(int hash,int x, int y, int yminus,JSObject obj,int width, int height){
+		this(hash,x,y,yminus,evalImages(obj),new Rectangle2D.Double(0,0,(Tile.SIZE/16)*width,(Tile.SIZE/16)*height),Panel.getInstance().getPlayer().getMap());
 	}
 	private static ImageIcon[] evalImages(JSObject obj){
 		ImageIcon[] images = new ImageIcon[16];
@@ -61,26 +62,35 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 				JSObject still = (JSObject)obj.getMember("still");
 				for(String name : still.keySet()){
 					try{
-						System.out.println("setting "+name+" in NPC to "+still.getMember(name));
-						images[Facing.valueOf(name).ordinal()] = (ImageIcon)still.getMember(name);
-					}catch(RuntimeException e){}
+						debug("Set still."+name+" in NPC to "+still.getMember(name));
+						images[Facing.fromString(name).ordinal()] = (ImageIcon)still.getMember(name);
+					}catch(RuntimeException e){
+						debug(e.getMessage());
+					}
 				}
 			}
 			if(obj.hasMember("walk")){
 				JSObject walk = (JSObject)obj.getMember("walk");
 				for(String name : walk.keySet()){
 					try{
-						images[Facing.valueOf(name).ordinal()+8] = (ImageIcon)walk.getMember(name);
-					}catch(RuntimeException e){}
+						debug("Set walk."+name+" to "+walk.getMember(name));
+						images[Facing.fromString(name).ordinal()+8] = (ImageIcon)walk.getMember(name);
+						System.out.println("Images = "+Arrays.toString(images));
+					}catch(RuntimeException e){
+						debug(e.getMessage());
+					}
 				}
 			}
 		}
+		
 		for(int i = 0; i < 16; i++){
-			if(images[i] == null) images[i] = Images.getError();
+			if(images[i] == null) 
+				images[i] = Images.getError();
 		}
+		
 		return images;
 	}
-	public NPC(int x, int y,int hash, int yminus,ImageIcon[] animations,Rectangle2D box,Map map){
+	public NPC(int hash, int x, int y, int yminus,ImageIcon[] animations,Rectangle2D box,Map map){
 		//animations == [N still, NE still, E still, SE still, S still, SW still, W still, NW still, N walk, NE walk, E walk, SE walk, S walk, SW walk, W walk, NW walk]
 		super(hash,animations[Facing.N.ordinal()],x,y,map);
 		assert animations.length == 16 : "Not right number of images passed to NPC()";
@@ -94,7 +104,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		setDestination((Tile.SIZE/16)*x,(Tile.SIZE/16)*y);
 		this.images = animations;
 		this.yminus = yminus;
-		System.out.println("New npc created");
+		debug("New npc created");
 	}
 	public void setUpdateScript(String str){
 		onUpdateThread = new ScriptThread(str);
@@ -131,17 +141,17 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 				}
 			};
 			onUpdateThread.start();
-			synchronized(onUpdateThread){
+			/*synchronized(onUpdateThread){
 				try{
 					onUpdateThread.wait();
 				}catch(InterruptedException e){}
-			}
-		}
+			}*/
+		}/*
 		if(onUpdateThread != null)
 		synchronized(onUpdateThread){
 			onUpdateThread.notify();
-		}
-
+		}*/
+		
 		double newx = x, newy = y;
 		if(x != destX){
 			
@@ -158,7 +168,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		}
 		setPos(newx,newy);
 		
-		
+//		debug("Set pos to "+newx+" "+newy);
 		if(lastX < x ){
 			if(lastY < y)
 				direction = Facing.SE;
@@ -177,16 +187,18 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			direction = Facing.N;
 		
 		this.image = images[direction.ordinal() + ((lastX != x || lastY != y)? 8 : 0)];
-		
+		/*
 		if(onUpdateThread != null)
 		synchronized(onUpdateThread){
 			try{
 				onUpdateThread.wait();
 			}catch(InterruptedException e){
 			}
-		}
+		}*/
 	}
 	public void setPos(double x, double y){
+		String s = Thread.currentThread().getStackTrace()[2].getClassName();
+		if(!s.equals("com.ombda.entities.NPC"))debug(s);\++
 		lastX = this.x;
 		lastY = this.y;
 		super.setPos(x, y);
@@ -201,8 +213,11 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	public static void deleteNPC(int hash){
 		npcs.put(hash, null);
 	}
+	public boolean isAtDestination(){return x == destX && y == destY;}
 	public void setDirection(Facing f){
 		direction = f;
+		image = images[f.ordinal()];
+		debug("Set direction to "+f);
 	}
 	@Override
 	public boolean doesPointCollide(int x, int y){
@@ -224,6 +239,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			//debug("Not drawing npc "+id+" because it is hidden or image = null");
 			return;
 		}
+		//debug("NPC "+id+" image = "+image.getImage());
 		g.drawImage(image.getImage(),(int)x+offsetX,(int)y-yminus+offsetY,null);
 	}
 	@Override
@@ -255,11 +271,13 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	}
 	@Override
 	public void onInteracted(final Player p, final int x, final int y){
-		debug("onInteracted npc ");
+		
 		if(onInteracted != null){
+			debug("onInteracted npc");
 			//debug("int y = "+y+" x = "+x+" my y = "+this.y+" "+this.yminus+" "+boundingBox.getHeight()+" "+(int)((this.y-yminus)+boundingBox.getHeight()-1)+" my x = "+this.x+" "+(this.x+this.boundingBox.getWidth()));
 			if(y >= (int)(this.y-yminus+boundingBox.getHeight()-1) && y <= (int)(this.y-yminus+boundingBox.getHeight()+1) && this.x < x && x < this.x+this.boundingBox.getWidth()){
 				debug("running script");
+				//lastTime = -1;
 				//new ScriptThread(onInteractedScript).start();
 				new Thread(){
 					public void run(){

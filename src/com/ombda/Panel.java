@@ -37,9 +37,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.JPanel;
 
-import jdk.nashorn.api.scripting.AbstractJSObject;
-import jdk.nashorn.api.scripting.JSObject;
-
 import com.ombda.entities.Player;
 import com.ombda.entities.Sprite;
 import com.ombda.gui.Console;
@@ -50,6 +47,9 @@ import com.ombda.gui.MapMaker;
 import com.ombda.gui.MessageBox;
 import com.ombda.gui.Picture;
 import com.ombda.scripts.Script;
+
+import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
 
 //import javax.swing.Timer;
 
@@ -69,14 +69,13 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 	public Picture img;
 	
 	public ScriptEngine scriptEngine;
-	
+	private Object global;
 	public int offsetX = -3*Tile.SIZE, offsetY = 0;
 	private Image buffer;
 	boolean running = true;
 	private int FPS = 60;
 	private int mouseX = 0, mouseY = 0;
 	public boolean drawBoundingBoxes = false;
-	public String step = null;
 	public static final double borderX_left = (3.0/8)*(double)PRF_WIDTH;
 	public static final double borderX_right = (5.0/8)*(double)PRF_WIDTH;
 	public static final double borderY_top = (3.0/8)*(double)PRF_HEIGHT;
@@ -113,9 +112,20 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		Tiles.loadTiles();
 		
 		scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
+		loadScriptEngine();
+		
+		loadScripts();
+		
+		loadSaveFile();
+
+		debug("New Panel created!");
+	}
+	public HashMap<String,String> scripts = new HashMap<>();
+	private void loadScriptEngine(){
 		Bindings bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
 		bindings.put("TILES",Tile.TILES_JS);
 		bindings.put("MAPS", Map.MAPS_JS);
+		bindings.put("msg", new Msg());
 		bindings.put("north", Facing.N);
 		bindings.put("northeast",Facing.NE);
 		bindings.put("east",Facing.E);
@@ -125,6 +135,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		bindings.put("west",Facing.W);
 		bindings.put("northwest",Facing.NW);
 		try{
+			scriptEngine.eval("var global = {}");
 			scriptEngine.eval("var Map = Java.type('com.ombda.Map')");
 			scriptEngine.eval("var Sprite = Java.type('com.ombda.entities.Sprite')");
 			scriptEngine.eval("var CollideableSprite = Java.type('com.ombda.entities.CollideableSprite')");
@@ -139,14 +150,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		}catch(ScriptException e){
 			throw new RuntimeException(e);
 		}
-		
-		loadScripts();
-		
-		loadSaveFile();
-
-		debug("New Panel created!");
+		bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+		global = bindings.get("global");
 	}
-	public HashMap<String,String> scripts = new HashMap<>();
 	private void loadScripts(){
 		File f = new File(Files.localize("scripts"));
 		assert f.exists() : "Scripts directory not found!";
@@ -165,20 +171,34 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			scripts.put(name,evaluateScriptFile(Files.read(file)));
 			//Script.compile(name,Files.read(file));
 		}
-		
+		try{
+			scriptEngine.eval(scripts.get("global"));
+		}catch(ScriptException e){
+			throw new RuntimeException(e);
+		}
 	}
-	private static String evaluateScriptFile(String str){
-		/*Matcher m = Pattern.compile("(-?((\\d+(\\.\\d*)?)|(\\d*\\.\\d+)))t").matcher(str);
-		while(m.find()){
+	public static String evaluateScriptFile(String str){
+		Matcher m = Pattern.compile("(?=(-?((\\d*\\.\\d+)|(\\d+(\\.\\d*)?))))t").matcher(str);
+		int start = 0;
+		int sub = 0;
+		/*while(m.find(start)){
 			String group = m.group();
+			debug("GROUP = "+group);
+			group = group.substring(0, group.length()-1);
 			String replacement;
-			if(group.contains(".")){
-				replacement = Script.toString(Script.parseDouble(group));
-			}else replacement = String.valueOf(Script.parseInt(group));
-			str = m.replaceFirst(replacement);
+			//if(group.contains(".")){
+			//	replacement = Script.toString(Double.parseDouble(group)*(Tile.SIZE/16));
+			//}else replacement = String.valueOf(Integer.parseInt(group)*(Tile.SIZE/16));
+			//debug("REPLACEMENT = "+replacement);
+			//str = str.substring(0, m.start()-sub++)+replacement+(m.end() == str.length()? "" : str.substring(m.end()-sub));
+			str = m.replaceFirst("*16");
+			m.reset(str);
 		}*/
-		str = str.replaceAll("//[^\n]*\n","").trim();
-		//System.out.println("Loaded script "+str);
+		str = str.replaceAll("//[^\n]*\n","")
+				.replaceAll("(?<=\\d)t(?![\\d\\w_])","*16")
+				.replaceAll("(?<=(^|\\(|,)\\s*)\\*wait(?=\\s*(\\)|$|,))","'__WAIT__'")
+				.trim();
+		debug("Loaded script "+str);
 		return str;
 	}
 	public void setMap(Map map){
@@ -237,16 +257,24 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			debug(Files.readLines(f));
 		}
 		List<String> lines = Files.readLines(f);
-		//if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
+		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
 		debug(lines);
 		player_name = lines.get(0);
 		setMap(Map.get(lines.get(1)));
 		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
 		offsetX = Integer.parseInt(lines.get(4));
 		offsetY = Integer.parseInt(lines.get(5));
-		//Script.loadVars(lines.get(6));
+		loadGlobal(lines.get(6));
+		
 	}
 	public void saveGame(){
+		JSObject Save = (JSObject)scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE).get("Save");
+		JSObject functions = (JSObject)Save.getMember("functions");
+		int length = (Integer)functions.getMember("length");
+		for(int i = 0; i < length; i++){
+			JSObject func = (JSObject)functions.getSlot(i);
+			func.call(null);
+		}
 		File f = new File(Files.localize("saves/save0.dat"));
 		if(!f.exists()){
 			try{
@@ -265,9 +293,42 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		lines.add(Double.toString(player.y));
 		lines.add(Integer.toString(offsetX));
 		lines.add(Integer.toString(offsetY));
-		//lines.add(Script.saveVars());
+		lines.add(saveGlobal());
 		Files.write("saves/save0.dat", lines);
 		debug("Game saved!");
+	}
+	private void loadGlobal(String str){
+		str = str.substring(1);
+		List<String> stuff = Script.scanLine(str);
+		JSObject obj = (JSObject)global;
+		try{
+		for(int i = 0; i < stuff.size()-1; i+=2){
+			String name = stuff.get(i);
+			String value = stuff.get(i+1);
+			name = name.substring(1, name.length()-1);
+			if(value.startsWith("\"") && value.endsWith("\"")){
+				obj.setMember(name,value.substring(1, value.length()-1));
+			}else if(value.contains(".")){
+				obj.setMember(name, Double.parseDouble(value));
+			}else obj.setMember(name, Integer.parseInt(value));
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		debug("LOADED GLOBAL");
+	}
+	private String saveGlobal(){
+		String result = "_";
+		JSObject fields = (JSObject)global;
+		for(String str : fields.keySet()){
+			Object obj = fields.getMember(str);
+			String val;
+			if(obj instanceof String) val = '"'+obj.toString()+'"';
+			else if(obj instanceof Number) val = obj.toString();
+			else val = null;
+			result += '"'+str+'"'+' '+val+' ';
+		}
+		return result.trim();
 	}
 	public static Panel getInstance(){ return instance;}
 	public Player getPlayer(){ return player; }
@@ -359,7 +420,6 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
 				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+6*size);
 				drawDebugString(g2d,"gui : "+gui.toString()+" blockinput = "+gui.blockInput(),0,10+7*size);
-				drawDebugString(g2d,"step = "+step,0,10+9*size);
 			}
 			lastFrame = temp;
 		}
@@ -390,8 +450,9 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				player.update();
 			}
 
-			Collection<Sprite> sprites = map.getSprites();
-			for(Sprite s : sprites){
+			List<Sprite> sprites = map.getSprites();
+			for(int i = 0; i < sprites.size(); i++){
+				Sprite s = sprites.get(i);
 				if(s instanceof Updateable)
 					((Updateable)s).update();
 			}
@@ -546,6 +607,36 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		return new int[]{x,y};
 	}
 
-	
+	private static class Msg extends AbstractJSObject implements MessageListener{
+		@Override
+		public boolean isFunction(){return true;}
+		boolean eventReceived = false;
+		@Override
+		public Object call(Object thiz, Object... args){
+			eventReceived = false;
+			Panel panel = Panel.getInstance();
+			String message = "";
+			for(Object obj : args){
+				String str = obj.toString();
+				if(str.equals("__WAIT__"))
+					message += MessageBox.WAIT;
+				else message += str;
+			}
+			panel.msgbox.setMessage(message);
+			panel.msgbox.addInputListener(this);
+			panel.setGUI(panel.msgbox);
+			panel.msgbox.waitingForInput = false;
+			while(!eventReceived){
+				debug("waiting");
+			}
+			return null;
+		}
+		@Override
+		public void onMessageFinish(){
+			eventReceived = true;
+			debug("Message finished");
+			Panel.getInstance().msgbox.removeInputListener(this);
+		}
+	}
 
 }

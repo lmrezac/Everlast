@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ombda.Files;
+import com.ombda.Frame;
 import com.ombda.Images;
 import com.ombda.Tile;
 
@@ -160,7 +161,7 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 		for(int i = 0; i < string.length; i++){
 			char c = string[i];
 			if(c == '\n'){
-				y += 10;
+				y += (Tile.SIZE/16)*10;
 				x = startX;
 			}else if(c == '\t'){
 				g2d.drawImage(letters[' '],x,y,null);
@@ -249,6 +250,10 @@ public abstract class GUI implements MouseListener, MouseMotionListener, KeyList
 					g2d.drawImage(tint(letters[c],tint),x,y,null);
 				}
 				x += letters[c].getWidth(null);
+			}
+			if(x > Frame.PRF_WIDTH-24){
+				y += (Tile.SIZE/16)*10;
+				x=startX;
 			}
 		}
 	}
