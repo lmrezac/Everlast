@@ -229,7 +229,8 @@ public class Console extends Input{
 			cmdLoad(args);
 		}else if(args.get(0).equals("drawBoxes")){
 			cmdBoxes(args);
-		}else if(args.get(0).equals("eval")){
+		}else if(args.get(0).equals("eval") || testArgsForJavaScript(args)){
+			if(args.get(0).equals("eval")) args.remove(0);
 			cmdEval(args);
 		}else{
 			debug("unknown command");
@@ -252,6 +253,12 @@ public class Console extends Input{
 		reset();
 	}
 	
+	private static boolean testArgsForJavaScript(List<String> args){
+		for(String str : args){
+			if(!str.matches("(\\d+(\\.\\d+)?)|([\\s\\w_\\d"+SECTION+"]*)")) return true;
+		}
+		return false;
+	}
 	private void cmdGui(List<String> args){
 		if(args.size() < 2) throw new IndexOutOfBoundsException();
 		if(args.get(1).equals("msgbox")){
@@ -841,7 +848,7 @@ public class Console extends Input{
 		}
 	}
 	private void cmdEval(List<String> args){
-		args.remove(0);
+		//args.remove(0);
 		String result = "?";
 	
 		for(String str : args){

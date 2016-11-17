@@ -1,3 +1,4 @@
+package main;
 import java.awt.EventQueue;
 import java.io.PrintStream;
 
@@ -21,15 +22,24 @@ public class Main{
 			}
 		});
 		}catch(FatalError ex){
-			Panel.getInstance().stop();
-			theFrame.dispose();
-			ex.printStackTrace();
-			System.exit(0);
+			fatalError(ex);
 		}catch(Exception e){
 			Debug.debug(e.getMessage());
 			if(Debug.printStackTrace)
 				e.printStackTrace();
-			System.exit(0);
+			forceStopGame();
 		}/**/
+	}
+	public static void fatalError(FatalError ex){
+		debug("FATAL ERROR DETECTED");
+		ex.printStackTrace();
+		forceStopGame();
+	}
+	public static void forceStopGame(){
+		Panel.getInstance().stop();
+		theFrame.dispose();
+		theFrame.close();
+		debug(theFrame.isActive());
+		System.exit(0);
 	}
 }

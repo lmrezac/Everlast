@@ -72,4 +72,9 @@ public class Frame extends JFrame implements KeyListener{
 
 	@Override
 	public void keyTyped(KeyEvent arg0){}
+	
+	public void close(){
+		dispose();
+		this.dispatchEvent(new WindowEvent(this,WindowEvent.WINDOW_CLOSING));
+	}
 }

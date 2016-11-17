@@ -29,6 +29,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	private static HashMap<Integer,NPC> npcs = new HashMap<>();
 	//private String onInteractedScript = null;
 	private Thread onUpdateThread = null;
+	private Runnable onUpdateRunnable = null;
 	public int destX, destY;
 	protected double lastX, lastY;
 	protected Rectangle2D boundingBox;
@@ -106,7 +107,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		this.yminus = yminus;
 		debug("New npc created");
 	}
-	public void setUpdateScript(String str){
+	/*public void setUpdateScript(String str){
 		onUpdateThread = new ScriptThread(str);
 		onUpdateThread.start();
 		synchronized(onUpdateThread){
@@ -116,7 +117,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			
 			}
 		}
-	}
+	}*/
 	public static NPC getNPC(int hash){
 		NPC npc = npcs.get(hash);
 		if(npc == null){
@@ -133,20 +134,26 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return direction;
 	}
 	public void update(){
-		if(!onUpdateSet && onUpdate != null){
+		if(onUpdate != null && onUpdateRunnable == null){
 			onUpdateSet = true;
-			onUpdateThread = new Thread(){
+			onUpdateRunnable = new Runnable(){
 				public void run(){
 					onUpdate.call(NPC.this);
 				}
 			};
+			onUpdateThread = new Thread(onUpdateRunnable);
 			onUpdateThread.start();
 			/*synchronized(onUpdateThread){
 				try{
 					onUpdateThread.wait();
 				}catch(InterruptedException e){}
 			}*/
-		}/*
+		}
+		if(onUpdateThread != null && onUpdateRunnable != null && !onUpdateThread.isAlive()){
+			onUpdateThread = new Thread(onUpdateRunnable);
+			onUpdateThread.start();
+		}
+		/*
 		if(onUpdateThread != null)
 		synchronized(onUpdateThread){
 			onUpdateThread.notify();
@@ -196,14 +203,43 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 			}
 		}*/
 	}
-	public void setPos(double x, double y){
+	public void moveTo(Entity e){
+		setPos(e.x,e.y);
+		setDestination((int)e.x,(int)e.y);
+	}
+	public void setPos(int x, int y){
 		String s = Thread.currentThread().getStackTrace()[2].getClassName();
-		if(!s.equals("com.ombda.entities.NPC"))debug(s);\++
+		//if(!s.equals("com.ombda.entities.NPC"))debug(s);
+		if(s.startsWith("jdk.nashorn.internal")){
+			x *= Tile.SIZE/16;
+			y *= Tile.SIZE/16;
+			debug("Set npc "+id+" pos to "+x+","+y);
+		}
 		lastX = this.x;
 		lastY = this.y;
+		super.setPos(x,y);
+	}
+	public void setPos(double x, double y){
+		String s = Thread.currentThread().getStackTrace()[2].getClassName();
+		if(!s.equals("com.ombda.entities.NPC"))debug(s);
+		if(s.startsWith("jdk.nashorn.internal")){
+			x *= Tile.SIZE/16;
+			y *= Tile.SIZE/16;
+			debug("Set npc "+id+" pos to "+x+","+y);
+		}
+		lastX = this.x;
+		lastY = this.y;
+	
 		super.setPos(x, y);
 	}
 	public void setDestination(int x, int y){
+		String s = Thread.currentThread().getStackTrace()[2].getClassName();
+		if(s.startsWith("jdk.nashorn.internal")){
+			x *= Tile.SIZE/16;
+			y *= Tile.SIZE/16;
+
+			debug("Set npc "+id+" destination to "+x+","+y);
+		}
 		destX = x;
 		destY = y;
 	}

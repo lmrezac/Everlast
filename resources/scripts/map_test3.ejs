@@ -46,22 +46,22 @@ var car1 = new NPC(0x06,0,0,0,{walk:{south:image('car2')},still:{south:image('ca
 car1.setMap(map);
 car1.setDirection(south);
 car1.speed = 2;
-car1.setPos(74t,-5t);
 car1.setDestination(74t,-5t);
-/*car1.onUpdate = function(){
+car1.setPos(74t,-5t);
+car1.onUpdate = function(){
 	while(true){
 		print('car1 update');
-		this.setPos(74t,-5t);
+		this.setPos(1192,-5t);
 		this.setDestination(1192,10t);
-		while(!this.isAtDestination()){print('waiting for destination')}
+		var count = 0;
+		while(!this.isAtDestination()){count++;}
 		print('at destination');
 		var x = map.getTile(81,13,1).animationFrame;
 		while(!(tile.animationFrame >= 4 && tile.animationFrame <= 6)){}
 		this.setDestination(1192,36t);
 		while(!this.isAtDestination()){}
 	}
-
-}*/
+};
 Save.addHook(function(){
 	delete global.lastGuyInteracted;
 });

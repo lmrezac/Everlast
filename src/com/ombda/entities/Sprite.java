@@ -66,7 +66,8 @@ public class Sprite extends Entity{
 		return new Point((int)Xlast,(int)Ylast);
 	}
 	public void setPos(double newx, double newy){
-		setPos((int)newx,(int)newy);
+		x = newx;
+		y = newy;
 	}
 	public double spriteHeight(){
 		return image.getIconHeight();
