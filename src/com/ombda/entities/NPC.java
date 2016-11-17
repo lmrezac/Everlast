@@ -262,7 +262,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return boundingBox.contains(x, y);
 	}
 	public void manageCollision(Collideable c){
-		
+		debug("Manage collision of "+this.toString()+" and "+c.toString());
 	}
 
 	public String toString(){

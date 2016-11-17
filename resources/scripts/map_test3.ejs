@@ -50,16 +50,20 @@ car1.setDestination(74t,-5t);
 car1.setPos(74t,-5t);
 car1.onUpdate = function(){
 	while(true){
-		print('car1 update');
+	//	print('car1 update');
 		this.setPos(1192,-5t);
 		this.setDestination(1192,10t);
 		var count = 0;
-		while(!this.isAtDestination()){count++;}
-		print('at destination');
-		var x = map.getTile(81,13,1).animationFrame;
-		while(!(tile.animationFrame >= 4 && tile.animationFrame <= 6)){}
+		while(!this.isAtDestination()){write('');}
+	//	print('reached destination');
+		var tile = map.getTile(81,13,1);
+		while(tile.animationFrame < 4 || tile.animationFrame > 6){
+			write('');
+		}
+	//	print('stoplight is green');
 		this.setDestination(1192,36t);
-		while(!this.isAtDestination()){}
+		while(!this.isAtDestination()){write('');}
+	//	print('loop!');
 	}
 };
 Save.addHook(function(){

@@ -9,7 +9,7 @@ import com.ombda.Panel;
 
 import static com.ombda.Debug.debug;
 public class Main{
-	private static Frame theFrame;
+	private static Frame theFrame = null;
 	public static final PrintStream stream = new com.ombda.Debug();
 	public static void main(String[] args){
 		try{
@@ -32,12 +32,21 @@ public class Main{
 	}
 	public static void fatalError(FatalError ex){
 		debug("FATAL ERROR DETECTED");
+		while(theFrame == null){}
 		ex.printStackTrace();
 		forceStopGame();
 	}
 	public static void forceStopGame(){
 		Panel.getInstance().stop();
-		theFrame.dispose();
+		boolean flag = true;
+		while(flag){
+		try{
+			theFrame.dispose();
+			flag = false;
+		}catch(RuntimeException e){
+			debug(e.getMessage());
+		}
+		}
 		theFrame.close();
 		debug(theFrame.isActive());
 		System.exit(0);

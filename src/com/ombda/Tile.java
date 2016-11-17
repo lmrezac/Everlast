@@ -126,8 +126,11 @@ public class Tile extends AbstractJSObject implements Collideable, Interactable{
 	public void manageCollision(Collideable c){}
 	@Override
 	public Object getDefaultValue(Class<?> hint){
+		debug("hint = "+hint);
 		if(hint == String.class){
 			return this.toString();
+		}else if(hint == null || hint == int.class || hint == Integer.class || Number.class.isAssignableFrom(hint)){	
+			return id;
 		}else return super.getDefaultValue(hint);
 	}
 	public static Tile getTile(int id){

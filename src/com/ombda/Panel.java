@@ -198,7 +198,7 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 				.replaceAll("(?<=\\d)t(?![\\d\\w_])","*16")
 				.replaceAll("(?<=(^|\\(|,)\\s*)\\*wait(?=\\s*(\\)|$|,))","'__WAIT__'")
 				.trim();
-		debug("Loaded script "+str);
+		//debug("Loaded script "+str);
 		return str;
 	}
 	public void setMap(Map map){
