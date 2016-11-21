@@ -66,7 +66,6 @@ public class Tile extends AbstractJSObject implements Collideable, Interactable{
 			int result;
 			if(!(image instanceof AnimatedImage)) result = 0;
 			result = ((AnimatedImage)image).index;
-			debug("Getanimationframe = "+result);
 			return result;
 		}else if(varname.equals("isAnimated")){
 			return image instanceof AnimatedImage;

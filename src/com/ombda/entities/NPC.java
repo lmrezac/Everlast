@@ -8,6 +8,7 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -39,7 +40,7 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 	public double speed = 1;
 	protected int yminus;
 	private boolean onUpdateSet = false;
-	public JSObject onInteracted = null, onUpdate = null;
+	public JSObject onInteracted = null, onUpdate = null, onCollision = null;
 	/*public NPC(int x, int y, int hash, int yminus, JSObject obj){
 		super(hash,evalImages(obj)[Facing.N.ordinal()],x,y);
 		this.boundingBox = new Rectangle2D.Double(0,0,images[0].getIconWidth(),images[0].getIconHeight());
@@ -262,7 +263,10 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 		return boundingBox.contains(x, y);
 	}
 	public void manageCollision(Collideable c){
-		debug("Manage collision of "+this.toString()+" and "+c.toString());
+		debug("manage collision between "+this+" and "+c);
+		if(onCollision != null){
+			onCollision.call(this,c);
+		}
 	}
 
 	public String toString(){
@@ -320,6 +324,91 @@ public class NPC extends Sprite implements Updateable, Collideable, Interactable
 						onInteracted.call(NPC.this, p,x,y);
 					}
 				}.start();
+			}
+		}
+	}
+	private void testCollisionNorth(){
+		Collection<Sprite> sprites =  map.getSprites();
+		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt(x, (int)this.y, 0)).doesPointCollide(x, (int)this.y)){
+				t.manageCollision(this);
+				y++;
+			}
+			}catch(NullPointerException e){}
+			for(Sprite s : sprites){
+				if(s instanceof Collideable && s != this){
+					Collideable c = (Collideable)s;
+					while(c.doesPointCollide(x, (int)this.y)){
+						c.manageCollision(this);
+						y++;
+					}
+				}
+			}
+		}
+		
+	}
+	private void testCollisionEast(){
+		Collection<Sprite> sprites =  map.getSprites();
+		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt((int)(this.x+this.boundingBox.getWidth()), y, 0)).doesPointCollide((int)(this.x+this.boundingBox.getWidth()),y)){
+				t.manageCollision(this);
+				x--;
+			}
+			}catch(NullPointerException e){}
+			for(Sprite s : sprites){
+				if(s instanceof Collideable && s != this){
+					Collideable c = (Collideable)s;
+					while(c.doesPointCollide((int)(this.x+this.boundingBox.getWidth()), y)){
+						c.manageCollision(this);
+						x--;
+					}
+				}
+			}
+		}
+	}
+	private void testCollisionSouth(){
+		Collection<Sprite> sprites =  map.getSprites();
+		for(int x = (int)this.x; x < (int)this.x+this.boundingBox.getWidth(); x++){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt(x, (int)(this.y+this.boundingBox.getHeight()), 0)).doesPointCollide(x, (int)this.y+this.boundingBox.getHeight())){
+				t.manageCollision(this);
+				y--;
+			}
+			}catch(NullPointerException e){}
+			for(Sprite s : sprites){
+				if(s instanceof Collideable && s != this){
+					Collideable c = (Collideable)s;
+					while(c.doesPointCollide(x, (int)(this.y+this.boundingBox.getHeight()))){
+						c.manageCollision(this);
+						y--;
+					}
+				}
+			}
+		}
+	}
+	private void testCollisionWest(){
+		Collection<Sprite> sprites =  map.getSprites();
+		for(int y = (int)this.y; y < (int)this.y+this.boundingBox.getHeight(); y++){
+			Tile t;
+			try{
+			while((t = this.map.getTileAt((int)this.x, y, 0)).doesPointCollide((int)this.x,y)){
+				t.manageCollision(this);
+				x++;
+			}
+			}catch(NullPointerException e){}
+			for(Sprite s : sprites){
+				if(s instanceof Collideable && s != this){
+					Collideable c = (Collideable)s;
+					while(c.doesPointCollide((int)this.x, y)){
+						c.manageCollision(this);
+						x++;
+					}
+				}
 			}
 		}
 	}

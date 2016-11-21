@@ -66,6 +66,11 @@ car1.onUpdate = function(){
 	//	print('loop!');
 	}
 };
+car1.onCollision = function(entity){
+	if(entity.y >= this.y+this.image.getIconHeight()){
+		print('player hurt');
+	}
+};
 Save.addHook(function(){
 	delete global.lastGuyInteracted;
 });
