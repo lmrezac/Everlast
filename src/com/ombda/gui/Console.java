@@ -673,7 +673,7 @@ public class Console extends Input{
 	
 	private void cmdHelp(List<String> args){
 		if(args.size() == 1){
-			panel.msgbox.setMessage("Commands: gui, noclip, close, set, fill, save,\ndebug, goto, help, quit\n\nDo 'help <command>' for more information.");
+			panel.msgbox.setMessage("Commands: gui, noclip, close, set, fill, save,\ndebug, goto, help, quit, newmap, drawBoxes, load\n\nDo 'help <command>' for more information."+WAIT);
 			panel.setGUI(panel.msgbox);
 			return;
 		}else{

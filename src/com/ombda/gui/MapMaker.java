@@ -44,6 +44,11 @@ public class MapMaker extends GUI implements InputListener{
 				Panel.getInstance().drawBoundingBoxes = false;
 			}
 		});
+		buttons.add(new Button("Boxes",204,0){
+			public void buttonPressed(){
+				Panel.getInstance().drawBoundingBoxes = !Panel.getInstance().drawBoundingBoxes;
+			}
+		});
 	}
 	private Map getMap(){
 		return Panel.getInstance().getPlayer().getMap();

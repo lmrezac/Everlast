@@ -24,8 +24,8 @@ public abstract class Button implements MouseListener{
 		
 		this.x = x;
 		this.y = y;
-		this.width = (Tile.SIZE/16) * normal.getIconWidth();
-		this.height = (Tile.SIZE/16) * normal.getIconHeight();
+		this.width =  normal.getIconWidth();
+		this.height =  (Tile.SIZE/16)* normal.getIconHeight();
 		if(normal.getIconHeight() != pressed.getIconHeight() || normal.getIconWidth() != pressed.getIconWidth())
 			throw new RuntimeException("No hitbox provided, but images aren't the same size!");
 		//hitbox = new Rectangle2D.Double(x,y,image.getWidth(),image.getHeight());

@@ -260,7 +260,8 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 		if(lines.size() != 7) throw new RuntimeException("Invalid save file : expected 7 lines, got "+lines.size());
 		debug(lines);
 		player_name = lines.get(0);
-		setMap(Map.get(lines.get(1)));
+		Map map = Map.get(lines.get(1));
+		setMap(map);
 		player.setPos(Double.parseDouble(lines.get(2)), Double.parseDouble(lines.get(3)));
 		offsetX = Integer.parseInt(lines.get(4));
 		offsetY = Integer.parseInt(lines.get(5));
@@ -404,11 +405,11 @@ public class Panel extends JPanel implements Runnable, MouseListener, MouseMotio
 			long temp = 0;
 			int size = 12;
 			if(gui == mapcreator){
-				drawDebugString(g2d,"map "+map.toString()+" {width:"+map.width()+", height:"+map.height()+"}",0,10);
+				drawDebugString(g2d,"map "+map.toString()+" {width:"+map.width()+", height:"+map.height()+"}",0,10+2*size);
 				int[] mouseCoords = screenCoordsToImageCoords(mouseX,mouseY);
 				int[] tileCoords = screenCoordsToTiles(mouseX,mouseY);
-				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+size);
-				drawDebugString(g2d,"layer: "+(Frame.keys[KeyEvent.VK_SHIFT]? "FOREGROUND" : "BACKGROUND"),0,10+2*size);
+				drawDebugString(g2d,"mouse : ("+mouseCoords[0]+","+mouseCoords[1]+") ["+tileCoords[0]+","+tileCoords[1]+"]",0,10+3*size);
+				drawDebugString(g2d,"layer: "+(Frame.keys[KeyEvent.VK_SHIFT]? "FOREGROUND" : "BACKGROUND"),0,10+4*size);
 			}else{
 				drawDebugString(g2d,"player ("+Math.round(player.x)/(Tile.SIZE/16)+","+Math.round(player.y)/(Tile.SIZE/16)+") ["+(int)(Math.round(player.x)/(double)Tile.SIZE)+","+(int)(Math.round(player.y)/(double)Tile.SIZE)+"]",0,10);
 				drawDebugString(g2d,"map "+map.toString()+" {width:"+map.width()+", height:"+map.height()+"}",0,10+size);

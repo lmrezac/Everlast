@@ -337,7 +337,7 @@ public class Map extends AbstractJSObject{
 				Tile t = getTileAt(Tile.SIZE*x,Tile.SIZE*y,0);
 				t.draw(g2d, Tile.SIZE*x+offsetX, Tile.SIZE*y+offsetY);
 				if(Panel.getInstance().drawBoundingBoxes)
-					t.drawBoundingBox(g2d,Tile.SIZE*x+offsetX, Tile.SIZE*y+offsetY);
+					t.drawBoundingBox(g2d,x,y,offsetX,offsetY);
 			}
 		}
 	}

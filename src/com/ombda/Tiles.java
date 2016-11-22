@@ -171,7 +171,9 @@ public class Tiles{
 		STOP_BAR_BOTTOM = 0x7D,
 		STOP_BAR_LEFT = 0x7E,
 		STOP_BAR_HORIZ = 0x7F,
-		STOP_BAR_RIGHT = 0x80;
+		STOP_BAR_RIGHT = 0x80,
+		WHITE_WALL = 0x81,
+		WHITE_WALL_BOTTOM = 0x82;
 	public static void loadTiles(){
 		new Tile(AIR,new ImageIcon(new BufferedImage(Tile.SIZE,Tile.SIZE,BufferedImage.TYPE_INT_ARGB)));
 		
@@ -322,6 +324,9 @@ public class Tiles{
 		new Tile(STOP_BAR_LEFT,"tiles/intro/city/stop_bars/1");
 		new Tile(STOP_BAR_HORIZ,"tiles/intro/city/stop_bars/3");
 		new Tile(STOP_BAR_RIGHT,"tiles/intro/city/stop_bars/5");
+		
+		new Tile(WHITE_WALL,"tiles/intro/lab/white_wall",FULL);
+		new Tile(WHITE_WALL_BOTTOM,"tiles/intro/lab/white_wall_bottom",FULL);
 	}
 
 

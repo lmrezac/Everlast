@@ -77,13 +77,15 @@ public class Tile extends AbstractJSObject implements Collideable, Interactable{
 	public void draw(Graphics2D g, int x, int y){
 		g.drawImage(frame,x,y,null);
 	}
-	public void drawBoundingBox(Graphics2D g, int x, int y){
-		if(x >= 0 && y >= 0 && hasTileEntity(x/SIZE,y/SIZE)){
-			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x/SIZE, y/SIZE);
+	public void drawBoundingBox(Graphics2D g, int x, int y, int offsetX, int offsetY){
+		if(x >= 0 && y >= 0 && hasTileEntity(x,y)){
+			TileEntity te = Panel.getInstance().getPlayer().getMap().getTileEntityAt(x,y);
 			if(te != null){
 				if(te.disableTileCollisions()) return;
 			}
 		}
+		x = Tile.SIZE*x+offsetX;
+		y = Tile.SIZE*y+offsetY;
 		g.translate(x, y);
 		g.setColor(new Color(255,128,0,128));
 		g.fill(getBoundingBox());
